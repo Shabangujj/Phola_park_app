@@ -3,10 +3,9 @@
 🚧 Status: Work in Progress (≈70% complete)
 
 ## Overview
-Phola Park App is a community reporting and survey management system
-designed to help residents submit service delivery issues and
-participate in surveys, while supervisors and administrators manage,
-review, and analyze submissions.
+## Phola Park App
+
+Phola Park App is a role-based community management web application built with Flask. It enables residents to submit service delivery and community incident reports, while supervisors and administrators manage surveys, notifications, portfolios, and reports through dedicated dashboards. The system supports secure authentication, role-based access control, structured reporting, and data-driven oversight to improve communication and service coordination within the Phola Park community.
 
 ## Key Features
 - Role-based authentication (Admin, Supervisor, User)
