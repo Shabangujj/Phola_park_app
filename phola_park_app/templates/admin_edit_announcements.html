@@ -1,0 +1,33 @@
+<h2>Edit Announcement</h2>
+
+<form method="post">
+  <input name="title"
+         class="form-control mb-2"
+         value="{{ announcement.title }}"
+         required>
+
+  <textarea name="message"
+            class="form-control mb-2"
+            required>{{ announcement.message }}</textarea>
+
+  <select name="target_role" class="form-control mb-2">
+    <option value="">All Roles</option>
+    <option value="user" {% if announcement.target_role == "user" %}selected{% endif %}>Users</option>
+    <option value="supervisor" {% if announcement.target_role == "supervisor" %}selected{% endif %}>Supervisors</option>
+  </select>
+
+  <select name="portfolio" class="form-control mb-3">
+    <option value="">All Portfolios</option>
+    {% for p in ["Water","Electricity","Housing","Crime","Health","Waste","Other"] %}
+      <option value="{{ p }}" {% if announcement.portfolio == p %}selected{% endif %}>
+        {{ p }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button class="btn btn-primary">Save Changes</button>
+  <a href="{{ url_for('admin.admin_announcements') }}"
+     class="btn btn-secondary">
+     Cancel
+  </a>
+</form>

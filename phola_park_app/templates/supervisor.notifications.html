@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Portfolio Notifications</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='supervisor.css') }}">
+
+<ul>
+{% for n in notes %}
+    <li>{{ n.message }} - <small>{{ n.created_at }}</small></li>
+{% else %}
+    <p>No notifications.</p>
+{% endfor %}
+</ul>
+
+{% endblock %}

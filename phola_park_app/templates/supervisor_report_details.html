@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Report Details</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='supervisor.css') }}">
+
+<div class="card">
+    <p><strong>ID:</strong> {{ report.id }}</p>
+    <p><strong>Type:</strong> {{ report.report_type }}</p>
+    <p><strong>Description:</strong><br> {{ report.description }}</p>
+    <p><strong>Timestamp:</strong> {{ report.timestamp }}</p>
+    <p><strong>Status:</strong> {{ report.status }}</p>
+    <p><strong>Portfolio:</strong> {{ report.portfolio }}</p>
+</div>
+
+<hr>
+
+<h3>Update Report</h3>
+
+<form method="POST" action="{{ url_for('supervisor.update_report_status', report_id=report.id) }}">
+    
+    <label>Status:</label>
+    <select name="status">
+        <option value="pending" {% if report.status=="pending" %}selected{% endif %}>Pending</option>
+        <option value="resolved" {% if report.status=="resolved" %}selected{% endif %}>Resolved</option>
+        <option value="rejected" {% if report.status=="rejected" %}selected{% endif %}>Rejected</option>
+    </select>
+
+    <br><br>
+
+    <label>Supervisor Comment:</label><br>
+    <textarea name="comment" rows="4" cols="50"></textarea>
+
+    <br><br>
+
+    <button type="submit">Update Report</button>
+</form>
+
+{% endblock %}

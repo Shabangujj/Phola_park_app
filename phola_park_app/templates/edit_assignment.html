@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Edit Assignment{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Assignment</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="supervisor">Supervisor</label>
+            <select class="form-control" id="supervisor" name="supervisor_id" required>
+                {% for sup in supervisors %}
+                    <option value="{{ sup[0] }}" {% if sup[0] == assignment[1] %}selected{% endif %}>
+                        {{ sup[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="portfolio">Portfolio</label>
+            <input type="text" class="form-control" id="portfolio" name="portfolio" value="{{ assignment[2] }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Assignment</button>
+        <a href="{{ url_for('assign_supervisor') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

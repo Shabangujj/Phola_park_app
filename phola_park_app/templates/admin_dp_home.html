@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Phola Park App{% endblock %}
+
+{% block content %}
+
+<section class="admin-dashboard">
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <h2>Admin Dashboard</h2>
+
+    {% if current_user.is_authenticated %}
+      <p>
+        Welcome,
+        <strong>{{ current_user.name | default('Administrator') }}</strong>
+        ({{ current_user.email | default('No email') }})
+      </p>
+    {% endif %}
+  </header>
+
+  <!-- Quick Actions -->
+  <nav class="dashboard-nav">
+    <a href="{{ url_for('main.home') }}">Dashboard</a>
+    <a href="{{ url_for('admin.reports') }}">Reports</a>
+    <a href="{{ url_for('admin.users') }}">Users</a>
+    <a href="{{ url_for('main.home') }}">Logout</a>
+  </nav>
+
+  <!-- Summary Cards -->
+  <section class="stats">
+    <div class="stat-card">
+      <h4>Total Users</h4>
+      <p>{{ total_users | default(0) }}</p>
+    </div>
+
+    <div class="stat-card">
+      <h4>Total Reports</h4>
+      <p>{{ total_reports | default(0) }}</p>
+    </div>
+  </section>
+
+  <!-- Reports Table -->
+  <section class="reports-section">
+    <h3>Recent Reports</h3>
+
+    {% if reports %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Reported By</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for report in reports %}
+            <tr>
+              <td>{{ report.id }}</td>
+              <td>{{ report.category | default('Uncategorized') }}</td>
+              <td>{{ report.description | default('No description') }}</td>
+              <td>
+                {{ report.user.email if report.user else 'Anonymous' }}
+              </td>
+              <td>
+                {{ report.created_at.strftime('%Y-%m-%d') if report.created_at else 'N/A' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No reports available.</p>
+    {% endif %}
+  </section>
+
+</section>
+
+{% endblock %}

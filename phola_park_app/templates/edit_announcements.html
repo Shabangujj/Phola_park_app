@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Announcement</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="{{ announcement.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea name="message" class="form-control" rows="4" required>{{ announcement.message }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Portfolio</label>
+            <input type="text" name="portfolio" class="form-control" value="{{ announcement.portfolio }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Attachment (optional)</label>
+            <input type="file" name="attachment" class="form-control">
+            {% if announcement.file_attachment %}
+                <p>Current File: <strong>{{ announcement.file_attachment }}</strong></p>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Update Announcement</button>
+        <a href="{{ url_for('manage_announcements') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

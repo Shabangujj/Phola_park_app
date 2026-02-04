@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ url_for('add_report') }}" class="btn btn-primary">+ Add Report</a>
+    </div>
+    <h2 class="mb-4">Reports</h2>
+    {% if reports %}
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Report Type</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Survey Type</th>
+                    <th>Portfolio</th>
+                    <th>User</th>
+                    <th>File</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.id }}</td>
+                    <td>{{ report.report_type }}</td>
+                    <td>{{ report.description }}</td>
+                    <td>{{ report.category }}</td>
+                    <td>{{ report.survey_type }}</td>
+                    <td>{{ report.portfolio }}</td>
+                    <td>{{ report.user_id }}</td>
+                    <td>
+                        {% if report.image %}
+                            <a href="{{ url_for('static', filename='uploads/' ~ report.image|basename) }}" target="_blank" class="btn btn-sm btn-info">
+                                View File
+                            </a>
+                        {% else %}
+                            <span class="text-muted">No file</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ report.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">No reports available yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

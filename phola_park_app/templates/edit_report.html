@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f3f3f3; padding: 30px; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 0 8px rgba(0,0,0,0.1);}
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        button { margin-top: 20px; background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;}
+        button:hover { background: #004d99; }
+        .back { margin-top: 20px; display: block; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Report</h2>
+        {% if report %}
+        <form method="POST" enctype="multipart/form-data">
+            <label for="report_type">Report Type</label>
+            <input type="text" id="report_type" name="report_type" value="{{ report['report_type'] }}" required>
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5" required>{{ report['description'] }}</textarea>
+
+            <label for="image">Image (optional)</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            {% if report['image'] %}
+                <p>Current Image:</p>
+                <img src="{{ url_for('static', filename='uploads/' ~ report['image']) }}" alt="Report Image" style="max-width:200px;">
+            {% endif %}
+
+            <button type="submit">Update Report</button>
+        </form>
+        {% else %}
+            <p>Report not found.</p>
+        {% endif %}
+        <a class="back" href="{{ url_for('view_reports') }}">← Back to Reports</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Supervisor</title>
+</head>
+<body>
+    <h2>Update Supervisor for Portfolio: {{ portfolio['name'] }}</h2>
+
+    <form method="POST">
+        <label>Select Supervisor:</label>
+        <select name="supervisor_id" required>
+            {% for supervisor in supervisors %}
+                <option value="{{ supervisor['id'] }}"
+                    {% if supervisor['id'] == portfolio['supervisor_id'] %} selected {% endif %}>
+                    {{ supervisor['name'] }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Update</button>
+    </form>
+
+    <a href="{{ url_for('view_portfolios') }}">Back to Portfolio List</a>
+</body>
+</html>

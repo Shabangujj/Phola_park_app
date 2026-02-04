@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Facility</title>
+</head>
+<body>
+    <h2>Add New Facility</h2>
+
+    <form method="POST" action="{{ url_for('add_facility') }}">
+        <label>Facility Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Location:</label><br>
+        <input type="text" name="location" required><br><br>
+
+        <label>Contact Person:</label><br>
+        <input type="text" name="contact_person" required><br><br>
+
+        <label>Contact Number:</label><br>
+        <input type="text" name="contact_number" required><br><br>
+
+        <input type="submit" value="Register Facility">
+    </form>
+
+    <br>
+    <a href="{{ url_for('supervisor_dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

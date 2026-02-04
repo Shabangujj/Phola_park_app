@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Manage Reports{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Manage Reports</h2>
+
+    {% if reports %}
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Survey Type</th>
+                <th>Portfolio</th>
+                <th>Uploaded By</th>
+                <th>File</th>
+                <th>Timestamp</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report['id'] }}</td>
+                <td>{{ report['report_type'] }}</td>
+                <td>{{ report['description'] }}</td>
+                <td>{{ report['survey_type'] }}</td>
+                <td>{{ report['portfolio'] }}</td>
+                <td>{{ report['user_id'] }}</td>
+                <td>
+                    {% if report['image'] %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ report['image']) }}" target="_blank" class="btn btn-sm btn-info">View File</a>
+                    <a href="{{ url_for('static', filename='uploads/' ~ report['image']) }}" download class="btn btn-sm btn-secondary">Download</a>
+                    {% else %}
+                    <span class="text-muted">No file</span>
+                    {% endif %}
+                </td>
+                <td>{{ report['timestamp'] }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('delete_report', report_id=report['id']) }}" onsubmit="return confirm('Are you sure you want to delete this report?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">No reports submitted yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>
+<form method="GET" class="row g-3 mb-3">
+    <div class="col-md-3">
+        <input type="text" class="form-control" name="search" placeholder="Search description..." value="{{ request.args.get('search','') }}">
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="survey_type">
+            <option value="">All Survey Types</option>
+            <option value="1" {% if request.args.get('survey_type') == '1' %}selected{% endif %}>Survey 1</option>
+            <option value="2" {% if request.args.get('survey_type') == '2' %}selected{% endif %}>Survey 2</option>
+            <option value="3" {% if request.args.get('survey_type') == '3' %}selected{% endif %}>Survey 3</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control" name="portfolio" placeholder="Portfolio" value="{{ request.args.get('portfolio','') }}">
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+<div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+{% endblock %}
+
+

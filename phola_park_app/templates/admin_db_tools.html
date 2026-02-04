@@ -1,0 +1,119 @@
+
+{% extends "admin_base.html" %}
+{% block admin_content %}
+<h2>admin Database Tools</h2>
+<div class="card shadow p-4 mt-4">
+    <div class="flex justify-end mb-2">
+  <a href="{{ url_for('admin_db.download_admin_log') }}" class="btn btn-outline-primary">
+    📥 Download Full Log
+  </a>
+</div>
+  <h2 class="text-xl font-bold mb-3">🛠️ Admin Tools Dashboard</h2>
+  <p><b>Database Path:</b> {{ db_path }}</p>
+  <p><b>Database Size:</b> {{ db_size }} MB</p>
+  <p><b>Last Backup:</b> {{ last_backup }}</p>
+
+  <div class="mt-4 flex gap-3">
+    <form action="{{ url_for('admin_db.admin_backup') }}" method="POST">
+      <button class="btn btn-success">💾 Backup Now</button>
+    </form>
+    <form action="{{ url_for('admin_db.admin_reset') }}" method="POST" onsubmit="return confirm('This will drop all tables — continue?')">
+      <button class="btn btn-danger">🧹 Reset Database</button>
+    </form>
+  </div>
+</div>
+<hr class="my-4">
+<div class="flex justify-between items-center mb-2">
+  <h3 class="text-lg font-bold">📜 Recent Admin Logs</h3>
+
+  <select id="filterSelect" class="border rounded px-2 py-1 text-sm">
+    <option value="all">All Time</option>
+    <option value="today">Today</option>
+    <option value="week">This Week</option>
+    <option value="month">This Month</option>
+  </select>
+</div>
+<table class="table-auto w-full border-collapse border border-gray-300">
+  <thead>
+    <tr>
+      <th class="border border-gray-300 px-4 py-2">Timestamp</th>
+      <th class="border border-gray-300 px-4 py-2"></th>
+      <th class="border border-gray-300 px-4 py-2">Admin User</th>
+      <th class="border border-gray-300 px-4 py-2">Action</th>
+      <th class="border border-gray-300 px-4 py-2">Status</th>
+      </tr>
+      </thead>
+  <tbody id="logTableBody">
+    {% for log in recent_logs %}
+    <tr>
+      <td class="border border-gray-300 px-4 py-2">{{ log.timestamp }}</td>
+      <td class="border border-gray-300 px-4 py-2">
+        {% if log.status == 'OK' %}
+          ✅
+        {% elif log.status == 'WARN' %}
+          ⚠️
+        {% elif log.status == 'ERROR' %}
+          ❌
+        {% elif log.status == 'INFO' %}
+          ℹ️
+        {% elif log.status == 'CANCEL' %}
+          🚫
+        {% endif %}
+      </td>
+      <td class="border border-gray-300 px-4 py-2">{{ log.admin_user }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ log.action }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ log.status }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script>
+let currentFilter = 'all';
+
+function refreshAdminData() {
+  fetch(`{{ url_for("admin.get_admin_data") }}?filter=${currentFilter}`)
+    .then(response => response.json())
+    .then(data => {
+      // Update log table
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = '';
+      data.logs.forEach(log => {
+        const row = document.createElement('tr');
+        row.classList.add('border-b');
+        let color = 'text-blue-700';
+        if (log.status === 'OK') color = 'text-green-700';
+        else if (log.status === 'WARN') color = 'text-yellow-700';
+        else if (log.status === 'ERROR') color = 'text-red-700';
+        else if (log.status === 'CANCEL') color = 'text-gray-500';
+        row.innerHTML = `
+          <td class="p-2">${log.timestamp}</td>
+          <td class="p-2 font-semibold ${color}">${log.status}</td>
+          <td class="p-2">${log.message}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Update chart
+      logChart.data.datasets[0].data = [
+        data.status_counts.OK || 0,
+        data.status_counts.WARN || 0,
+        data.status_counts.ERROR || 0,
+        data.status_counts.INFO || 0,
+        data.status_counts.CANCEL || 0
+      ];
+      logChart.update();
+    })
+    .catch(err => console.error('Refresh failed:', err));
+}
+
+// Listen for dropdown change
+document.getElementById('filterSelect').addEventListener('change', (e) => {
+  currentFilter = e.target.value;
+  refreshAdminData();
+});
+
+// Auto-refresh every 30 seconds
+setInterval(refreshAdminData, 30000);
+</script>
+
+{% endblock %}

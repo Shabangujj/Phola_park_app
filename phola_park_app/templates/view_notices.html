@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Notices</h2>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mb-3">Back</a>
+
+    {% for notice in notices %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ notice['title'] }}</h5>
+            <p class="card-text">{{ notice['content'] }}</p>
+            <small class="text-muted">Posted by {{ notice['created_by'] }} on {{ notice['timestamp'] }}</small>
+        </div>
+    </div>
+    {% else %}
+    <p>No notices available.</p>
+    {% endfor %}
+</div>
+<div class="mt-4">
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+{% endblock %}

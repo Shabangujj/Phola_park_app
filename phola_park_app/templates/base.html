@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}Phola Park App{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="
+{% if current_user.is_authenticated %}
+    role-{{ current_user.role.name|lower }}
+{% else %}
+    role-guest
+{% endif %}
+">
+
+
+{% include "partials/navbar.html" %}
+{% block content %}
+
+<nav class="navbar">
+  {% if current_user.is_authenticated %}
+
+  {% if current_user.role.name == "admin" %}
+    <a href="{{ url_for('main.home') }}">Admin Dashboard</a>
+    <a href="{{ url_for('admin.admin_users') }}">Manage Users</a>
+  {% endif %}
+
+  {% if current_user.role.name == "supervisor" %}
+    <a href="{{ url_for('main.home') }}">Supervisor Dashboard</a>
+  {% endif %}
+
+  {% if current_user.role.name == "user" %}
+    <a href="{{ url_for('main.home') }}">My Dashboard</a>
+  {% endif %}
+
+  <a href="{{ url_for('auth.logout') }}">Logout</a>
+
+{% endif %}
+
+</nav>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle position-relative"
+     href="#"
+     data-bs-toggle="dropdown">
+
+    🔔
+    {% if unread_notifications|length %}
+      <span class="position-absolute top-0 start-100 translate-middle
+                   badge rounded-pill bg-danger">
+        {{ unread_notifications|length }}
+      </span>
+    {% endif %}
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px;">
+    {% if unread_notifications %}
+      {% for n in unread_notifications[:5] %}
+        <li>
+          <a class="dropdown-item small"
+             href="{{ url_for('main.mark_notification_read', notification_id=n.id) }}">
+            <strong>{{ n.title }}</strong><br>
+            <span class="text-muted">{{ n.message }}</span>
+          </a>
+        </li>
+      {% endfor %}
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-center"
+           href="{{ url_for('main.notifications_page') }}">
+          View all notifications
+        </a>
+      </li>
+    {% else %}
+      <li class="dropdown-item text-muted text-center">
+        No new notifications
+      </li>
+    {% endif %}
+  </ul>
+</li>
+<a href="{{ url_for('notifications.notifications') }}" class="nav-link">
+  🔔 Notifications
+  {% set unread = current_user.notifications | selectattr("is_read", "equalto", False) | list | length %}
+  {% if unread > 0 %}
+    <span class="badge bg-danger">{{ unread }}</span>
+  {% endif %}
+</a>
+{% if current_user.is_authenticated %}
+  <p>
+    Welcome,
+    {{ current_user.name | default('User') }}
+  </p>
+{% endif %}
+
+{% endblock %}
+</body>
+</html>

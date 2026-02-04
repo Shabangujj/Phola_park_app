@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Manage Users</h2>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Roles</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+
+        <td>
+            {% if roles_map[user.id] %}
+                {% for role in roles_map[user.id] %}
+                    {{ role.role }} {% if role.portfolio %} ({{ role.portfolio }}) {% endif %}
+                    <a href="{{ url_for('admin_manage.remove_role', role_id=role.id) }}">[x]</a><br>
+                {% endfor %}
+            {% else %}
+                No roles
+            {% endif %}
+        </td>
+
+        <td>
+            <a href="{{ url_for('admin_manage.assign_role') }}?user_id={{ user.id }}">Assign Role</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

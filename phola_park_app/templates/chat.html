@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Group Chat</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h2>Welcome, {{ user["name"] }} ({{ user["role"] }})</h2>
+
+  <select id="roomSelect">
+    {% for room in rooms %}
+    <option value="{{ room['id'] }}">{{ room['name'] }}</option>
+    {% endfor %}
+  </select>
+
+  <div id="chatBox" style="border:1px solid #ccc; height:300px; overflow-y:scroll;"></div>
+
+  <input type="text" id="messageInput" placeholder="Type a message">
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    let currentRoom = $('#roomSelect').val();
+
+    function loadMessages() {
+      $.get("/get_messages/" + currentRoom, function(data) {
+        $("#chatBox").html("");
+        data.reverse().forEach(msg => {
+          $("#chatBox").append(`<p><b>${msg.name}</b>: ${msg.message} <i>${msg.timestamp}</i></p>`);
+        });
+      });
+    }
+
+    function sendMessage() {
+      const message = $("#messageInput").val();
+      if (!message) return;
+      $.ajax({
+        url: "/send_message",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+          message: message,
+          room_id: currentRoom
+        }),
+        success: function() {
+          $("#messageInput").val("");
+          loadMessages();
+        }
+      });
+    }
+
+    $('#roomSelect').change(function() {
+      currentRoom = $(this).val();
+      loadMessages();
+    });
+
+    setInterval(loadMessages, 3000);
+    loadMessages();
+  </script>
+</body>
+</html>

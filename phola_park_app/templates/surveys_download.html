@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="section">
+    <h3 class="text-center mb-4"></h3>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- User Information -->
+    <div class="section">
+        <h2 class="text-center mb-4">Welcome Report an Incident </h2>
+        <div class="mb-4">
+            <h4>Hello, {{ session['name'] }}!</h4>
+            <p>Your role: {{ session['user_role'] }}</p>
+            <p>Portfolio: {{ session['portfolio'] }}</p>
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+    <p><a class="btn btn-info me-2" href="/user_dashboard">← Back</a></p>
+    
+    </div>
+    </div>
+<form method="POST" action="{{ url_for('submit_incident', survey_number=1) }}" enctype="multipart/form-data">
+    <label>Incident Title:</label>
+    <input type="text" name="title" required><br>
+
+    <label>Description:</label>
+    <textarea name="description" required></textarea><br>
+
+    <label>Category (e.g., Water, Crime, etc.):</label>
+    <input type="text" name="category" required><br>
+
+    <label>Upload Image (optional):</label>
+    <input type="file" name="image"><br><br>
+
+    <button type="submit">Submit Incident</button>
+</form>
+<br><br><br><br><br>
+    </div>
+    </div>
+{% endblock %}

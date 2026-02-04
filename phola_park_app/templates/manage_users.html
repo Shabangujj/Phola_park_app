@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Manage Users</h2>
+        <a href="{{ url_for('add_user') }}" class="btn btn-success">+ Add User</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-success">Cancel</a>
+    </div>
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+      </tr>
+      <td>
+  {% if user['can_upload'] == 1 %}
+    <span class="badge bg-success">Can Upload</span>
+    <a href="{{ url_for('toggle_upload_permission', user_id=user['id'], value=0) }}" class="btn btn-warning btn-sm">Revoke</a>
+  {% else %}
+    <span class="badge bg-secondary">No Upload</span>
+    <a href="{{ url_for('toggle_upload_permission', user_id=user['id'], value=1) }}" class="btn btn-success btn-sm">Assign</a>
+  {% endif %}
+</td>
+
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="mt-4">
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+    ← Back
+  </a>
+{% endblock %}

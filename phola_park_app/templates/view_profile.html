@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="section">
+    <h3 class="text-center mb-4"></h3>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- User Information -->
+    <div class="section">
+        <h2 class="text-center mb-4">Welcome to 👤 Your Profile Information </h2>
+        <div class="mb-4">
+            <h4>Hello, {{ session['name'] }}!</h4>
+            <p>Your role: {{ session['user_role'] }}</p>
+            <p>Portfolio: {{ session['portfolio'] }}</p>
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+    <p><a class="btn btn-info me-2" href="/user_dashboard">← Back</a></p>
+    </div>
+    </div>
+<p>
+    <a class="btn btn-warning me-2" href="{{ url_for('edit_profile') }}">✏️ Edit Profile</a> |
+    <a class="btn btn-danger" href="{{ url_for('delete_profile') }}" onclick="return confirm('Are you sure you want to delete your profile?')">🗑️ Delete Profile</a>
+</p>
+
+{% if profile %}
+    <p><strong>ID Number:</strong> {{ profile.id_number }}</p>
+    <p><strong>Name:</strong> {{ profile.full_name }}</p>
+    <p><strong>Age:</strong> {{ profile.age }}</p>
+    <p><strong>Gender:</strong> {{ profile.gender }}</p>
+    <p><strong>Indigenous Class:</strong> {{ profile.indigenous_class }}</p>
+    <p><strong>Postal Address:</strong> {{ profile.postal_address }}</p>
+    <p><strong>Residential Address:</strong> {{ profile.residential_address }}</p>
+    <p><strong>Email:</strong> {{ profile.email }}</p>
+    <p><strong>Phone:</strong> {{ profile.phone }}</p>
+    <p><strong>Skills:</strong> {{ profile.skills }}</p>
+    <p><strong>Education:</strong> {{ profile.education }}</p>
+    <p><strong>Employment Status:</strong> {{ profile.employment_status }}</p>
+    <p><strong>CV:</strong> <a href="{{ url_for('static', filename='../uploads/' + profile.cv_filename) }}" target="_blank">📄 View CV</a></p>
+{% else %}
+    <h2>❌ No profile data found.</h2>
+    <a class="btn btn-primary" href="{{ url_for('submit_profile') }}">create your profile</a>
+{% endif %}
+</div><br><br><br><br><br>
+    </div>
+    <div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+{% endblock %}

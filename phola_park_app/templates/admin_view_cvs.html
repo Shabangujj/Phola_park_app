@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>View Submitted CVs</title></head>
+<body>
+    <h2>📁 Submitted CVs</h2>
+    <table border="1" cellpadding="6">
+        <tr>
+            <th>Full Name</th>
+            <th>ID Number</th>
+            <th>Age</th>
+            <th>Skills</th>
+            <th>Education</th>
+            <th>Employment</th>
+            <th>CV File</th>
+        </tr>
+        {% for p in cvs %}
+        <tr>
+            <td>{{ p.full_name }}</td>
+            <td>{{ p.id_number }}</td>
+            <td>{{ p.age }}</td>
+            <td>{{ p.skills }}</td>
+            <td>{{ p.education }}</td>
+            <td>{{ p.employment_status }}</td>
+            <td><a href="{{ url_for('static', filename='../uploads/' ~ p.cv_filename) }}" target="_blank">📄 View</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

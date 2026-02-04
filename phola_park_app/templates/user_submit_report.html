@@ -1,0 +1,38 @@
+{% extends "user_base.html" %}
+
+{% block user_content %}
+<h4>Submit Community Report</h4>
+
+<form method="POST" action="{{ url_for('user.submit_report')}}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        {{ form.report_type.label }}
+        {{ form.report_type(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.category.label }}
+        {{ form.category(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.description.label }}
+        {{ form.description(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.portfolio.label }}
+        {{ form.portfolio(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.image.label }}
+        {{ form.image(class="form-control") }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Submit Report
+    </button>
+</form>
+{% endblock %}

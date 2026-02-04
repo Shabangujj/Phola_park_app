@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h2>👥 User Management</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for user in users %}
+  <tr>
+    <td>{{ user.name }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.role.name }}</td>
+    <td>
+      {% if user.is_active %}
+        <span class="badge bg-success">Active</span>
+      {% else %}
+        <span class="badge bg-danger">Disabled</span>
+      {% endif %}
+    </td>
+
+    <td>
+      {% if user.role.name == "supervisor" %}
+  <a
+    href="{{ url_for('admin.assign_portfolio', user_id=user.id) }}"
+    class="btn btn-sm btn-outline-primary">
+    Assign Portfolio
+  </a>
+{% endif %}
+      <!-- Change role -->
+      <form method="POST" action="{{ url_for('admin.change_user_role', user_id=user.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <select name="role_id" required>
+        {% for role in roles %}
+            <option value="{{ role.id }}" {% if user.role_id == role.id %}selected{% endif %}>
+                {{ role.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Update</button>
+</form>
+
+
+      <!-- Activate / Deactivate -->
+      <a href="{{ url_for('admin.toggle_user', user_id=user.id) }}"
+         class="btn btn-sm btn-warning">
+         Toggle
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
+{% endblock %}

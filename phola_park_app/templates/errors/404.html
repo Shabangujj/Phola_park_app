@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-wrapper">
+  <div class="error-card">
+    <div class="error-code">404</div>
+    <div class="error-title">Page Not Found</div>
+    <p class="error-text">
+      The page you’re looking for doesn’t exist or was moved.
+    </p>
+
+    <div class="error-actions">
+      <a href="{{ home_url }}" class="btn-primary">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

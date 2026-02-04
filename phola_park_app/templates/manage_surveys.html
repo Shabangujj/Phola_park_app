@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="section">
+    <h3 class="text-center mb-4"></h3>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <!-- User Information -->
+    <div class="section">
+        <h2 class="text-center mb-4">Welcome Manage Surveys</h2>
+        <div class="mb-4">
+            <h4>Hello, {{ session['name'] }}!</h4>
+            <p>Your role: {{ session['user_role'] }}</p>
+            <p>Portfolio: {{ session['portfolio'] }}</p>
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+    <p><a class="btn btn-info me-2" href="{{ url_for('admin_dashboard') }}">← Back</a></p>
+    </div>
+    </div>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Link</th>
+                <th>Uploaded By</th>
+                <th>Views</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for survey in surveys %}
+            <tr>
+                <td>{{ survey['title'] }}</td>
+                <td>{{ survey['description'] }}</td>
+                <td><a href="{{ survey['form_link'] }}" target="_blank">Open Form</a></td>
+                <td>{{ survey['uploaded_by'] }}</td>
+                <td>{{ survey['views'] or 0 }}</td>
+                <td>
+                    <a href="/edit-survey/{{ survey['id'] }}">✏️ Edit</a> |
+                    <a href="/delete-survey/{{ survey['id'] }}" onclick="return confirm('Delete this survey?');">🗑️ Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="section card"><a class="btn btn-info me-2" href="{{ url_for('upload_new_survey') }}">Upload Survey</a></div>
+    <br><br><br><br><br><br>
+        </div>
+        <div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+    </div>
+        {% endblock %}

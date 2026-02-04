@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Custom Surveys</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include 'Menu.html' %}
+  <h2>Submitted Custom Surveys</h2>
+
+  <table>
+    <tr><th>ID</th><th>Title</th><th>Question 1</th><th>Question 2</th></tr>
+    {% for row in data %}
+      <tr>
+        {% for item in row %}
+          <td>{{ item }}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+<div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+  <footer>
+    Jay and Pro Project (PTY) LTD - Confidential<br>
+    <small>Slogan: Building Communities Through Information</small>
+  </footer>
+</body>
+</html>

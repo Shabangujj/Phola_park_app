@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Facility</title>
+</head>
+<body>
+    <h2>✏️ Edit Facility</h2>
+    <form method="POST">
+        <label>Name:</label><br>
+        <input type="text" name="name" value="{{ facility.name }}" required><br><br>
+
+        <label>Type:</label><br>
+        <input type="text" name="type" value="{{ facility.type }}"><br><br>
+
+        <label>Location:</label><br>
+        <input type="text" name="location" value="{{ facility.location }}"><br><br>
+
+        <button type="submit">Update</button>
+    </form>
+    <br>
+    <a href="/facilities.html">⬅ Back to Facility List</a>
+</body>
+</html>

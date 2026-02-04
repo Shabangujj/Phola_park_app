@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>Upload CV</title></head>
+<body>
+    <h2>📄 Upload Your CV</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label>ID Number:</label><br><input type="text" name="id_number" required><br><br>
+        <label>Full Name:</label><br><input type="text" name="full_name" required><br><br>
+        <label>Age:</label><br><input type="number" name="age" required><br><br>
+        <label>Gender:</label><br><input type="text" name="gender" required><br><br>
+        <label>Indigenous Class:</label><br><input type="text" name="indigenous_class" required><br><br>
+        <label>Postal Address:</label><br><input type="text" name="postal_address"><br><br>
+        <label>Residential Address:</label><br><input type="text" name="residential_address" required><br><br>
+        <label>Email:</label><br><input type="email" name="email"><br><br>
+        <label>Phone:</label><br><input type="text" name="phone" required><br><br>
+        <label>Skills:</label><br><input type="text" name="skills" required><br><br>
+        <label>Education:</label><br><input type="text" name="education" required><br><br>
+        <label>Employment Status:</label><br><input type="text" name="employment_status" required><br><br>
+        <label>Upload CV File (PDF/DOC):</label><br><input type="file" name="cv_file" required><br><br>
+
+        <button type="submit">📤 Submit CV</button>
+    </form>
+   <div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+ 
+</body>
+</html>

@@ -1,0 +1,102 @@
+.error-page {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.error-page h1 {
+  font-size: 96px;
+  margin-bottom: 10px;
+  color: #c0392b;
+}
+
+.error-page h2 {
+  margin-bottom: 15px;
+}
+
+.error-actions {
+  margin-top: 30px;
+}
+
+.error-actions .btn {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 18px;
+  text-decoration: none;
+  background: #2c3e50;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.error-actions .btn-secondary {
+  background: #16a085;
+}
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #f4f6f9;
+}
+
+/* App layout */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #1f2937;
+    color: #fff;
+    padding: 20px;
+}
+
+.sidebar h3 {
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    display: block;
+    color: #cbd5e1;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: #2563eb;
+    color: #fff;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top bar */
+.topbar {
+    background: #2563eb;
+    color: #fff;
+    padding: 16px 24px;
+}
+
+/* Page content */
+.page-content {
+    padding: 24px;
+}
+
+/* Cards */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}

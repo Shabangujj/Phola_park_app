@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="section">
+    <h3 class="text-center mb-4"></h3>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- User Information -->
+    <div class="section">
+        <h2 class="text-center mb-4">Welcome to: 📄 Submit Your Profile & CV</h2>
+        <div class="mb-4">
+            <h4>Hello, {{ session['name'] }}!</h4>
+            <p>Your role: {{ session['user_role'] }}</p>
+            <p>Portfolio: {{ session['portfolio'] }}</p>
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+            <p><a class="btn btn-info me-2" href="/user_dashboard">← Back</a></p>
+    </div>
+    </div>
+<form action="/submit-profile" method="POST" enctype="multipart/form-data">
+    <label>ID Number:</label><br>
+    <input type="text" name="id_number" required><br>
+
+    <label>Full Name:</label><br>
+    <input type="text" name="full_name" required><br>
+
+    <label>Age:</label><br>
+    <input type="number" name="age" required><br>
+
+    <label>Gender:</label><br>
+    <select name="gender" required>
+        <option value="">-- Select --</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select><br>
+
+    <label>Indigenous Class:</label><br>
+    <input type="text" name="indigenous_class" required><br>
+
+    <label>Postal Address:</label><br>
+    <input type="text" name="postal_address"><br>
+
+    <label>Residential Address:</label><br>
+    <input type="text" name="residential_address" required><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email"><br>
+
+    <label>Phone:</label><br>
+    <input type="text" name="phone" required><br>
+
+    <label>Skills:</label><br>
+    <input type="text" name="skills" required><br>
+
+    <label>Education:</label><br>
+    <input type="text" name="education" required><br>
+
+    <label>Employment Status:</label><br>
+    <select name="employment_status" required>
+        <option value="Unemployed">Unemployed</option>
+        <option value="Employed">Employed</option>
+        <option value="Student">Student</option>
+        <option value="SelfEmployed">Self Employed</option>
+    </select><br>
+
+    <label>Upload CV (PDF):</label><br>
+    <input type="file" name="cv_file" accept=".pdf" required><br><br>
+
+    <button type="submit">Submit</button>
+</form>
+<br><br><br><br><br>
+    </div>
+{% endblock %}
+<br><br><br><br><br><br><br><br>
+<div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>

@@ -1,0 +1,25 @@
+<!-- templates/Admin_Survey1.html -->
+{% extends "base.html" %}
+
+{% block title %}Survey 1 Results{% endblock %}
+
+{% block content %}
+<h2>Survey 3 Responses</h2>
+<table border="1" cellpadding="8">
+    <tr><th>ID</th><th>Q1</th><th>Q2</th></tr>
+    {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}
+
+  <footer>
+    Jay and Pro Project (PTY) LTD - Confidential<br>
+    <small>Slogan: Building Communities Through Information</small>
+  </footer>
+</body>
+</html>

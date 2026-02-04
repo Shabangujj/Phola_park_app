@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+Phola Park App | Login
+{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="login-container">
+    <h2>Login</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <label>Email:</label>
+        <input type="text" name="email">
+
+        <label>Password:</label>
+        <input type="password" name="password">
+
+        <button class="login-btn" type="submit">Login</button>
+
+        <div class="register-link">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+        </div>
+    </form>
+</div>
+{% endblock %}

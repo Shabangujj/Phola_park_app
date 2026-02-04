@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block Content %}
+    <div class="admin-layout">
+    <title>Admin Panel - Phola Park App</title>
+    </div>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block admin_content %}
+        <h1>Admin Panel</h1>
+        <nav>
+          <a href="{{ url_for('admin_bp.admin_db_home') }}">Dashboard</a>
+          <a href="{{ url_for('admin_bp.admin_users') }}">Manage Users</a>
+          <a href="{{ url_for('admin_bp.admin_assign_portfolio') }}">Assign Portfolios</a>
+         <a href="{{ url_for('admin_bp.admin_notices') }}">Manage Notices</a>
+         <a href="{{ url_for('admin_bp.admin_reports') }}">View Reports</a>
+         <a href="{{ url_for('admin_bp.admin_create_announcement') }}">Create Announcement</a>
+        <a href="{{ url_for('admin_bp.admin_export_data') }}">Export Data</a>
+        <a href="{{ url_for('admin_bp.admin_db_tools') }}">Database Tools</a>
+        </nav>
+        <hr>
+ <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle position-relative"
+     href="#"
+     data-bs-toggle="dropdown">
+
+    🔔
+    {% if unread_notifications|length %}
+      <span class="position-absolute top-0 start-100 translate-middle
+                   badge rounded-pill bg-danger">
+        {{ unread_notifications|length }}
+      </span>
+    {% endif %}
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px;">
+    {% if unread_notifications %}
+      {% for n in unread_notifications[:5] %}
+        <li>
+          <a class="dropdown-item small"
+             href="{{ url_for('main.mark_notification_read', notification_id=n.id) }}">
+            <strong>{{ n.title }}</strong><br>
+            <span class="text-muted">{{ n.message }}</span>
+          </a>
+        </li>
+      {% endfor %}
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-center"
+           href="{{ url_for('main.notifications_page') }}">
+          View all notifications
+        </a>
+      </li>
+    {% else %}
+      <li class="dropdown-item text-muted text-center">
+        No new notifications
+      </li>
+    {% endif %}
+  </ul>
+</li>
+
+    {% endblock %}
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>

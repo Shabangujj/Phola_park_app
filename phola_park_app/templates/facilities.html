@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="section card">
+        <h2 class="text-center mb-4">🏢 Facility List</h2>
+        <h1>Welcome, {{ session['name'] }}</h1>
+    </div>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+    <div class="section card">
+        <h2 class="text-center mb-4">Registered Facilities</h2>
+        <p>Here is the list of all registered facilities in the community.</p>
+    <a class="btn btn-primary" href="add_facility.html">➕ Add New Facility</a>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Action</th>
+        </tr>
+        {% for f in facilities %}
+        <tr>
+            <td>{{ f.id }}</td>
+            <td>{{ f.name }}</td>
+            <td>{{ f.type }}</td>
+            <td>{{ f.location }}</td>
+            <td>{% if session['role'] == 'admin' %}
+  <a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
+{% elif session['role'] == 'supervisor' %}
+  <a href="{{ url_for('supervisor_dashboard') }}">Back to Dashboard</a>
+{% else %}
+  <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+{% endif %}
+</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

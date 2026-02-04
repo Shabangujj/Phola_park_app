@@ -1,0 +1,31 @@
+/* SUPERVISOR DASHBOARD STYLE */
+
+.dashboard-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.supervisor-menu li {
+    margin-bottom: 10px;
+}
+
+.supervisor-report {
+    background: #fff;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+
+.btn {
+    padding: 8px 14px;
+    background: #0066cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background: #004c99;
+}

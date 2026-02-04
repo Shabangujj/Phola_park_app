@@ -1,0 +1,54 @@
+<nav class="navbar">
+    <div class="brand">
+        Phola Park
+    </div>
+
+    <ul>
+        {# ---------------- GUEST ---------------- #}
+        {% if not current_user.is_authenticated %}
+            <li><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+            <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+        {% else %}
+
+        {# ---------------- LOGGED-IN USERS ---------------- #}
+            <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+
+            {# ---------------- USER ---------------- #}
+            {% if current_user.role.name == 'user' %}
+                <li><a href="{{ url_for('user.dashboard') }}">My Dashboard</a></li>
+                <li><a href="{{ url_for('user.surveys') }}">Surveys</a></li>
+                <li><a href="{{ url_for('user.user_reports') }}">My Reports</a></li>
+            {% endif %}
+
+            {# ---------------- SUPERVISOR ---------------- #}
+            {% if current_user.role.name == 'supervisor' %}
+                <li><a href="{{ url_for('supervisor.dashboard') }}">Supervisor Dashboard</a></li>
+                <li><a href="{{ url_for('supervisor.reports') }}">Reports</a></li>
+                <li><a href="{{ url_for('supervisor.surveys') }}">Surveys</a></li>
+            {% endif %}
+
+            {# ---------------- ADMIN ---------------- #}
+            {% if current_user.role.name == 'admin' %}
+                <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
+                <li><a href="{{ url_for('admin.admin_users') }}">Users</a></li>
+                <li><a href="{{ url_for('admin.admin_surveys') }}">Surveys</a></li>
+                <li><a href="{{ url_for('admin.admin_reports') }}">Reports</a></li>
+                <li><a href="{{ url_for('admin.admin_announcements') }}">Announcements</a></li>
+            {% endif %}
+
+            {# ---------------- NOTIFICATIONS (ALL ROLES) ---------------- #}
+            <li>
+                <a href="{{ url_for('main.notifications_page') }}">
+                    Notifications
+                    {% if unread_notifications|length > 0 %}
+                        <span class="badge">{{ unread_notifications|length }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+
+        {% endif %}
+    </ul>
+</nav>

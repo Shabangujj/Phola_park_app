@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Assign Supervisor{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4 text-center text-primary">Assign Supervisor to Committee / Portfolio</h3>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Assignment Form -->
+  <form method="POST" class="card p-4 shadow-sm mb-5">
+    <div class="mb-3">
+      <label for="supervisor" class="form-label">Select Supervisor:</label>
+      <select name="supervisor_id" id="supervisor" class="form-select" required>
+        <option value="">-- Choose Supervisor --</option>
+        {% for s in supervisors %}
+          <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="portfolio" class="form-label">Select Committee / Portfolio:</label>
+      <select name="portfolio_id" id="portfolio" class="form-select" required>
+        <option value="">-- Choose Committee --</option>
+        {% for p in portfolios %}
+          <option value="{{ p.id }}">{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary px-4">Assign</button>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary px-4">Back</a>
+    </div>
+  </form>
+<!-- 🔍 Filter Section -->
+  <div class="card p-3 mb-4 shadow-sm">
+    <form method="GET" action="{{ url_for('assign_supervisor') }}" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Filter by Portfolio:</label>
+        <select name="filter_portfolio" class="form-select">
+          <option value="">All Committees</option>
+          {% for p in portfolios %}
+            <option value="{{ p.id }}" {% if p.id|string == filter_portfolio %}selected{% endif %}>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-5">
+        <label class="form-label">Filter by Supervisor:</label>
+        <select name="filter_supervisor" class="form-select">
+          <option value="">All Supervisors</option>
+          {% for s in supervisors %}
+            <option value="{{ s.id }}" {% if s.id|string == filter_supervisor %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 text-end">
+        <button type="submit" class="btn btn-success w-100">Apply</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Assigned Supervisors Table -->
+  <div class="card shadow-sm p-4">
+    <h5 class="mb-3 text-center text-success">📋 Current Supervisor Assignments</h5>
+    {% if assignments %}
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Supervisor Name</th>
+            <th>Committee / Portfolio</th>
+            <th>Date Assigned</th>
+            <th>Unassign</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assignments %}
+            <tr>
+              <td>{{ a.supervisor_name }}</td>
+              <td>{{ a.portfolio_name }}</td>
+              <td>
+  {% if a.assigned_at %}
+    <span class="text-muted">
+      📅 {{ a.assigned_at }}
+    </span>
+  {% else %}
+    <span class="text-danger">Not recorded</span>
+  {% endif %}
+</td>
+<td>
+                <form method="POST" action="{{ url_for('remove_assignment') }}" onsubmit="return confirm('Remove {{ a.supervisor_name }} from {{ a.portfolio_name }}?');">
+                  <input type="hidden" name="portfolio_name" value="{{ a.portfolio_name }}">
+                  <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted text-center">No supervisors assigned yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

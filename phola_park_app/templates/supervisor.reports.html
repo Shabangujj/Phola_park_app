@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Reports for Your Portfolio</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='supervisor.css') }}">
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>User</th>
+        <th>Date</th>
+    </tr>
+
+    {% for report in reports %}
+    <tr>
+        <td>{{ report.id }}</td>
+        <td>{{ report.report_type }}</td>
+        <td>{{ report.description }}</td>
+        <td>{{ report.user_id }}</td>
+        <td>{{ report.timestamp }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<h2>Assigned Reports</h2>
+
+<ul>
+{% for r in reports %}
+    <li>
+        <strong>{{ r.report_type }}</strong><br>
+        {{ r.description }} <br>
+        <small>{{ r.timestamp }}</small>
+    </li>
+{% else %}
+    <p>No reports found.</p>
+{% endfor %}
+</ul>
+
+<h2>Report Filters</h2>
+
+<form method="get">
+    <label>Report Type:</label>
+    <select name="type">
+        <option value="">All</option>
+        <option value="water">Water</option>
+        <option value="crime">Crime</option>
+        <option value="health">Health</option>
+    </select>
+
+    <label>Date:</label>
+    <select name="date">
+        <option value="">All</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+    </select>
+
+    <button type="submit">Apply</button>
+</form>
+
+<hr>
+
+<h2>Filtered Reports</h2>
+
+<ul>
+{% for r in reports %}
+    <li>
+        {{ r.report_type }} —
+        {{ r.description }} —
+        {{ r.timestamp }}
+    </li>
+{% endfor %}
+</ul>
+
+
+<h2>Reports for Portfolio: {{ portfolio }}</h2>
+
+<form method="GET" class="filter-box">
+
+    <label>Status:</label>
+    <select name="status">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+        <option value="escalated">Escalated</option>
+    </select>
+
+    <label>From:</label>
+    <input type="date" name="from">
+
+    <label>To:</label>
+    <input type="date" name="to">
+
+    <label>Search:</label>
+    <input type="text" name="search" placeholder="description, keywords...">
+
+    <button type="submit">Apply Filters</button>
+</form>
+
+<hr>
+
+<table border="1" width="100%">
+    <tr>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+
+    {% for r in reports %}
+    <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.description }}</td>
+        <td>{{ r.status }}</td>
+        <td>{{ r.timestamp.strftime("%Y-%m-%d %H:%M") }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock %}

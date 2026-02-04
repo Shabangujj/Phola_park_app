@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Reports | Phola Park App{% endblock %}
+
+{% block content %}
+
+<section class="admin-reports">
+
+  <!-- Header -->
+  <header class="page-header">
+    <h2>Reports Management</h2>
+    <p>View, filter, and export all community reports.</p>
+  </header>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <a href="{{ url_for('admin.admin_home') }}" class="btn">
+      ← Back to Dashboard
+    </a>
+
+    <div class="export-actions">
+      <a
+        href="{{ url_for('admin.admin_reports') }}?export=csv"
+        class="btn btn-outline"
+      >
+        Export CSV
+      </a>
+
+      <a
+        href="{{ url_for('admin.admin_reports') }}?export=pdf"
+        class="btn btn-outline"
+      >
+        Export PDF
+      </a>
+    </div>
+  </div>
+
+  <!-- Reports Table -->
+  <section class="reports-table">
+
+    {% if reports %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Portfolio</th>
+            <th>Reported By</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for report in reports %}
+            <tr>
+              <td>{{ report.id }}</td>
+              <td>{{ report.report_type | default('N/A') }}</td>
+              <td>{{ report.category | default('Uncategorized') }}</td>
+              <td>{{ report.description | default('No description') }}</td>
+              <td>{{ report.portfolio | default('N/A') }}</td>
+              <td>
+                {{ report.user.email if report.user else 'Anonymous' }}
+              </td>
+              <td>
+                {{ report.created_at.strftime('%Y-%m-%d') if report.created_at else 'N/A' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No reports found.</p>
+    {% endif %}
+
+  </section>
+
+</section>
+
+{% endblock %}

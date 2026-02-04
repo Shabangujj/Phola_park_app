@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>surveys</h2>
+<p><a href="{{ url_for('supervisor.upload_new_surveys')}}">upload_new_surveys</a></p>
+ 
+{% if surveys %}
+<ul>
+    {% for s in surveys %}
+    <li>
+        <strong> {{s.title}}</strong> - {{s,created_at.strftime('%Y-%M-%d %H: %M')}}br 
+        {{s.description or ''}}<br>
+        {% if s.filename %}
+        <a href = "{{ url_for('supervisor.surveys_download',filename.filename)}}">Download file</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No surveys ye</p>
+{% endif %}
+{% endblock %}

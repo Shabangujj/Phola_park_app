@@ -1,0 +1,18 @@
+{% extends "base.html" %} {# or admin_base.html if you want consistent header/nav #}
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+<style>
+/* small inline fallback if file not loaded */
+</style>
+{% endblock %}
+{% block content %}
+<div class="user-container">
+  <div class="top-bar d-flex align-items-center justify-content-between">
+    <h4 class="mb-0">Hello, {{ current_user.name.split(' ')[0] }}</h4>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+  </div>
+  <div class="user-body mt-3">
+    {% block user_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

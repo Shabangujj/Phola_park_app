@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+        form {
+            background: white; padding: 20px; max-width: 400px;
+            margin: auto; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, select {
+            width: 100%; padding: 10px; margin-bottom: 15px;
+        }
+        button {
+            padding: 10px; background: #007bff; color: white; border: none;
+            width: 100%; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <form method="POST">
+        <h2>Edit User</h2>
+
+        <input type="text" name="name" value="{{ user.name }}" required>
+        <input type="email" name="email" value="{{ user.email }}" required>
+
+        <select name="role" required>
+            <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+            <option value="supervisor" {% if user.role == 'supervisor' %}selected{% endif %}>Supervisor</option>
+            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+        </select>
+
+        <button type="submit">Update</button>
+    </form>
+
+</body>
+</html>

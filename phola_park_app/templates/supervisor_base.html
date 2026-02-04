@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="layout">
+
+  {% include "partials/supervisor_sidebar.html" %}
+
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+<nav>
+    <a href="{{ url_for('supervisor.supervisor_home') }}">Home</a> |
+    <a href="{{ url_for('supervisor.logout') }}">Logout</a>
+</nav>
+<hr>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle position-relative"
+     href="#"
+     data-bs-toggle="dropdown">
+
+    🔔
+    {% if unread_notifications|length %}
+      <span class="position-absolute top-0 start-100 translate-middle
+                   badge rounded-pill bg-danger">
+        {{ unread_notifications|length }}
+      </span>
+    {% endif %}
+  </a>
+<li>
+    <a href="{{ url_for('supervisor.supervisor_reports') }}">
+        Reports
+    </a>
+</li>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px;">
+    {% if unread_notifications %}
+      {% for n in unread_notifications[:5] %}
+        <li>
+          <a class="dropdown-item small"
+             href="{{ url_for('main.mark_notification_read', notification_id=n.id) }}">
+            <strong>{{ n.title }}</strong><br>
+            <span class="text-muted">{{ n.message }}</span>
+          </a>
+        </li>
+      {% endfor %}
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-center"
+           href="{{ url_for('main.notifications_page') }}">
+          View all notifications
+        </a>
+      </li>
+    {% else %}
+      <li class="dropdown-item text-muted text-center">
+        No new notifications
+      </li>
+    {% endif %}
+  </ul>
+</li>
+
+</div>
+{% endblock %}

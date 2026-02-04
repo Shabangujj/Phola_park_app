@@ -1,0 +1,27 @@
+{% extends "user_base.html" %}
+{% block user_content %}
+<h4>Active Surveys</h4>
+
+<div class="row gy-2">
+  {% for s in surveys %}
+  <div class="col-12">
+    <div class="card p-2 d-flex flex-row align-items-center justify-content-between">
+      <div>
+        <div class="fw-bold">{{ s.title }}</div>
+        <div class="small text-muted">{{ s.description[:120] }}{% if s.description|length>120 %}…{% endif %}</div>
+      </div>
+      <div class="text-end">
+        {% if s.external_url %}
+          <a href="{{ s.external_url }}" target="_blank" class="btn btn-sm btn-primary">Open</a>
+        {% else %}
+          <a href="{{ url_for('survey.take', survey_id=s.id) }}" class="btn btn-sm btn-primary">Take</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">No active surveys at the moment.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

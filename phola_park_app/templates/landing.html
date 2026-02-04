@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<section class="landing-hero">
+  <div class="landing-container">
+
+    <h1 class="landing-title">Phola Park Community Platform</h1>
+
+    <p class="landing-subtitle">
+      A digital platform for transparent reporting, communication,
+      and collaborative community management.
+    </p>
+
+    <div class="landing-actions">
+      <a href="{{ url_for('auth.login') }}" class="btn-primary">
+        Login
+      </a>
+      <a href="{{ url_for('auth.register') }}" class="btn-secondary">
+        Register
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<section class="landing-features">
+  <div class="feature-card">
+    <h3>Incident Reporting</h3>
+    <p>
+      Report water, electricity, crime, health, and service delivery issues
+      with optional images.
+    </p>
+  </div>
+
+  <div class="feature-card">
+    <h3>Role-Based Dashboards</h3>
+    <p>
+      Separate dashboards for residents, supervisors, and administrators
+      for efficient management.
+    </p>
+  </div>
+
+  <div class="feature-card">
+    <h3>Community Transparency</h3>
+    <p>
+      Track reports, announcements, and notifications in one central place.
+    </p>
+  </div>
+</section>
+{% endblock %}

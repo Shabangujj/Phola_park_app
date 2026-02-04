@@ -1,0 +1,47 @@
+{% extends "user_base.html" %}
+{% block user_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<h4>Notices & Announcements</h4>
+
+<div class="list-group mt-2">
+  {% for n in notices %}
+  <div class="list-group-item">
+    <div class="d-flex justify-content-between">
+      <div>
+        <div class="fw-bold">{{ n.title }}</div>
+        <div class="small text-muted">{{ n.created_at.strftime('%Y-%m-%d') if n.created_at else '' }}</div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-info">{{ n.target }}</span>
+      </div>
+    </div>
+    <div class="mt-2">{{ n.content }}</div>
+  </div>
+  {% else %}
+  <p class="text-muted">No notices found.</p>
+  {% endfor %}
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination">
+    {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('user.notices', page=pagination.prev_num) }}">Previous</a></li>
+    {% endif %}
+    {% for pnum in pagination.iter_pages() %}
+      {% if pnum %}
+        <li class="page-item {% if pnum==pagination.page %}active{% endif %}"><a class="page-link" href="{{ url_for('user.notices', page=pnum) }}">{{ pnum }}</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('user.notices', page=pagination.next_num) }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

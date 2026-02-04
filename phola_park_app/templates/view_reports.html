@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<head><title>Reports</title></head>
+<body>
+  <h2>Reports</h2>
+  <p>Here all submitted reports will show (for Admin & Supervisor).</p>
+  <a href="{{ url_for('admin_dashboard') }}">⬅ Back</a>
+    <h2>Report Details</h2>
+
+    <p><strong>Submitted By:</strong> {{ report['submitted_by'] }}</p>
+    <p><strong>Category:</strong> {{ report['category'] }}</p>
+    <p><strong>Description:</strong> {{ report['description'] }}</p>
+    <p><strong>Portfolio:</strong> {{ report['portfolio'] }}</p>
+    <p><strong>Date:</strong> {{ report['created_at'] }}</p>
+
+    <br>
+    {% if session['role'] == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
+    {% elif session['role'] == 'supervisor' %}
+        <a href="{{ url_for('supervisor_dashboard') }}">Back to Dashboard</a>
+{% endif %}
+<div class="mt-4">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+{% endblock %}

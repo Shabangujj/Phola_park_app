@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Submit Report{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="mb-4 text-center">📑 Submit a New Report</h2>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form action="{{ url_for('add_report') }}" method="POST" enctype="multipart/form-data" class="card shadow p-4">
+    <div class="mb-3">
+      <label for="report_type" class="form-label">Report Type</label>
+      <select class="form-select" id="report_type" name="report_type" required>
+        <option value="">-- Select Type --</option>
+        <option value="Service Delivery">Service Delivery</option>
+        <option value="Health">Health</option>
+        <option value="Crime">Crime</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="category" class="form-label">Category (optional)</label>
+      <input type="text" class="form-control" id="category" name="category">
+    </div>
+
+    <div class="mb-3">
+      <label for="survey_type" class="form-label">Survey Type (optional)</label>
+      <input type="text" class="form-control" id="survey_type" name="survey_type">
+    </div>
+
+    <div class="mb-3">
+      <label for="portfolio" class="form-label">Portfolio (optional)</label>
+      <input type="text" class="form-control" id="portfolio" name="portfolio">
+    </div>
+
+    <div class="mb-3">
+      <label for="file" class="form-label">Attach File (Image/PDF)</label>
+      <input class="form-control" type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf">
+      <div class="form-text">Optional — upload evidence like images or PDFs</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit Report</button>
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">Back</a>
+  </form>
+</div>
+
+{% endblock %}

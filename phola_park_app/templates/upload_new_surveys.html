@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  {% if user_role == 'admin' %}
+<div class="mb-3">
+    <label for="portfolio" class="form-label">Assign Portfolio</label>
+    <select name="portfolio" id="portfolio" class="form-select" required>
+        {% for p in portfolios %}
+            <option value="{{ p }}">{{ p }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endif %}
+
+    <h2>Upload New Survey</h2>
+    <p class="text-muted">Fill in the details to create and share a new survey with users.</p>
+<form method="POST" action="{{ url_for('supervisor.upload_new_surveys') }}">
+  <div class="form-group">
+    <label for="title">Survey Title</label>
+    <input type="text" name="title" class="form-control" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="description">Survey Description</label>
+    <textarea name="description" class="form-control" required></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="form_link">Form Link</label>
+    <input type="url" name="form_link" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Upload Survey</button>
+
+</form>
+
+</div>
+{% endblock %}

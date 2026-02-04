@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">✏️ Edit Your Profile</h2>
+    <p>Welcome, {{ session['name'] }}!</p>
+<div class="d-flex justify-content-end mb-3"></div>
+    <p><a class="btn btn-info me-2" href="/user_dashboard">← Back</a></p>
+    </div>
+<form method="POST">
+    <label>Full Name:</label><br>
+    <input type="text" name="full_name" value="{{ profile.full_name }}"><br>
+
+    <label>Age:</label><br>
+    <input type="number" name="age" value="{{ profile.age }}"><br>
+
+    <label>Gender:</label><br>
+    <select name="gender">
+        <option value="Male" {% if profile.gender == 'Male' %}selected{% endif %}>Male</option>
+        <option value="Female" {% if profile.gender == 'Female' %}selected{% endif %}>Female</option>
+    </select><br>
+
+    <label>Indigenous Class:</label><br>
+    <input type="text" name="indigenous_class" value="{{ profile.indigenous_class }}"><br>
+
+    <label>Postal Address:</label><br>
+    <input type="text" name="postal_address" value="{{ profile.postal_address }}"><br>
+
+    <label>Residential Address:</label><br>
+    <input type="text" name="residential_address" value="{{ profile.residential_address }}"><br>
+
+    <label>Phone:</label><br>
+    <input type="text" name="phone" value="{{ profile.phone }}"><br>
+
+    <label>Skills:</label><br>
+    <input type="text" name="skills" value="{{ profile.skills }}"><br>
+
+    <label>Education:</label><br>
+    <input type="text" name="education" value="{{ profile.education }}"><br>
+
+    <label>Employment Status:</label><br>
+    <select name="employment_status">
+        <option value="Unemployed" {% if profile.employment_status == 'Unemployed' %}selected{% endif %}>Unemployed</option>
+        <option value="Employed" {% if profile.employment_status == 'Employed' %}selected{% endif %}>Employed</option>
+        <option value="Student" {% if profile.employment_status == 'Student' %}selected{% endif %}>Student</option>
+    </select><br><br>
+
+    <button type="submit">Update</button>
+</form>
+<br><br><br><br><br>
+</div>
+{% endblock %}

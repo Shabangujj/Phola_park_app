@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}View Surveys{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Available Surveys ({{ portfolio }})</h2>
+
+  {% if surveys %}
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Link</th>
+        <th>Uploaded By</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in surveys %}
+      <tr>
+        <td>{{ s.title }}</td>
+        <td>{{ s.description }}</td>
+        <td><a href="{{ s.form_link }}" target="_blank" class="btn btn-sm btn-primary">Open</a></td>
+        <td>{{ s.uploaded_by }}</td>
+        <td>{{ s.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No surveys available.</p>
+  {% endif %}
+
+  <!-- Back button -->
+  <div class="mt-4">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

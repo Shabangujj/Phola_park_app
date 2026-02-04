@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h1>🛠 Admin Dashboard</h1>
+<h3>🔔 Notifications</h3>
+<div class="dashboard">
+    {% include "partials/sidebar.html" %}
+    <div class="content">
+    
+    </div>
+</div>
+
+{% for note in notifications %}
+  <div class="alert alert-info">
+    <strong>{{ note.title }}</strong><br>
+    {{ note.message }}
+  </div>
+{% else %}
+  <p>No notifications</p>
+{% endfor %}
+<div class="dashboard-grid">
+
+  <div class="card">
+    <h3>Total Users</h3>
+    <p>{{ stats.users }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Supervisors</h3>
+    <p>{{ stats.supervisors }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Total Reports</h3>
+    <p>{{ stats.reports }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Total Surveys</h3>
+    <p>{{ stats.surveys }}</p>
+  </div>
+
+</div>
+
+<hr>
+
+<h2>🧾 Recent Reports</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for report in recent_reports %}
+    <tr>
+      <td>{{ report.id }}</td>
+      <td>{{ report.category }}</td>
+      <td>{{ report.status }}</td>
+      <td>{{ report.created_at.strftime("%Y-%m-%d") }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4">No reports yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a href="{{ url_for('admin.export_reports_csv') }}"
+   class="btn btn-outline-secondary">
+   Export Reports (CSV)
+</a>
+<a href="{{ url_for('admin.admin_users') }}">Manage Users</a>
+<a href="{{ url_for('admin.admin_announcements') }}">Manage Announcements</a>
+{% endblock %}

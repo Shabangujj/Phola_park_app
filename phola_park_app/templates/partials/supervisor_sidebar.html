@@ -1,0 +1,24 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h4>Phola Park</h4>
+    <span class="role-badge">Supervisor</span>
+  </div>
+
+  <ul class="sidebar-menu">
+    <li>
+      <a href="{{ url_for('supervisor.dashboard') }}">Dashboard</a>
+    </li>
+    <li>
+      <a href="{{ url_for('supervisor.reports') }}">Reports</a>
+    </li>
+    <li>
+      <a href="{{ url_for('supervisor.surveys') }}">Surveys</a>
+    </li>
+    <li>
+      <a href="{{ url_for('notifications.inbox') }}">Notifications</a>
+    </li>
+    <li class="logout">
+      <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </li>
+  </ul>
+</div>

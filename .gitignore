@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+
+# Flask
+instance/
+.env
+*.sqlite3
+
+# Editors
+.vscode/
+
+# Uploads
+phola_park_app/uploads/
+phola_park_app/static/uploads/

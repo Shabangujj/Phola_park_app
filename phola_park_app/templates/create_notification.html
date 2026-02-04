@@ -1,0 +1,98 @@
+  <meta charset="UTF-8">
+        <title></title>
+         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+            <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        header {
+            background-color: #003366;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position:fixed;
+            text-align:center; 
+            width:100%;
+
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+            max-width: 500px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .flash {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        table {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        table th {
+            background: #f0f0f0;
+        }
+    </style>
+{% extends 'base.html' %}
+{% block content %}
+<header><h3>Create Notification</h3></header><br><br><br>
+<br><br><br>
+<div class="container mt-4">
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Portfolio</label>
+            <select name="portfolio" class="form-control" required>
+                {% for p in portfolios %}
+                    <option value="{{ p }}">{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+       <div class="button"><button class="button">Send Notification</button></div>
+    </form>
+</div>
+{% endblock %}

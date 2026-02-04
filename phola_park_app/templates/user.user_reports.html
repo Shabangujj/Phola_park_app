@@ -1,0 +1,118 @@
+{% extends "user_base.html" %}
+{% block user_content %}
+<h4>My Reports</h4>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col">
+    <input name="q" value="{{ filters.q or '' }}" class="form-control" placeholder="Search type or description">
+  </div>
+  <div class="col-auto">
+    <select name="category" class="form-select">
+      <option value="">Category</option>
+      <option>Water</option><option>Electricity</option><option>Housing</option><option>Crime</option><option>Health</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <input name="date_from" type="date" class="form-control" value="{{ filters.date_from or '' }}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-primary">Filter</button>
+  </div>
+  <div class="col-auto">
+    <a href="{{ url_for('user.user_reports', export='csv', **request.args.to_dict()) }}" class="btn btn-outline-secondary">Export CSV</a>
+  </div>
+</form>
+
+<div class="list-group">
+  {% for r in reports %}
+  <div class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms-2 me-auto">
+      <div class="fw-bold">{{ r.report_type }} <small class="text-muted">• {{ r.category or '' }}</small></div>
+      <div class="small text-muted">{{ r.description[:120] }}{% if r.description|length>120 %}…{% endif %}</div>
+      <div class="small mt-1 text-muted">Status: {{ r.status or 'pending' }} • {{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '' }}</div>
+    </div>
+    <div class="text-end">
+      {% if r.image %}
+        <img src="{{ url_for('static', filename='uploads/'~r.image) }}" style="max-width:60px" class="img-thumbnail mb-1 view-report" data-id="{{ r.id }}">
+      {% endif %}
+      <div><a href="#" class="btn btn-sm btn-outline-primary view-report" data-id="{{ r.id }}">View</a></div>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">You have not submitted any reports yet.</p>
+  {% endfor %}
+</div>
+
+<!-- pagination -->
+{% if pagination.pages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination">
+    {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('user.user_reports', page=pagination.prev_num, **request.args.to_dict()) }}">Previous</a></li>
+    {% endif %}
+    {% for pnum in pagination.iter_pages() %}
+      {% if pnum %}
+        <li class="page-item {% if pnum==pagination.page %}active{% endif %}"><a class="page-link" href="{{ url_for('user.user_reports', page=pnum, **request.args.to_dict()) }}">{{ pnum }}</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('user.user_reports', page=pagination.next_num, **request.args.to_dict()) }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<!-- reuse modal (same as admin) -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Report</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="report-image-holder" class="text-center mb-3"></div>
+        <dl class="row">
+          <dt class="col-sm-4">Type</dt><dd class="col-sm-8" id="r-type"></dd>
+          <dt class="col-sm-4">Category</dt><dd class="col-sm-8" id="r-category"></dd>
+          <dt class="col-sm-4">Created</dt><dd class="col-sm-8" id="r-created"></dd>
+          <dt class="col-sm-4">Description</dt><dd class="col-sm-8" id="r-desc"></dd>
+          <dt class="col-sm-4">Comment</dt><dd class="col-sm-8" id="r-comment"></dd>
+        </dl>
+      </div>
+      <div class="modal-footer"><a id="open-full" class="btn btn-secondary" target="_blank">Open Full</a><button class="btn btn-primary" data-bs-dismiss="modal">Close</button></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.view-report').forEach(el => el.addEventListener('click', function(ev){
+    ev.preventDefault();
+    const id = this.dataset.id;
+    if (!id) return;
+    fetch('{{ url_for("user.report_detail", report_id=0) }}'.replace('/0','/'+id))
+      .then(r=>r.json()).then(data=>{
+        if (data.error) { alert(data.error); return; }
+        document.getElementById('r-type').textContent = data.report_type || '-';
+        document.getElementById('r-category').textContent = data.category || '-';
+        document.getElementById('r-created').textContent = data.created_at || '-';
+        document.getElementById('r-desc').textContent = data.description || '-';
+        document.getElementById('r-comment').textContent = data.comment || '-';
+        const holder = document.getElementById('report-image-holder');
+        holder.innerHTML='';
+        if (data.image_url) {
+          const img = document.createElement('img'); img.src=data.image_url; img.className='img-fluid rounded';
+          holder.appendChild(img);
+          document.getElementById('open-full').href = data.image_url; document.getElementById('open-full').style.display='inline-block';
+        } else {
+          document.getElementById('open-full').style.display='none';
+        }
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('reportModal')).show();
+      });
+  }));
+});
+</script>
+{% endblock %}

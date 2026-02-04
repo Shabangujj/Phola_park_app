@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}
+Phola Park App | Home
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<header class="relative h-96 bg-cover bg-center bg-gray-800 text-white">
+  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+  <div class="relative container mx-auto px-6 h-full flex items-center">
+    <div class="max-w-xl space-y-4">
+      <h1 class="text-4xl font-bold flex items-center gap-3">
+        <i class="lucide lucide-building-2 text-white text-4xl"></i>
+        Phola Park
+      </h1>
+
+      <p class="text-lg opacity-90">
+        Empowering residents through efficient reporting, transparent communication,
+        and collaborative community management.
+      </p>
+
+      <div class="flex gap-4 mt-4">
+        {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.login') }}" class="btn-primary">Sign In</a>
+          <a href="{{ url_for('auth.register') }}" class="btn-outline-light">Get Started</a>
+        {% else %}
+          <a href="{{ url_for('main.redirect_by_role') }}" class="btn-primary">
+            Go to Dashboard
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- FEATURES SECTION -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6 text-center mb-10">
+    <h2 class="text-3xl font-bold mb-2">Platform Features</h2>
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      A community management solution for residents, supervisors, and administrators.
+    </p>
+  </div>
+
+  <div class="container mx-auto px-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+    <div class="card">
+      <i class="lucide lucide-file-text text-3xl text-blue-600"></i>
+      <h3 class="card-title">Incident Reporting</h3>
+      <p class="card-desc">
+        Submit reports for water, power, crime, health issues, and more — including images.
+      </p>
+    </div>
+
+    <div class="card">
+      <i class="lucide lucide-bar-chart-3 text-3xl text-green-600"></i>
+      <h3 class="card-title">Data Analytics</h3>
+      <p class="card-desc">
+        View charts, trends, and statistics for better decision-making.
+      </p>
+    </div>
+
+    <div class="card">
+      <i class="lucide lucide-bell text-3xl text-purple-600"></i>
+      <h3 class="card-title">Notifications</h3>
+      <p class="card-desc">
+        Receive updates, announcements, and portfolio-specific messages.
+      </p>
+    </div>
+
+    <div class="card">
+      <i class="lucide lucide-users text-3xl text-blue-600"></i>
+      <h3 class="card-title">Community Surveys</h3>
+      <p class="card-desc">
+        Participate in surveys to guide community changes.
+      </p>
+    </div>
+
+    <div class="card">
+      <i class="lucide lucide-shield text-3xl text-red-600"></i>
+      <h3 class="card-title">Portfolio Management</h3>
+      <p class="card-desc">
+        Supervisors manage assigned portfolios with dedicated tools.
+      </p>
+    </div>
+
+    <div class="card">
+      <i class="lucide lucide-building-2 text-3xl text-yellow-600"></i>
+      <h3 class="card-title">Admin Control</h3>
+      <p class="card-desc">
+        Manage users, view all data, and control system operations.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROLES SECTION -->
+<section class="py-16">
+  <div class="container mx-auto px-6 text-center mb-10">
+    <h2 class="text-3xl font-bold mb-2">Role-Based Access</h2>
+    <p class="text-gray-600">Every user gets tools tailored to their role.</p>
+  </div>
+
+  <div class="container mx-auto px-6 grid gap-8 md:grid-cols-3">
+
+    <div class="role-card border-blue-300">
+      <h3>Residents</h3>
+      <ul>
+        <li>• Submit incident reports</li>
+        <li>• Upload images</li>
+        <li>• Complete surveys</li>
+        <li>• Receive notifications</li>
+        <li>• Track report history</li>
+      </ul>
+    </div>
+
+    <div class="role-card border-green-300">
+      <h3>Supervisors</h3>
+      <ul>
+        <li>• Manage portfolio reports</li>
+        <li>• Upload surveys</li>
+        <li>• View analytics charts</li>
+        <li>• Add comments to reports</li>
+        <li>• Post notices</li>
+      </ul>
+    </div>
+
+    <div class="role-card border-purple-300">
+      <h3>Administrators</h3>
+      <ul>
+        <li>• Manage all users</li>
+        <li>• Assign portfolios</li>
+        <li>• Full report access</li>
+        <li>• System announcements</li>
+        <li>• Export data</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-blue-700 text-white text-center">
+  <h2 class="text-3xl font-bold">Ready to Get Started?</h2>
+  <p class="mt-4 opacity-90">Join the Phola Park digital community today.</p>
+
+  {% if not current_user.is_authenticated %}
+  <div class="mt-6 flex justify-center gap-4">
+    <a href="{{ url_for('auth.register') }}" class="btn-light">Create Account</a>
+    <a href="{{ url_for('auth.login') }}" class="btn-outline-light">Sign In</a>
+  </div>
+  {% endif %}
+</section>
+
+<footer class="py-6 bg-gray-800 text-gray-300 text-center">
+  © 2025 Jay & Pro Project (PTY) LTD — Phola Park App
+</footer>
+
+{% endblock %}
