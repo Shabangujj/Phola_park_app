@@ -3,9 +3,9 @@ from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_login import current_user
 from flask_wtf import CSRFProtect
-from phola_park_app.extensions import db, login_manager, csrf
-from phola_park_app.model import User
-from phola_park_app.utils.notifications import get_unread_notifications
+from .extensions import db, login_manager, csrf
+from .model import User
+from .utils.notifications import get_unread_notifications
 def create_app():
     app = Flask(__name__)
 

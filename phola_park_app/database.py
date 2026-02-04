@@ -1,41 +1,32 @@
-from phola_park_app import db
-from phola_park_app.model import User, Report, Notice
 from datetime import datetime
 import os
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 
-# Create database object
 db = SQLAlchemy()
+
+# ===================================================
+# DATABASE SETUP
+# ===================================================
 
 def get_db_path():
     """
-    Returns the correct FULL PATH to the SQLite database file.
-    Works on Windows, Linux, and inside VS Code.
+    Return absolute path to SQLite database.
+    Cross-platform (Windows/Linux).
     """
-    # Folder where THIS file lives (phola_park_app)
     base_dir = os.path.abspath(os.path.dirname(__file__))
-
-    # Go up one folder (to main project folder)
     project_root = os.path.abspath(os.path.join(base_dir, ".."))
-
-    # Instance folder
     instance_folder = os.path.join(project_root, "instance")
 
-    # Ensure instance folder exists
-    if not os.path.exists(instance_folder):
-        os.makedirs(instance_folder)
+    os.makedirs(instance_folder, exist_ok=True)
 
-    # Final database file path
-    db_path = os.path.join(instance_folder, "phola_park_app.db")
-
-    return db_path
+    return os.path.join(instance_folder, "phola_park_app.db")
 
 
 def init_db(app):
     """
-    Initialize DB and create tables.
+    Initialize database and create tables.
     """
-
     db_path = get_db_path()
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -43,27 +34,31 @@ def init_db(app):
     db.init_app(app)
 
     with app.app_context():
-        from phola_park_app.model import User   # import your models
+        from .model import User, Report, Notice
         db.create_all()
+
 
 # ===================================================
 # USER HELPERS
 # ===================================================
+
 def get_user_by_username(username):
-    """Return a user object by username."""
+    from .model import User
     return User.query.filter_by(username=username).first()
 
 
 def get_user_by_id(user_id):
-    """Return a user object by ID."""
+    from .model import User
     return User.query.get(user_id)
 
 
 # ===================================================
 # REPORT HELPERS
 # ===================================================
+
 def get_user_reports(user_id, portfolio=None, start_date=None, end_date=None):
-    """Return reports filtered by user, portfolio, and optional date range."""
+    from .model import Report
+
     query = Report.query.filter_by(user_id=user_id)
 
     if portfolio:
@@ -77,8 +72,9 @@ def get_user_reports(user_id, portfolio=None, start_date=None, end_date=None):
 
 
 def add_report(user_id, report_type, description, category=None, image=None, portfolio=None):
-    """Add a new report to the database."""
-    new_report = Report(
+    from .model import Report
+
+    report = Report(
         user_id=user_id,
         report_type=report_type,
         description=description,
@@ -87,58 +83,85 @@ def add_report(user_id, report_type, description, category=None, image=None, por
         portfolio=portfolio,
         timestamp=datetime.utcnow()
     )
-    db.session.add(new_report)
+
+    db.session.add(report)
     db.session.commit()
-    return new_report
+    return report
 
 
 def delete_report(report_id):
-    """Delete a report by ID."""
+    from .model import Report
+
     report = Report.query.get(report_id)
-    if report:
-        db.session.delete(report)
-        db.session.commit()
-        return True
-    return False
+    if not report:
+        return False
+
+    db.session.delete(report)
+    db.session.commit()
+    return True
 
 
 # ===================================================
 # NOTICE HELPERS
 # ===================================================
+
+def get_all_notifications():
+    from .model import Notice
+    return Notice.query.order_by(Notice.created_at.desc()).all()
+
+
 def get_user_notifications(portfolio=None):
-    """Get all notices visible to the user or their portfolio."""
+    from .model import Notice
+
     query = Notice.query
     if portfolio:
-        query = query.filter((Notice.portfolio == portfolio) | (Notice.portfolio.is_(None)))
+        query = query.filter(
+            or_(Notice.portfolio == portfolio, Notice.portfolio.is_(None))
+        )
+
     return query.order_by(Notice.created_at.desc()).all()
 
 
 def add_notice(message, portfolio=None):
-    """Create a new notice (for admin/supervisor use)."""
-    new_notice = Notice(message=message, portfolio=portfolio, created_at=datetime.utcnow())
-    db.session.add(new_notice)
+    from .model import Notice
+
+    notice = Notice(
+        message=message,
+        portfolio=portfolio,
+        created_at=datetime.utcnow()
+    )
+
+    db.session.add(notice)
     db.session.commit()
-    return new_notice
+    return notice
+
+
+def notifications_for_portfolio(portfolio):
+    from .model import Notice
+    return Notice.query.filter_by(portfolio=portfolio).order_by(Notice.created_at.desc()).all()
 
 
 # ===================================================
-# UTILITY HELPERS
+# ADMIN / DASHBOARD HELPERS
 # ===================================================
+
 def get_all_reports():
-    """Return all reports (for admin dashboard)."""
+    from .model import Report
     return Report.query.order_by(Report.timestamp.desc()).all()
 
 
 def get_reports_by_portfolio(portfolio):
-    """Return all reports filtered by portfolio (for supervisor dashboard)."""
+    from .model import Report
     return Report.query.filter_by(portfolio=portfolio).order_by(Report.timestamp.desc()).all()
 
 
 def get_reports_summary():
-    """Return a dictionary of report counts per portfolio."""
-    portfolios = db.session.query(Report.portfolio).distinct().all()
+    from .model import Report
+
     summary = {}
+    portfolios = db.session.query(Report.portfolio).distinct().all()
+
     for (portfolio,) in portfolios:
-        count = Report.query.filter_by(portfolio=portfolio).count()
-        summary[portfolio] = count
+        summary[portfolio] = Report.query.filter_by(portfolio=portfolio).count()
+
     return summary

@@ -1,5 +1,5 @@
-from phola_park_app import db
-from phola_park_app.model import Notification
+from ..database import Notification
+from ..extensions import db
 
 def notify(user_id, title, message, link=None):
     n = Notification(
