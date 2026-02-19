@@ -43,7 +43,7 @@ def reset_db():
         print("👤 Creating default admin user...")
 
         admin = User(
-            name="System Admin",
+            username="System Admin",
             email="admin@pholapark.co.za",
             password_hash=generate_password_hash("admin123"),
             role=admin_role,     # ✅ relationship assignment

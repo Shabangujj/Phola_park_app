@@ -2,8 +2,8 @@
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
-from .extensions import db
+from datetime import datetime
+from phola_park_app.extensions import db
 
 # ───────────────────────────────────────────
 # USER ROLE MODEL
@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(120), nullable=False)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     password_hash = db.Column(db.String(255), nullable=False)
@@ -116,6 +116,16 @@ class Report(db.Model):
         db.ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
+    def to_dict(self):
+         return {
+        "id": self.id,
+        "report_type": self.report_type,
+        "description": self.description,
+        "category": self.category,
+        "portfolio": self.portfolio,
+        "user_id": self.user_id,
+        "created_at": self.created_at.isoformat() if self.created_at else None
+    }
 
     def __repr__(self):
         return f"<Report {self.id}>"
@@ -193,20 +203,23 @@ class Notification(db.Model):
     __tablename__ = "notifications"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    user = db.relationship("User", backref="notifications")
-
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    message = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    role_target = db.Column(db.String(50), nullable=True)
+    portfolio = db.Column(db.String(50), nullable=True)
     is_read = db.Column(db.Boolean, default=False)
-    target_role = db.Column(db.String(50), default="all")
-    link = db.Column(db.String(255), nullable=True)
-    
-    def __repr__(self):
-        return f"<Notification {self.title}>"
-    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "title": self.title,
+            "message": self.message,
+            "is_read": self.is_read,
+            "created_at": self.created_at.isoformat()
+        }
+   
 class Announcement(db.Model):
     __tablename__ = "announcements"
 

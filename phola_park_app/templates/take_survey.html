@@ -11,5 +11,43 @@
     <button type="submit">Submit</button>
   </form>
   <a href="/user_dashboard">⬅ Back</a>
+  <div id="surveyList"></div>
+
+<script>
+async function loadSurveys() {
+    const surveys = await apiFetch("/api/surveys");
+
+    const container = document.getElementById("surveyList");
+
+    surveys.forEach(s => {
+        container.innerHTML += `
+            <div class="card p-3 mb-2">
+                <h5>${s.title}</h5>
+                <button onclick="submitSurvey(${s.id})">
+                    Open Survey
+                </button>
+            </div>
+        `;
+    });
+}
+
+loadSurveys();
+</script>
+<script>
+async function submitSurvey(id) {
+    const answers = {
+        q1: "Yes",
+        q2: "No"
+    };
+
+    const result = await apiFetch(`/api/surveys/${id}/submit`, {
+        method: "POST",
+        body: JSON.stringify({ answers })
+    });
+
+    alert(result.message);
+}
+</script>
+
 </body>
 </html>

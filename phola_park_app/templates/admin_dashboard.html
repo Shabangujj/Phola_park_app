@@ -3,6 +3,7 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <h1>🛠 Admin Dashboard</h1>
 <h3>🔔 Notifications</h3>
 <div class="dashboard">
@@ -11,7 +12,8 @@
     
     </div>
 </div>
-
+<h3>Notifications (<span id="notification-count">0</span>)</h3>
+<ul id="notification-list"></ul>
 {% for note in notifications %}
   <div class="alert alert-info">
     <strong>{{ note.title }}</strong><br>

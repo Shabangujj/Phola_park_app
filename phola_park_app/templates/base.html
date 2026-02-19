@@ -3,6 +3,8 @@
 <head>
   <title>{% block title %}Phola Park App{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="/static/js/api.js"></script>
+
 </head>
 <body class="
 {% if current_user.is_authenticated %}

@@ -7,7 +7,7 @@ SQLAlchemy==2.0.31
 
 # Authentication & Session Management
 Flask-Login==0.6.3
-
+flask-jwt-extended==4.7.1
 # Password Hashing
 Werkzeug==3.0.2
 

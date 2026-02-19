@@ -1,4 +1,4 @@
-from phola_park_app import create_app, db
+from phola_park_app.extensions import create_app, db
 from phola_park_app.model import User, UserRole
 from werkzeug.security import generate_password_hash
 
@@ -9,6 +9,7 @@ def seed_users():
         admin_role = UserRole.query.filter_by(name="admin").first()
         supervisor_role = UserRole.query.filter_by(name="supervisor").first()
         user_role = UserRole.query.filter_by(name="user").first()
+
         users = [
             {
                 "name": "Admin User",
@@ -37,15 +38,15 @@ def seed_users():
                 print(f"✔ {data['email']} already exists — skipping")
                 continue
 
-        user = User(
-            name=data["name"],
-            email=data["email"],
-            password_hash=generate_password_hash(data["password"]),
-            role=data["role"],
-        )
-        user.set_password(data["password"])
-        db.session.add(user)
-        print(f"➕ Created {data['email']} ({data['role']})")
+            user = User(
+                name=data["name"],
+                email=data["email"],
+                password_hash=generate_password_hash(data["password"]),
+                role=data["role"],
+            )
+
+            db.session.add(user)
+            print(f"➕ Created {data['email']}")
 
         db.session.commit()
         print("✅ User seeding completed successfully")

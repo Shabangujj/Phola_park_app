@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from functools import wraps
 
 from flask import (
     Blueprint, render_template, request,
@@ -12,38 +11,31 @@ from werkzeug.utils import secure_filename
 
 from phola_park_app.extensions import db
 from phola_park_app.model import (
-    Report, Notification, Announcement,
-    User, UserRole
+    Report, Notification, Announcement
 )
 from phola_park_app.utils.navigation import home_url
+from phola_park_app.decorators import redirect_if_wrong_role
 
 # ─────────────────────────────────────
 # BLUEPRINT (DECLARE ONCE)
 # ─────────────────────────────────────
-main_bp = Blueprint("main", __name__)
+main_bp = Blueprint("main", __name__,url_prefix="/api/v1")
+from flask import Blueprint, jsonify
+@main_bp.route("/")
+def home():
+    return jsonify({
+        "status": "running",
+        "message": "Phola Park API is working",
+        "version": "v1"
+    })
 
 # ─────────────────────────────────────
-# FILE UPLOAD HELPERS
+# FILE UPLOAD SETTINGS
 # ─────────────────────────────────────
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# ─────────────────────────────────────
-# ROLE DECORATOR
-# ─────────────────────────────────────
-def role_required(*roles):
-    def decorator(f):
-        @wraps(f)
-        def wrapped(*args, **kwargs):
-            if not current_user.is_authenticated:
-                abort(401)
-            if not current_user.role or current_user.role.name not in roles:
-                abort(403)
-            return f(*args, **kwargs)
-        return wrapped
-    return decorator
 
 # ─────────────────────────────────────
 # LANDING PAGE
@@ -52,45 +44,62 @@ def role_required(*roles):
 def index():
     if current_user.is_authenticated:
         return redirect(url_for("main.home"))
-    return render_template("landing.html")
+    return render_template("index.html")
 
 # ─────────────────────────────────────
-# ROLE-AWARE HOME
+# ROLE-AWARE HOME REDIRECT
 # ─────────────────────────────────────
-@main_bp.route("/home")
-@login_required
-def home():
-    return redirect(home_url())
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
+@main_bp.route("/protected")
+@jwt_required()
+def protected():
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+
+    return jsonify({
+        "message": "Access granted",
+        "user_id": user_id,
+        "role": claims["role"],
+        "username": claims["username"]
+    })
 
 # ─────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────
 @main_bp.route("/admin/dashboard")
 @login_required
-@role_required("admin")
+@redirect_if_wrong_role("admin")
 def admin_dashboard():
     stats = {
-        "users": User.query.count(),
-        "supervisors": User.query.join(UserRole)
-            .filter(UserRole.name == "supervisor")
-            .count(),
-        "reports": Report.query.count()
+        "reports": Report.query.count(),
+        "announcements": Announcement.query.count(),
+        "notifications": Notification.query.count()
     }
-    return render_template("admin_dashboard.html", stats=stats)
+
+    return render_template(
+        "admin_dashboard.html",
+        stats=stats
+    )
 
 # ─────────────────────────────────────
 # SUPERVISOR DASHBOARD
 # ─────────────────────────────────────
 @main_bp.route("/supervisor/dashboard")
 @login_required
-@role_required("supervisor")
+@redirect_if_wrong_role("supervisor")
 def supervisor_dashboard():
     stats = {
         "reports": Report.query.count(),
         "notifications": Notification.query.count()
     }
+
     reports = Report.query.order_by(Report.created_at.desc()).all()
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+
+    notifications = Notification.query.filter_by(
+        user_id=current_user.id
+    ).order_by(Notification.created_at.desc()).all()
+
     return render_template(
         "supervisor_dashboard.html",
         stats=stats,
@@ -103,16 +112,18 @@ def supervisor_dashboard():
 # ─────────────────────────────────────
 @main_bp.route("/user/dashboard")
 @login_required
-@role_required("user")
+@redirect_if_wrong_role("user")
 def user_dashboard():
-    return render_template("user_dashboard.html", user=current_user)
+    return render_template(
+        "user_dashboard.html",
+        user=current_user
+    )
 
 # ─────────────────────────────────────
-# USER NOTICES
+# USER NOTICES / ANNOUNCEMENTS
 # ─────────────────────────────────────
 @main_bp.route("/notices")
 @login_required
-@role_required("user")
 def user_notices():
     notices = (
         Announcement.query
@@ -123,11 +134,11 @@ def user_notices():
     return render_template("user_notices.html", notices=notices)
 
 # ─────────────────────────────────────
-# SUBMIT REPORT
+# SUBMIT REPORT (USER)
 # ─────────────────────────────────────
 @main_bp.route("/submit-report", methods=["POST"])
 @login_required
-@role_required("user")
+@redirect_if_wrong_role("user")
 def submit_report():
     category = request.form.get("category")
     description = request.form.get("description")
@@ -138,16 +149,20 @@ def submit_report():
         return redirect(url_for("main.user_dashboard"))
 
     image_filename = None
+
     if image_file and image_file.filename:
         if not allowed_file(image_file.filename):
             flash("Invalid image type.", "danger")
             return redirect(url_for("main.user_dashboard"))
 
         filename = secure_filename(image_file.filename)
+
         upload_path = os.path.join(
-            current_app.static_folder, "uploads/reports"
+            current_app.static_folder,
+            "uploads/reports"
         )
         os.makedirs(upload_path, exist_ok=True)
+
         image_file.save(os.path.join(upload_path, filename))
         image_filename = f"uploads/reports/{filename}"
 
@@ -167,7 +182,7 @@ def submit_report():
     return redirect(url_for("main.user_dashboard"))
 
 # ─────────────────────────────────────
-# NOTIFICATIONS
+# USER NOTIFICATIONS PAGE
 # ─────────────────────────────────────
 @main_bp.route("/notifications")
 @login_required
@@ -178,4 +193,7 @@ def notifications_page():
         .order_by(Notification.created_at.desc())
         .all()
     )
-    return render_template("notifications.html", notifications=notifications)
+    return render_template(
+        "notifications.html",
+        notifications=notifications
+    )

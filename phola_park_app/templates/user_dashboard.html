@@ -5,6 +5,7 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 <div class="dashboard">
     {% include "partials/sidebar.html" %}
@@ -51,6 +52,9 @@
       {% endif %}
     </div>
   </div>
+  <h3>Notifications (<span id="notification-count">0</span>)</h3>
+<ul id="notification-list"></ul>
+
 
   <!-- Surveys -->
   <div class="card mb-4 shadow-sm">

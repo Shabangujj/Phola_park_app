@@ -37,4 +37,27 @@ Phola Park App | Login
         </div>
     </form>
 </div>
+<script>
+async function loginUser() {
+    const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "/dashboard";
+    } else {
+        alert("Login failed");
+    }
+}
+</script>
+<button onclick="loginUser()">Login</button>
+
 {% endblock %}

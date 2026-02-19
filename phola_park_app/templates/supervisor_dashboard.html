@@ -1,6 +1,7 @@
 {% extends "supervisor_base.html" %}
 
 {% block content %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <div class="container mt-4">
 
   <!-- Header -->
@@ -8,7 +9,8 @@
     <h3>Supervisor Dashboard</h3>
     <span class="badge bg-primary">{{ portfolio }} Portfolio</span>
   </div>
-
+<h3>Notifications (<span id="notification-count">0</span>)</h3>
+<ul id="notification-list"></ul>
   <!-- Stats Cards -->
   <div class="row mb-4">
     <div class="col-md-4">

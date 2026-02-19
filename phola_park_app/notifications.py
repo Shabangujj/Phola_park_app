@@ -1,10 +1,10 @@
 from phola_park_app.extensions import db
 from flask_login import current_user
-from phola_park_app.model import Notification
+from phola_park_app.model import User, Notification
 
 
 def notify_survey_submission(survey, user):
-    from phola_park_app.model import User, Notification
+    
 
     supervisors = User.query.filter_by(
         role="supervisor",

@@ -48,4 +48,48 @@
         <div class="alert alert-info">No reports available yet.</div>
     {% endif %}
 </div>
+<form id="reportForm">
+    <input type="text" id="description" placeholder="Describe issue">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+document.getElementById("reportForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const result = await apiFetch("/api/reports", {
+        method: "POST",
+        body: JSON.stringify({
+            report_type: "Service Issue",
+            description: document.getElementById("description").value,
+            category: "service_delivery",
+            portfolio: "water"
+        })
+    });
+
+    alert(result.message);
+});
+</script>
+<div id="myReports"></div>
+
+<script>
+async function loadReports() {
+    const reports = await apiFetch("/api/reports/my");
+
+    const container = document.getElementById("myReports");
+
+    reports.forEach(r => {
+        container.innerHTML += `
+            <div class="card p-2 mb-2">
+                <strong>${r.type}</strong>
+                <p>${r.description}</p>
+                <small>Status: ${r.status}</small>
+            </div>
+        `;
+    });
+}
+
+loadReports();
+</script>
+
 {% endblock %}

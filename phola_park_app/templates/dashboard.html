@@ -2,6 +2,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <div class="container mt-4">
 
   <h2 class="text-center mb-4">Welcome, {{ user.name }}!</h2>
@@ -115,6 +116,37 @@
         </div>
       </div>
     </div>
+    <div id="announcements"></div>
+<script>
+async function loadAnnouncements() {
+    const data = await apiFetch("/api/announcements");
+
+    const container = document.getElementById("announcements");
+    container.innerHTML = "";
+
+    data.forEach(a => {
+        container.innerHTML += `
+            <div class="alert alert-info">
+                <strong>${a.title}</strong><br>
+                ${a.message}
+            </div>
+        `;
+    });
+}
+
+loadAnnouncements();
+</script>
+<script>
+async function loadChart() {
+    const data = await apiFetch("/api/analytics/reports-by-status");
+
+    console.log(data); // connect to Chart.js later
+}
+
+loadChart();
+</script>
+
+
     {% endif %}
 
   </div>
