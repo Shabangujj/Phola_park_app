@@ -8,7 +8,7 @@ from flask import jsonify
 db = SQLAlchemy()
 migrate = Migrate()  
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"
+login_manager.login_view = "auth.login"  # Redirect to this route if not logged in
 jwt = JWTManager()  
 
 @jwt.unauthorized_loader

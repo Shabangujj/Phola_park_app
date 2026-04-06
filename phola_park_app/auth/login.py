@@ -28,7 +28,7 @@ def jwt_login():
     role_name = user.role.name if user.role else "user"
     access_token = create_access_token(
         identity=user.id,
-        additional_claims={"role": role_name}
+        additional_claims={"role": user.role_name}
     )
 
     return jsonify({
@@ -36,7 +36,7 @@ def jwt_login():
         "user": {
             "id": user.id,
             "email": user.email,
-            "role": role_name
+            "role": user.role_name
         }
     })
 

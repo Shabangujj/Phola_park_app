@@ -16,9 +16,9 @@
 
             {# ---------------- USER ---------------- #}
             {% if current_user.role.name == 'user' %}
-                <li><a href="{{ url_for('user.dashboard') }}">My Dashboard</a></li>
-                <li><a href="{{ url_for('user.surveys') }}">Surveys</a></li>
-                <li><a href="{{ url_for('user.user_reports') }}">My Reports</a></li>
+                <li><a href="{{ url_for('web.dashboard') }}">My Dashboard</a></li>
+                <li><a href="{{ url_for('surveys.get_surveys') }}">Surveys</a></li>
+                <li><a href="{{ url_for('reports.get_reports') }}">My Reports</a></li>
             {% endif %}
 
             {# ---------------- SUPERVISOR ---------------- #}

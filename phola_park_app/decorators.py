@@ -1,42 +1,68 @@
 from functools import wraps
-from flask import redirect, url_for
+from flask import redirect, url_for, jsonify
 from flask_login import current_user
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
 
+# ======================================================
+# 🔐 JWT ROLE PROTECTION (FOR APIs)
+# ======================================================
 
-# 🔐 JWT ROLE PROTECTION (API)
-def role_required(role):
+def api_role_required(*roles):
+    """
+    Protect API routes using JWT roles
+    """
     def wrapper(fn):
         @wraps(fn)
-        def decorated_function(*args, **kwargs):
+        def decorator(*args, **kwargs):
             verify_jwt_in_request()
-            claims = get_jwt()
 
-            if claims.get("role") != role:
-                return {"error": "Access denied"}, 403
+            claims = get_jwt()
+            user_role = claims.get("role")
+
+            if user_role not in roles:
+                return jsonify({
+                    "error": "Forbidden",
+                    "message": "You do not have permission"
+                }), 403
 
             return fn(*args, **kwargs)
-        return decorated_function
+        return decorator
     return wrapper
 
 
-# 🔐 SESSION ROLE REDIRECT (WEB PAGES)
-def redirect_if_wrong_role(role):
-    def decorator(fn):
+# ======================================================
+# 🔐 SESSION ROLE PROTECTION (WEB PAGES)
+# ======================================================
+
+def role_required(*roles):
+    """
+    Protect web routes based on logged-in user role
+    """
+    def wrapper(fn):
         @wraps(fn)
-        def wrapped_function(*args, **kwargs):
+        def decorated_view(*args, **kwargs):
 
             if not current_user.is_authenticated:
                 return redirect(url_for("auth.login"))
 
-            if current_user.role.name != role:
-                if current_user.role.name == "admin":
-                    return redirect(url_for("admin.admin_dashboard"))
-                elif current_user.role.name == "supervisor":
-                    return redirect(url_for("supervisor.dashboard"))
-                else:
-                    return redirect(url_for("main.user_dashboard"))
+            user_role = getattr(current_user.role, "name", current_user.role)
+
+            if user_role not in roles:
+                return redirect_user_dashboard(user_role)
 
             return fn(*args, **kwargs)
-        return wrapped_function
-    return decorator
+        return decorated_view
+    return wrapper
+
+
+# ======================================================
+# 🔄 SMART REDIRECT BASED ON ROLE
+# ======================================================
+
+def redirect_user_dashboard(role):
+    if role == "admin":
+        return redirect(url_for("admin.admin_dashboard"))
+    elif role == "supervisor":
+        return redirect(url_for("supervisor.dashboard"))
+    else:
+        return redirect(url_for("user.user_dashboard"))

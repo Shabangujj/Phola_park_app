@@ -1,28 +1,25 @@
-
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from phola_park_app.utils.permissions import supervisor_required, role_required
 from datetime import datetime
-from phola_park_app.utils.notifications import get_notifications_for_user
-from phola_park_app.extensions import db
-from phola_park_app.model import Survey, User, Report, Notice, Announcement, UserRole
+from flask import Blueprint
+
+
 from sqlalchemy import func
-from phola_park_app.model import Report
+
+from phola_park_app.extensions import db
+from phola_park_app.model import Survey, Report
+from phola_park_app.utils.permissions import role_required
 
 
 supervisor_bp = Blueprint("supervisor", __name__, url_prefix="/supervisor")
 
-from sqlalchemy import func
-from phola_park_app.extensions import db
-from phola_park_app.model import Report
 
 @supervisor_bp.route("/dashboard")
 @login_required
 @role_required("supervisor")
 def dashboard():
-    portfolio = current_user.portfolio
+    portfolio = getattr(current_user, "portfolio", None)
 
-    # --- Status aggregation ---
     status_rows = (
         db.session.query(Report.status, func.count(Report.id))
         .filter(Report.portfolio == portfolio)
@@ -30,7 +27,6 @@ def dashboard():
         .all()
     )
 
-    # --- Category aggregation ---
     category_rows = (
         db.session.query(Report.category, func.count(Report.id))
         .filter(Report.portfolio == portfolio)
@@ -38,7 +34,6 @@ def dashboard():
         .all()
     )
 
-    # --- ALWAYS define lists (never None) ---
     status_labels = [row[0] or "Unknown" for row in status_rows]
     status_values = [row[1] for row in status_rows]
 
@@ -47,12 +42,13 @@ def dashboard():
 
     stats = {
         "total": sum(status_values),
-        "open": next((v for l, v in zip(status_labels, status_values) if l == "open"), 0),
-        "closed": next((v for l, v in zip(status_labels, status_values) if l == "closed"), 0),
+        "pending": next((v for l, v in zip(status_labels, status_values) if l == "Pending"), 0),
+        "in_progress": next((v for l, v in zip(status_labels, status_values) if l == "In Progress"), 0),
+        "completed": next((v for l, v in zip(status_labels, status_values) if l == "Completed"), 0),
     }
 
     return render_template(
-        "supervisor_dashboard.html",
+        "supervisor/dashboard.html",
         portfolio=portfolio,
         stats=stats,
         status_labels=status_labels,
@@ -60,7 +56,6 @@ def dashboard():
         category_labels=category_labels,
         category_values=category_values
     )
-
 
 # ─────────────────────────────────────────────
 # VIEW REPORTS

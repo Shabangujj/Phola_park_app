@@ -14,7 +14,7 @@ from phola_park_app.model import (
     Report, Notification, Announcement
 )
 from phola_park_app.utils.navigation import home_url
-from phola_park_app.decorators import redirect_if_wrong_role
+from phola_park_app.decorators import role_required
 
 # ─────────────────────────────────────
 # BLUEPRINT (DECLARE ONCE)
@@ -28,6 +28,19 @@ def home():
         "message": "Phola Park API is working",
         "version": "v1"
     })
+@main_bp.route("/dashboard")
+@login_required
+def dashboard():
+    role = current_user.role.name
+
+    if role == "admin":
+        return render_template("admin_dashboard.html")
+
+    elif role == "supervisor":
+        return render_template("supervisor_dashboard.html")
+
+    return render_template("user_dashboard.html")
+
 
 # ─────────────────────────────────────
 # FILE UPLOAD SETTINGS
@@ -52,7 +65,6 @@ def index():
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 @main_bp.route("/protected")
-@jwt_required()
 def protected():
     user_id = get_jwt_identity()
     claims = get_jwt()
@@ -69,7 +81,7 @@ def protected():
 # ─────────────────────────────────────
 @main_bp.route("/admin/dashboard")
 @login_required
-@redirect_if_wrong_role("admin")
+@role_required("admin")
 def admin_dashboard():
     stats = {
         "reports": Report.query.count(),
@@ -87,7 +99,7 @@ def admin_dashboard():
 # ─────────────────────────────────────
 @main_bp.route("/supervisor/dashboard")
 @login_required
-@redirect_if_wrong_role("supervisor")
+@role_required("supervisor")
 def supervisor_dashboard():
     stats = {
         "reports": Report.query.count(),
@@ -112,7 +124,7 @@ def supervisor_dashboard():
 # ─────────────────────────────────────
 @main_bp.route("/user/dashboard")
 @login_required
-@redirect_if_wrong_role("user")
+@role_required
 def user_dashboard():
     return render_template(
         "user_dashboard.html",
@@ -124,6 +136,7 @@ def user_dashboard():
 # ─────────────────────────────────────
 @main_bp.route("/notices")
 @login_required
+@role_required("user")
 def user_notices():
     notices = (
         Announcement.query
@@ -138,7 +151,7 @@ def user_notices():
 # ─────────────────────────────────────
 @main_bp.route("/submit-report", methods=["POST"])
 @login_required
-@redirect_if_wrong_role("user")
+@role_required("user")
 def submit_report():
     category = request.form.get("category")
     description = request.form.get("description")

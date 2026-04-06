@@ -6,7 +6,6 @@ from ..auth.jwt_guard import jwt_access_required, jwt_role_required
 from phola_park_app.model import Report, User, Notification
 from phola_park_app.extensions import db
 from datetime import datetime, timedelta
-from phola_park_app.supervisor_routes import reports
 from phola_park_app.model import Notification
 
 

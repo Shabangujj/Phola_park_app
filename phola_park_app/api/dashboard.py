@@ -1,29 +1,28 @@
 from flask import Blueprint, jsonify
-from flask_login import login_required, current_user
-from sqlalchemy import func
 from datetime import datetime, timedelta
 
-from phola_park_app.extensions import db
-from phola_park_app.model import Report, SurveyResponse, User
-from phola_park_app.decorators import role_required
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt, get_jwt_identity
 from phola_park_app.auth.jwt_guard import jwt_role_required
+
+from phola_park_app.extensions import db
+from phola_park_app.model import Report, User
 
 dashboard_api = Blueprint("dashboard_api", __name__, url_prefix="/dashboard")
 
-@dashboard_api.route(
-    "",
-    methods=["GET"],
-    endpoint="user_dashboard_summary_api"
-)
 
+# ===============================
+# USER DASHBOARD
+# ===============================
+@dashboard_api.route("", methods=["GET"])
 @jwt_role_required("user")
-def user_dashboard_summary():
-    reports_count = Report.query.filter_by(user_id=current_user.id).count()
+def user_dashboard():
+    user_id = get_jwt_identity()
+
+    reports_count = Report.query.filter_by(user_id=user_id).count()
 
     recent_reports = (
         Report.query
-        .filter_by(user_id=current_user.id)
+        .filter_by(user_id=user_id)
         .order_by(Report.created_at.desc())
         .limit(5)
         .all()
@@ -42,14 +41,15 @@ def user_dashboard_summary():
         ]
     })
 
-@dashboard_api.route(
-    "/supervisor",
-    methods=["GET"],
-    endpoint="supervisor_dashboard_summary_api"
-)
+
+# ===============================
+# SUPERVISOR DASHBOARD
+# ===============================
+@dashboard_api.route("/supervisor", methods=["GET"])
 @jwt_role_required("supervisor")
-def supervisor_dashboard_summary():
-    portfolio = current_user.portfolio
+def supervisor_dashboard():
+    claims = get_jwt()
+    portfolio = claims.get("portfolio")
 
     total_reports = Report.query.filter_by(portfolio=portfolio).count()
 
@@ -65,13 +65,13 @@ def supervisor_dashboard_summary():
         "pending_reports": pending_reports
     })
 
-@dashboard_api.route(
-    "/admin",
-    methods=["GET"],
-    endpoint="admin_dashboard_summary_api"
-)
+
+# ===============================
+# ADMIN DASHBOARD
+# ===============================
+@dashboard_api.route("/admin", methods=["GET"])
 @jwt_role_required("admin")
-def admin_dashboard_summary():
+def admin_dashboard():
     total_users = User.query.count()
     total_reports = Report.query.count()
 
@@ -85,52 +85,4 @@ def admin_dashboard_summary():
         "total_users": total_users,
         "total_reports": total_reports,
         "reports_last_7_days": recent_reports
-    })
-
-from flask_jwt_extended import jwt_required, get_jwt
-from phola_park_app.auth.jwt_guard import jwt_role_required
-
-@dashboard_api.route(
-    "",
-    methods=["GET"],
-    endpoint="user_dashboard_jwt_api"
-)
-@jwt_role_required("user")
-def user_dashboard_jwt():
-    claims = get_jwt()
-    role = claims["role"]
-
-    return jsonify({
-        "message": "User dashboard",
-        "role": role
-    })
-
-@dashboard_api.route(
-    "/supervisor",
-    methods=["GET"],
-    endpoint="supervisor_dashboard_jwt_api"
-)
-
-@jwt_role_required("supervisor")
-def supervisor_dashboard_jwt():
-    claim = get_jwt()
-    role = claim["role"]
-    return jsonify({
-        "message": "Supervisor dashboard",
-        "role": role
-    })
-
-@dashboard_api.route(
-    "/admin", 
-    methods=["GET"],
-    endpoint="admin_dashboard_jwt_api"
-)
-
-@jwt_role_required("admin")
-def admin_dashboard_jwt():
-    claim = get_jwt()
-    role = claim["role"]
-    return jsonify({
-        "message": "Admin dashboard",
-        "role": role
     })

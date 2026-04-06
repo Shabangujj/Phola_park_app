@@ -1,28 +1,35 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Blueprint
 from werkzeug.exceptions import HTTPException
+
 from .extensions import db, migrate, login_manager, jwt
 from .model import User
+from config import Config   # ✅ import config class
+
 
 def create_app():
     app = Flask(__name__)
 
-    # 🔐 Required secrets
-    app.config["SECRET_KEY"] = "phola-park-session-secret-2026"
-    app.config["JWT_SECRET_KEY"] = "phola-park-super-secure-jwt-secret-key-2026"
+    # ✅ Load configuration from config.py
+    app.config.from_object(Config)
+
+    # 🔧 Optional overrides (if needed)
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///phola_park.db"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    # extensions
+
+    # -------------------------
+    # Initialize extensions
+    # -------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     jwt.init_app(app)
+    @login_manager.user_loader
+    def load_user(user_id):
+      return User.query.get(int(user_id))
 
-    # routes
-    from phola_park_app.main_routes import main_bp
-    app.register_blueprint(main_bp, url_prefix="/api/v1")
-
-    from flask import Blueprint
+    # -------------------------
+    # Register API blueprints
+    # -------------------------
+    from .routes import register_routes
     from phola_park_app.api.auth import auth_api
     from phola_park_app.api.reports import reports_api
     from phola_park_app.api.health import health_api
@@ -36,15 +43,22 @@ def create_app():
     api_bp.register_blueprint(health_api)
     api_bp.register_blueprint(surveys_api)
     api_bp.register_blueprint(dashboard_api)
+    register_routes(app)
 
     app.register_blueprint(api_bp)
 
     print("✅ API v1 blueprint registered")
 
+    # -------------------------
+    # Login manager
+    # -------------------------
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
+    # -------------------------
+    # JSON error handling
+    # -------------------------
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
         response = e.get_response()
