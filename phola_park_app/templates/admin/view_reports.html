@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Reports Dashboard</h2>
+
+<!-- 🔍 Filters -->
+ <label>Status:</label>
+<select name="status">
+    <option value="">All</option>
+    <option value="Open">Open</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Resolved">Resolved</option>
+</select>
+<form method="GET" style="margin-bottom:20px;">
+    
+    <label>Portfolio:</label>
+    <select name="portfolio">
+        <option value="">All</option>
+        <option value="Health">Health</option>
+        <option value="Water">Water</option>
+        <option value="Electricity">Electricity</option>
+        <option value="Roads">Roads</option>
+        <option value="Safety">Safety</option>
+    </select>
+
+    <label>Last:</label>
+    <select name="days">
+        <option value="">All</option>
+        <option value="7">7 Days</option>
+        <option value="30">30 Days</option>
+    </select>
+
+    <button type="submit">Apply</button>
+</form>
+
+<!-- 📤 Export -->
+<a href="{{ url_for('admin.export_reports') }}">
+    <button>Export CSV</button>
+</a>
+
+<hr>
+
+<!-- 📊 Charts -->
+<canvas id="barChart" width="400" height="150"></canvas>
+<canvas id="pieChart" width="400" height="150"></canvas>
+
+<hr>
+
+<!-- 📋 Table -->
+<table border="1" cellpadding="10">
+    <tr>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Portfolio</th>
+        <th>User</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Update</th>
+    </tr>
+
+    {% for r in reports %}
+    <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.report_type }}</td>
+        <td>{{ r.description }}</td>
+        <td>{{ r.portfolio }}</td>
+        <td>{{ r.user_id }}</td>
+        <td>{{ r.created_at }}</td>
+    </tr>
+    <td>
+    {% if r.status == "Open" %}
+        <span style="color:red;">Open</span>
+    {% elif r.status == "In Progress" %}
+        <span style="color:orange;">In Progress</span>
+    {% else %}
+        <span style="color:green;">Resolved</span>
+    {% endif %}
+</td>
+
+<td>
+    <form method="POST"
+          action="{{ url_for('admin.update_report_status', report_id=r.id) }}">
+        
+        <select name="status" onchange="this.form.submit()">
+            <option disabled selected>Change</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+        </select>
+    </form>
+</td>
+    {% endfor %}
+</table>
+
+<!-- 📊 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const data = JSON.parse('{{ portfolio_counts | tojson | safe }}');
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    // 📊 Bar Chart
+    new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Reports per Portfolio",
+                data: values
+            }]
+        }
+    });
+
+    // 🥧 Pie Chart
+    new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values
+            }]
+        }
+    });
+</script>
+{% endblock %}

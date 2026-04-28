@@ -62,9 +62,10 @@ def index():
 # ─────────────────────────────────────
 # ROLE-AWARE HOME REDIRECT
 # ─────────────────────────────────────
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt  # type: ignore[import]
 
 @main_bp.route("/protected")
+@jwt_required()
 def protected():
     user_id = get_jwt_identity()
     claims = get_jwt()

@@ -1,29 +1,23 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import request, render_template, redirect, url_for, flash
 from phola_park_app.extensions import db
 from phola_park_app.model import User, UserRole
-from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """
-    Handles:
-    ✔ Show login page (GET)
-    ✔ Browser form login (POST form)
-    ✔ API login (POST JSON)
-    """
 
-    # ✅ SHOW LOGIN PAGE
+    # =========================
+    # 📄 LOAD LOGIN PAGE
+    # =========================
     if request.method == "GET":
         return render_template("login.html")
 
-    # ===============================
-    # DETERMINE REQUEST TYPE
-    # ===============================
+    # =========================
+    # 📥 DETECT REQUEST TYPE
+    # =========================
     if request.is_json:
         data = request.get_json()
         email = data.get("email")
@@ -34,61 +28,108 @@ def login():
         password = request.form.get("password")
         api_request = False
 
-    # ✅ Validate input
+    # =========================
+    # ⚠️ VALIDATE INPUT
+    # =========================
     if not email or not password:
         message = "Email and password required"
         if api_request:
             return jsonify({"error": message}), 400
-        flash(message)
+        flash(message, "danger")
         return redirect(url_for("auth.login"))
 
-    # ✅ Find user
+    # =========================
+    # 🔍 FIND USER
+    # =========================
     user = User.query.filter_by(email=email).first()
 
     if not user or not check_password_hash(user.password_hash, password):
         message = "Invalid email or password"
         if api_request:
             return jsonify({"error": message}), 401
-        flash(message)
+        flash(message, "danger")
         return redirect(url_for("auth.login"))
 
-    # ✅ Create session login (for dashboard)
-    login_user(user)
-    if user.role == "admin":
-                return redirect(url_for("admin.admin_dashboard"))
+    # =========================
+    # ✅ SAFE ROLE HANDLING
+    # =========================
+    role = user.role.name.lower() if user.role else "user"
 
-    elif user.role == "supervisor":
-                return redirect(url_for("supervisor.supervisor_dashboard"))
+    # =========================
+    # 🔐 SAVE SESSION (CRITICAL)
+    # =========================
+    session["user_id"] = user.id
+    session["role"] = user.role.name.lower() if user.role else "user"
+    session["portfolio"] = getattr(user, "portfolio", None)
+
+    print("SESSION SAVED:", session)
+
+    # =========================
+    # 🔁 API RESPONSE
+    # =========================
+    if api_request:
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": role
+            }
+        }), 200
+
+    # =========================
+    # 🚀 ROLE-BASED REDIRECT
+    # =========================
+    if role == "admin":
+        return redirect(url_for("admin.dashboard"))
+
+    elif role == "supervisor":
+        return redirect(url_for("supervisor.dashboard"))
 
     else:
-                return redirect(url_for("web.dashboard"))
+        return redirect(url_for("web.user_dashboard"))
+    
 
-    # ✅ Create JWT token (for API use)
-    access_token = create_access_token(
-        identity=str(user.id),
-        additional_claims={
-            "role": user.role.name if user.role else "user"
-        }
-    )
-
-    # ===============================
-    # RETURN RESPONSE
-    # ===============================
+    # =========================
+    # ✅ API LOGIN (JWT)
+    # =========================
     if api_request:
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={"role": role}
+        )
+
         return jsonify({
             "status": "success",
             "access_token": access_token,
             "user": {
                 "id": user.id,
-                "username": getattr(user, "username", user.name),
+                "username": getattr(user, "username", getattr(user, "name", "")),
                 "email": user.email,
-                "role": user.role.name if user.role else "user"
+                "role": role
             }
         }), 200
 
-    flash("Login successful")
-    return redirect(url_for("web.dashboard"))
+    # =========================
+    # ✅ WEB LOGIN (SESSION)
+    # =========================
+    login_user(user)
 
+    flash("Login successful")
+
+    if role == "admin":
+        return redirect(url_for("web.admin_dashboard"))
+
+    elif role == "supervisor":
+        return redirect(url_for("web.supervisor_dashboard"))
+
+    else:
+        return redirect(url_for("web.user_dashboard"))
+
+
+# =========================
+# 📝 REGISTER
+# =========================
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -97,22 +138,32 @@ def register():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # check if user exists
+        if not name or not email or not password:
+            flash("All fields are required")
+            return redirect(url_for("auth.register"))
+
+        # Check if exists
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash("Email already registered")
             return redirect(url_for("auth.register"))
 
-        # hash password
+        # Hash password
         hashed_pw = generate_password_hash(password)
-        # assign default role (assuming role_id=2 is "user")
-        default_role_id = UserRole.query.filter_by(name="user").first().id
-        # create user
+
+        # Get default role
+        role = UserRole.query.filter_by(name="user").first()
+
+        if not role:
+            flash("Default role not configured")
+            return redirect(url_for("auth.register"))
+
+        # Create user
         new_user = User(
             username=name,
             email=email,
             password_hash=hashed_pw,
-            role_id=default_role_id  # assign default role 
+            role_id=role.id
         )
 
         db.session.add(new_user)
@@ -122,11 +173,14 @@ def register():
         return redirect(url_for("auth.login"))
 
     return render_template("register.html")
-#--------------------------
-#---------logout route
-#--------------------------
+
+
+# =========================
+# 🚪 LOGOUT
+# =========================
 @auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
+    flash("Logged out successfully")
     return redirect(url_for("auth.login"))

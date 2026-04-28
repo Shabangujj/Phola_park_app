@@ -1,299 +1,558 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
-from flask_login import login_required, current_user
-from phola_park_app.extensions import db
-from phola_park_app.model import (
-    User, Report, Notice, Announcement,
-    UserRole, Survey, Notification
-)
-from phola_park_app.utils.permissions import role_required
-import csv
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from phola_park_app.decorators import role_required
+from phola_park_app.model import db, User, Survey, Report, Announcement, UserRole
+from datetime import datetime
+from functools import wraps
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+from phola_park_app.routes.web_routes import login_required
 
-# ─────────────────────────────────────────────
-# HELPERS
-# ─────────────────────────────────────────────
-def create_announcement_notifications(announcement):
-    """Create notifications for users based on role and/or portfolio."""
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+
+# =========================
+# 🔐 ADMIN ACCESS ONLY
+# =========================
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Please login first", "warning")
+            return redirect(url_for('auth.login'))
+
+        if session.get('role') != 'admin':
+            flash("Admin access only", "danger")
+            return redirect(url_for('auth.login'))
+
+        return f(*args, **kwargs)
+    return wrapper
+
+
+# =========================
+# 👑 ADMIN DASHBOARD
+# =========================
+@admin_bp.route('/')
+@admin_required
+def dashboard():
     users = User.query.all()
-
-    for user in users:
-        if announcement.target_role and user.role.name != announcement.target_role:
-            continue
-
-        if announcement.portfolio and user.portfolio != announcement.portfolio:
-            continue
-
-        notification = Notification(
-            user_id=user.id,
-            title=announcement.title,
-            message=announcement.message
-        )
-        db.session.add(notification)
-
-    db.session.commit()
-
-
-# ─────────────────────────────────────────────
-# DASHBOARD
-# ─────────────────────────────────────────────
-@admin_bp.route("/")
-@login_required
-@role_required("admin")
-def admin_home():
-    return redirect(url_for("main.home"))
-
-
-@admin_bp.route("/dashboard")
-@login_required
-@role_required("admin")
-def admin_dashboard():
-    stats = {
-        "users": User.query.count(),
-        "supervisors": User.query.join(UserRole).filter(UserRole.name == "supervisor").count(),
-        "reports": Report.query.count(),
-        "surveys": Survey.query.count(),
+    reports = Report.query.order_by(Report.created_at.desc()).all()
+    surveys = Survey.query.all()
+    stats = {  # Placeholder stats
+        "users": len(users),
+        "reports": len(reports),
+        "surveys": len(surveys),
+        "announcements": Announcement.query.count()
     }
 
-    recent_reports = (
-        Report.query
-        .order_by(Report.created_at.desc())
-        .limit(5)
-        .all()
+    return render_template(
+        'admin/dashboard.html',
+        stats=stats,
+        users=users,
+        reports=reports,
+        surveys=surveys,
+        announcements=Announcement.query.order_by(Announcement.created_at.desc()).all()
+       
     )
+
+
+# =========================
+# 👥 VIEW USERS
+# =========================
+@admin_bp.route('/users')
+@admin_required
+def view_users():
+    users = User.query.all()
+    return render_template('admin/users.html', users=users)
+
+
+# =========================
+# ➕ ADD USER
+# =========================
+@admin_bp.route('/add_user', methods=['GET', 'POST'])
+@admin_required
+def add_user():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        portfolio = request.form.get('portfolio')
+
+        new_user = User(
+            username=username,
+            password=password,  # ⚠️ replace with hashing later
+            role=role,
+            portfolio=portfolio
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("User added successfully", "success")
+        return redirect(url_for('admin.view_users'))
+
+    return render_template('admin/admin_user.html')
+
+
+# =========================
+# ✏ EDIT USER
+# =========================
+@admin_bp.route('/edit_user/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def edit_user(id):
+    user = User.query.get_or_404(id)
+
+    if request.method == 'POST':
+        user.username = request.form.get('username')
+        user.role = request.form.get('role')
+        user.portfolio = request.form.get('portfolio')
+
+        db.session.commit()
+
+        flash("User updated", "success")
+        return redirect(url_for('admin.view_users'))
+
+    return render_template('admin/edit_user.html', user=user)
+# =========================
+# 📊 VIEW REPORTS
+# =========================
+@admin_bp.route("/view_reports")
+def view_reports():
+    from flask import render_template, request, session, redirect, url_for
+    from datetime import datetime, timedelta
+
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+
+    portfolio = request.args.get("portfolio")
+    days = request.args.get("days")
+
+    query = Report.query
+
+    # 📅 Date filter
+    if days:
+        days = int(days)
+        date_limit = datetime.utcnow() - timedelta(days=days)
+        query = query.filter(Report.created_at >= date_limit)
+
+    # 📂 Portfolio filter
+    if portfolio:
+        query = query.filter_by(portfolio=portfolio)
+
+    reports = query.all()
+
+    # 📊 Count per portfolio (for charts)
+    portfolio_counts = {}
+    for r in reports:
+        key = r.portfolio or "Unknown"
+        portfolio_counts[key] = portfolio_counts.get(key, 0) + 1
 
     return render_template(
-        "admin_dashboard.html",
-        stats=stats,
-        recent_reports=recent_reports
+        "admin/view_reports.html",
+        reports=reports,
+        portfolio_counts=portfolio_counts
     )
+# =========================
+# ✏ EDIT REPORT
+# =========================
+@admin_bp.route('/edit_report/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def edit_report(id):
+    report = Report.query.get_or_404(id)
 
+    if request.method == 'POST':
+        report.description = request.form.get('description')
+        report.category = request.form.get('category')
 
-# ─────────────────────────────────────────────
-# USERS
-# ─────────────────────────────────────────────
-@admin_bp.route("/users")
-@login_required
-@role_required("admin")
-def admin_users():
-    users = User.query.join(UserRole).order_by(User.id.asc()).all()
-    roles = UserRole.query.all()
-    return render_template("admin_users.html", users=users, roles=roles)
-
-
-@admin_bp.route("/users/create", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def create_user():
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").lower().strip()
-        password = request.form.get("password", "")
-        role_name = request.form.get("role", "user")
-        portfolio = request.form.get("portfolio")
-
-        if not name or not email or not password:
-            flash("All fields are required.", "warning")
-            return redirect(url_for("admin.create_user"))
-
-        if User.query.filter_by(email=email).first():
-            flash("Email already exists.", "danger")
-            return redirect(url_for("admin.create_user"))
-
-        role = UserRole.query.filter_by(name=role_name).first()
-        if not role:
-            abort(400)
-
-        user = User(
-            name=name,
-            email=email,
-            role_id=role.id,
-            portfolio=portfolio if role_name == "supervisor" else None,
-        )
-        user.set_password(password)
-
-        db.session.add(user)
         db.session.commit()
 
-        flash("User created successfully.", "success")
-        return redirect(url_for("admin.admin_users"))
+        flash("Report updated", "success")
+        return redirect(url_for('admin.view_reports'))
 
-    roles = UserRole.query.all()
-    return render_template("admin_create_user.html", roles=roles)
+    return render_template('admin/edit_report.html', report=report)
 
 
-@admin_bp.route("/users/<int:user_id>/role", methods=["POST"])
-@login_required
-@role_required("admin")
-def change_user_role(user_id):
-    user = User.query.get_or_404(user_id)
-    role_id = request.form.get("role_id")
+# =========================
+# 🗑 DELETE REPORT
+# =========================
+@admin_bp.route('/delete_report/<int:id>')
+@admin_required
+def delete_report(id):
+    report = Report.query.get_or_404(id)
 
-    role = UserRole.query.get(role_id)
-    if not role:
-        abort(400)
-
-    user.role_id = role.id
+    db.session.delete(report)
     db.session.commit()
 
-    flash("User role updated.", "success")
-    return redirect(url_for("admin.admin_users"))
+    flash("Report deleted", "success")
+    return redirect(url_for('admin.view_reports'))
+# =========================
+# Export reports CSV
+# =========================
+@admin_bp.route("/export_reports")
+def export_reports():
+    from flask import Response, session, redirect, url_for
 
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
 
-@admin_bp.route("/users/<int:user_id>/toggle")
-@login_required
-@role_required("admin")
-def toggle_user(user_id):
-    user = User.query.get_or_404(user_id)
-    user.is_active = not user.is_active
-    db.session.commit()
-
-    flash("User status updated.", "info")
-    return redirect(url_for("admin.admin_users"))
-
-
-@admin_bp.route("/assign-portfolio/<int:user_id>", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def assign_portfolio(user_id):
-    user = User.query.get_or_404(user_id)
-
-    if user.role.name != "supervisor":
-        flash("Only supervisors can be assigned portfolios.", "warning")
-        return redirect(url_for("admin.admin_users"))
-
-    portfolios = ["Water", "Electricity", "Housing", "Roads", "Sanitation", "Health", "Safety"]
-
-    if request.method == "POST":
-        user.portfolio = request.form.get("portfolio")
-        db.session.commit()
-        flash("Portfolio assigned successfully.", "success")
-        return redirect(url_for("admin.admin_users"))
-
-    return render_template("admin_assign_portfolio.html", user=user, portfolios=portfolios)
-
-
-# ─────────────────────────────────────────────
-# REPORTS
-# ─────────────────────────────────────────────
-@admin_bp.route("/reports")
-@login_required
-@role_required("admin")
-def admin_reports():
-    reports = Report.query.order_by(Report.created_at.desc()).all()
-    return render_template("admin_reports.html", reports=reports)
-
-
-@admin_bp.route("/reports/export/csv")
-@login_required
-@role_required("admin")
-def export_reports_csv():
     reports = Report.query.all()
 
     def generate():
-        yield "ID,Category,Status,Created At\n"
+        yield "ID,Type,Description,Portfolio,User,Date\n"
         for r in reports:
-            yield f"{r.id},{r.category},{r.status},{r.created_at}\n"
+            yield f"{r.id},{r.report_type},{r.description},{r.portfolio},{r.user_id},{r.created_at}\n"
+
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment;filename=reports.csv"})
+
+# =========================
+# 📝 VIEW SURVEYS
+# =========================
+@admin_bp.route('/surveys')
+@admin_required
+def view_surveys():
+    surveys = Survey.query.all()
+    return render_template('admin/surveys.html', surveys=surveys)
+
+
+# =========================
+# ➕ ADD SURVEY
+# =========================
+@admin_bp.route("/add_survey", methods=["GET", "POST"])
+def add_survey():
+    from flask import render_template, request, redirect, url_for, flash, session
+
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        survey_type = request.form.get("survey_type")
+
+        new_survey = Survey(
+            title=title,
+            description=description,
+            survey_type=survey_type
+        )
+
+        db.session.add(new_survey)
+        db.session.commit()
+
+        flash("Survey created successfully", "success")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    return render_template("admin/add_survey.html")
+
+# =========================
+# 🗑 DELETE SURVEY
+# =========================
+@admin_bp.route('/delete_survey/<int:id>')
+@admin_required
+def delete_survey(id):
+    survey = Survey.query.get_or_404(id)
+
+    db.session.delete(survey)
+    db.session.commit()
+
+    flash("Survey deleted", "success")
+    return redirect(url_for('admin.view_surveys'))
+# =========================
+# 🚨EXPORT REPORTS CSV
+# =========================
+import csv
+from flask import Response
+from io import StringIO
+from datetime import datetime
+
+@admin_bp.route('/export_reports_csv')
+def export_reports_csv():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('auth.login'))
+
+    reports = Report.query.all()
+
+    si = StringIO()
+    writer = csv.writer(si)
+
+    # Header
+    writer.writerow([
+        "ID", "Type", "Description", "Category",
+        "Portfolio", "User ID", "Date"
+    ])
+
+    # Data
+    for r in reports:
+        writer.writerow([
+            r.id,
+            r.report_type,
+            r.description,
+            r.category,
+            r.portfolio,
+            r.user_id,
+            r.created_at.strftime("%Y-%m-%d")
+        ])
+
+    output = si.getvalue()
+
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": "attachment;filename=reports.csv"
+        }
+    )
+    # =========================
+    # ANNOUNCEMENTS MANAGEMENT
+    # =========================
+@admin_bp.route('/announcements', methods=['GET', 'POST'])
+def announcements():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        message = request.form.get('message')
+        portfolio = request.form.get('portfolio')
+
+        new_announcement = Announcement(
+            title=title,
+            message=message,
+            portfolio=portfolio
+        )
+
+        db.session.add(new_announcement)
+        db.session.commit()
+
+        flash("Announcement created successfully!", "success")
+        return redirect(url_for('admin.announcements'))
+
+    announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+
+    return render_template(
+        'admin/announcements.html',
+        announcements=announcements
+    )
+    # =========================
+    # DELETE ANNOUNCEMENT
+    # =========================
+@admin_bp.route("/delete_announcement/<int:announcement_id>", methods=["POST"])
+def delete_announcement(announcement_id):
+
+    # 🔒 Only admin allowed
+    if session.get("role") != "admin":
+        flash("Unauthorized access", "danger")
+        return redirect(url_for("auth.login"))
+
+    announcement = Announcement.query.get_or_404(announcement_id)
+
+    try:
+        db.session.delete(announcement)
+        db.session.commit()
+        flash("Announcement deleted successfully", "success")
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR:", e)
+        flash("Error deleting announcement", "danger")
+
+    return redirect(url_for("admin.announcements"))
+# =========================
+# EDIT ANNOUNCEMENT
+# =========================
+@admin_bp.route("/edit_announcement/<int:announcement_id>", methods=["GET", "POST"])
+def edit_announcement(announcement_id):
+
+    # 🔒 Only admin allowed
+    if session.get("role") != "admin":
+        flash("Unauthorized access", "danger")
+        return redirect(url_for("auth.login"))
+
+    announcement = Announcement.query.get_or_404(announcement_id)
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        message = request.form.get("message")
+
+        # ✅ Update fields
+        announcement.title = title
+        announcement.message = message
+
+        try:
+            db.session.commit()
+            flash("Announcement updated successfully", "success")
+        except Exception as e:
+            db.session.rollback()
+            print("ERROR:", e)
+            flash("Error updating announcement", "danger")
+
+        return redirect(url_for("admin.announcements"))
+
+    return render_template("admin/edit_announcement.html", announcement=announcement)
+# =========================
+# ADMIN USER
+# =========================
+@admin_bp.route('/users')
+def admin_users():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('auth.login'))
+
+    users = User.query.all()
+
+    return render_template(
+        'admin/users.html',
+        users=users
+    )
+# =========================
+# DELETE USER
+# =========================
+@admin_bp.route('/delete_user/<int:id>')
+def delete_user(id):
+    user = User.query.get_or_404(id)
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("User deleted successfully", "success")
+    return redirect(url_for('admin.admin_users'))
+# =========================
+# ASSIGN PORTFOLIO
+# =========================
+@admin_bp.route("/assign_portfolio/<int:user_id>", methods=["POST"])
+def assign_portfolio(user_id):
+
+    portfolio = request.form.get("portfolio")
+
+    user = User.query.get(user_id)
+
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for("admin.users"))
+
+    # ✅ Update correct field
+    user.portfolio = portfolio
+
+    try:
+        db.session.commit()
+        print(f"UPDATED USER: {user.id} -> {user.portfolio}")
+        flash("Portfolio assigned successfully", "success")
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR:", e)
+        flash("Failed to assign portfolio", "danger")
+    print("FORM DATA:", request.form)
+    return redirect(url_for("admin.admin_users"))
+# =========================
+# assign role
+# =========================
+@admin_bp.route("/assign_role/<int:user_id>", methods=["POST"])
+def assign_role(user_id):
+    from flask import request, redirect, url_for, flash
+    from phola_park_app.model import User, UserRole
+    from phola_park_app.extensions import db
+
+    user = User.query.get_or_404(user_id)
+
+    # Get role from form OR API
+    new_role_name = request.form.get("role") or request.json.get("role")
+
+    if not new_role_name:
+        flash("No role provided", "danger")
+        return redirect(url_for("admin.admin_users"))
+
+    # 🔍 Find role object
+    role = UserRole.query.filter_by(name=new_role_name).first()
+
+    if not role:
+        flash("Invalid role selected", "danger")
+        return redirect(url_for("admin.admin_users"))
+
+    # ✅ Assign role object (FIX)
+    user.role = role
+
+    db.session.commit()
+
+    flash(f"{user.email} is now {new_role_name}", "success")
+
+    return redirect(url_for("admin.admin_users"))
+# =========================
+# update routes
+# =========================
+@admin_bp.route("/update_report_status/<int:report_id>", methods=["POST"])
+def update_report_status(report_id):
+    from flask import request, redirect, url_for, session, flash
+
+    if session.get("role") not in ["admin", "supervisor"]:
+        return redirect(url_for("auth.login"))
+
+    report = Report.query.get_or_404(report_id)
+    new_status = request.form.get("status")
+
+    report.status = new_status
+    db.session.commit()
+
+    flash("Status updated", "success")
+    return redirect(url_for("admin.view_reports"))
+# ===============
+# AUDIT LOGS
+# =================
+@admin_bp.route("/audit_logs")
+@login_required
+@role_required("admin")
+def audit_logs():
+    from phola_park_app.model import AuditLog
+    from flask import render_template, request
+
+    action = request.args.get("action")
+    user_id = request.args.get("user_id")
+
+    query = AuditLog.query
+
+    # 🔍 Filter by action
+    if action:
+        query = query.filter(AuditLog.action == action)
+
+    # 🔍 Filter by user
+    if user_id:
+        query = query.filter(AuditLog.user_id == user_id)
+
+    logs = query.order_by(AuditLog.timestamp.desc()).all()
+
+    return render_template("admin/audit_logs.html", logs=logs)
+# ================================
+# EXPORT AUDIT LOGS(CVS$PDF)
+# ================================
+@admin_bp.route("/export_audit_logs")
+@login_required
+@role_required("admin")
+def export_audit_logs():
+    from phola_park_app.model import AuditLog
+    from flask import Response
+
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+
+    def generate():
+        yield "ID,Action,Description,User,Date\n"
+        for log in logs:
+            yield f"{log.id},{log.action},{log.description},{log.user_id},{log.timestamp}\n"
 
     return Response(
         generate(),
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=reports.csv"}
+        headers={"Content-Disposition": "attachment;filename=audit_logs.csv"}
     )
-
-
-# ─────────────────────────────────────────────
-# NOTICES
-# ─────────────────────────────────────────────
-@admin_bp.route("/notices")
+    # ==================
+    # LOGS DELETES
+    # =====================
+@admin_bp.route("/delete_audit_log/<int:log_id>", methods=["POST"])
 @login_required
 @role_required("admin")
-def notices():
-    notices = Notice.query.order_by(Notice.created_at.desc()).all()
-    return render_template("admin_notices.html", notices=notices)
+def delete_audit_log(log_id):
+    from phola_park_app.model import AuditLog
+    from phola_park_app.extensions import db
+    from flask import redirect, url_for, flash
 
+    log = AuditLog.query.get_or_404(log_id)
 
-@admin_bp.route("/notices/delete/<int:notice_id>", methods=["POST"])
-@login_required
-@role_required("admin")
-def delete_notice(notice_id):
-    notice = Notice.query.get_or_404(notice_id)
-    db.session.delete(notice)
+    db.session.delete(log)
     db.session.commit()
-    flash("Notice deleted.", "info")
-    return redirect(url_for("admin.notices"))
 
-
-# ─────────────────────────────────────────────
-# ANNOUNCEMENTS
-# ─────────────────────────────────────────────
-@admin_bp.route("/announcements", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def admin_announcements():
-    if request.method == "POST":
-        ann = Announcement(
-            title=request.form["title"],
-            message=request.form["message"],
-            target_role=request.form.get("target_role") or None,
-            portfolio=request.form.get("portfolio") or None
-        )
-        db.session.add(ann)
-        db.session.commit()
-
-        create_announcement_notifications(ann)
-
-        flash("Announcement published.", "success")
-        return redirect(url_for("admin.admin_announcements"))
-
-    announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
-    return render_template("admin_announcements.html", announcements=announcements)
-
-
-@admin_bp.route("/announcements/<int:id>/edit", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def edit_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-
-    if request.method == "POST":
-        announcement.title = request.form["title"]
-        announcement.message = request.form["message"]
-        announcement.target_role = request.form.get("target_role") or None
-        announcement.portfolio = request.form.get("portfolio") or None
-        db.session.commit()
-
-        flash("Announcement updated.", "success")
-        return redirect(url_for("admin.admin_announcements"))
-
-    return render_template("admin/edit_announcement.html", announcement=announcement)
-
-
-@admin_bp.route("/announcements/<int:id>/delete", methods=["POST"])
-@login_required
-@role_required("admin")
-def delete_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    db.session.delete(announcement)
-    db.session.commit()
-    flash("Announcement deleted.", "success")
-    return redirect(url_for("admin.admin_announcements"))
-
-
-# ─────────────────────────────────────────────
-# DB TOOLS
-# ─────────────────────────────────────────────
-@admin_bp.route("/db-tools")
-@login_required
-@role_required("admin")
-def db_tools():
-    return render_template("admin_db_tools.html")
-#-----------------------------------------
-#-----admin surveys route added------
-#-----------------------
-@admin_bp.route("/surveys")
-@login_required
-@role_required("admin")
-def admin_surveys():
-    surveys = Survey.query.order_by(Survey.created_at.desc()).all()
-    return render_template("admin_surveys.html", surveys=surveys)
+    flash("Audit log deleted", "success")
+    return redirect(url_for("admin.audit_logs"))

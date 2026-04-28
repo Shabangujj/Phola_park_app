@@ -8,7 +8,7 @@ from config import Config   # ✅ import config class
 
 def create_app():
     app = Flask(__name__)
-
+    app.config['SECRET_KEY'] = 'super_secret_key_123'  # Change this in production
     # ✅ Load configuration from config.py
     app.config.from_object(Config)
 
@@ -31,6 +31,7 @@ def create_app():
     # -------------------------
     from .routes import register_routes
     from phola_park_app.api.auth import auth_api
+    from phola_park_app.api.notifications import notifications_api
     from phola_park_app.api.reports import reports_api
     from phola_park_app.api.health import health_api
     from phola_park_app.api.surveys import surveys_api
@@ -40,6 +41,7 @@ def create_app():
 
     api_bp.register_blueprint(auth_api)
     api_bp.register_blueprint(reports_api)
+    api_bp.register_blueprint(notifications_api)
     api_bp.register_blueprint(health_api)
     api_bp.register_blueprint(surveys_api)
     api_bp.register_blueprint(dashboard_api)

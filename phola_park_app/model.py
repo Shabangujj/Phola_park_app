@@ -33,62 +33,69 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    username = db.Column(db.String(120), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
 
     password_hash = db.Column(db.String(255), nullable=False)
 
-    # 🔑 ROLE FK
     role_id = db.Column(
         db.Integer,
         db.ForeignKey("user_roles.id", ondelete="RESTRICT"),
         nullable=False
     )
-    is_active = db.Column(db.Boolean, default=True)
 
-    # ✅ SINGLE, CORRECT RELATIONSHIP
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+
     role = db.relationship("UserRole", back_populates="users")
 
-    # supervisor-only
     portfolio = db.Column(db.String(50), nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # relationships
-    reports = db.relationship("Report", backref="user", lazy=True)
-    notices = db.relationship("Notice", backref="creator", lazy=True)
+    reports = db.relationship(
+        "Report",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
-    # ───────────────
-    # AUTH HELPERS
-    # ───────────────
-    def set_password(self, password: str):
+    notices = db.relationship(
+        "Notice",
+        backref="creator",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    # 🔐 PASSWORD
+    def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password: str) -> bool:
+    def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # ───────────────
-    # ROLE HELPERS (SAFE)
-    # ───────────────
+    # 🎭 ROLE
     @property
-    def role_name(self) -> str:
+    def role_name(self):
         return self.role.name if self.role else "user"
 
+    def set_role(self, role_name):
+        from phola_park_app.model import UserRole
+        role = UserRole.query.filter_by(name=role_name).first()
+        if not role:
+            raise ValueError("Invalid role")
+        self.role = role
+
     @property
-    def is_admin(self) -> bool:
+    def is_admin(self):
         return self.role_name == "admin"
 
     @property
-    def is_supervisor(self) -> bool:
+    def is_supervisor(self):
         return self.role_name == "supervisor"
 
     @property
-    def is_user(self) -> bool:
+    def is_user(self):
         return self.role_name == "user"
-
-    def __repr__(self):
-        return f"<User {self.email} ({self.role_name})>"
-
 # ───────────────────────────────────────────
 # REPORT MODEL
 # ───────────────────────────────────────────
@@ -262,4 +269,11 @@ class Notice(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<Notice {self.title}>"
+        return f"<Notice {self.id}>"
+    
+class AuditLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    action = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    user_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)

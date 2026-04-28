@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Assign Portfolio</h2>
+
+<p>User: {{ <user class="portfolio"></user> }}</p>
+
+<form method="POST"
+      action="{{ url_for('admin.assign_portfolio', user_id=user.id) }}">
+
+    <label>Select Portfolio:</label><br><br>
+
+    <select name="portfolio" required>
+        <option value="Health">Health</option>
+        <option value="Water">Water</option>
+        <option value="Electricity">Electricity</option>
+        <option value="Roads">Roads</option>
+        <option value="Safety">Safety</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Assign</button>
+</form>
+
+{% endblock %}

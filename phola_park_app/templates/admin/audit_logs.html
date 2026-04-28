@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Audit Logs</h2>
+
+<!-- 🔍 Filters -->
+<form method="GET" style="margin-bottom:15px;">
+    <label>Action:</label>
+    <input type="text" name="action">
+
+    <label>User ID:</label>
+    <input type="number" name="user_id">
+
+    <button type="submit">Filter</button>
+</form>
+
+<!-- 📤 Export -->
+<a href="{{ url_for('admin.export_audit_logs') }}">
+    <button>Export CSV</button>
+</a>
+
+<br><br>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>ID</th>
+        <th>Action</th>
+        <th>Description</th>
+        <th>User</th>
+        <th>Date</th>
+        <th>Delete</th>
+    </tr>
+
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.id }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.description }}</td>
+        <td>{{ log.user_id }}</td>
+        <td>{{ log.timestamp }}</td>
+
+        <td>
+            <form method="POST"
+                  action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
+                  onsubmit="return confirm('Delete this log?');">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Edit Announcement</h2>
+
+<form method="POST">
+
+    <label>Title</label><br>
+    <input type="text" name="title" value="{{ announcement.title }}" required><br><br>
+
+    <label>Message</label><br>
+    <textarea name="message" rows="5" required>{{ announcement.message }}</textarea><br><br>
+
+    <button type="submit">Update</button>
+
+</form>
+
+<br>
+<a href="{{ url_for('admin.announcements') }}">⬅ Back</a>
+
+{% endblock %}

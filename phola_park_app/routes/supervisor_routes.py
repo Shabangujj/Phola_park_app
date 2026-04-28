@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 from datetime import datetime
 from flask import Blueprint
@@ -7,55 +7,60 @@ from flask import Blueprint
 from sqlalchemy import func
 
 from phola_park_app.extensions import db
-from phola_park_app.model import Survey, Report
+from phola_park_app.model import Survey, Report, User, Announcement
 from phola_park_app.utils.permissions import role_required
+from collections import Counter
 
-
-supervisor_bp = Blueprint("supervisor", __name__, url_prefix="/supervisor")
-
-
+supervisor_bp = Blueprint('supervisor', __name__, url_prefix='/supervisor')
 @supervisor_bp.route("/dashboard")
-@login_required
-@role_required("supervisor")
-def dashboard():
-    portfolio = getattr(current_user, "portfolio", None)
+def supervisor_dashboard():
 
-    status_rows = (
-        db.session.query(Report.status, func.count(Report.id))
-        .filter(Report.portfolio == portfolio)
-        .group_by(Report.status)
-        .all()
-    )
+    # 🔒 Ensure only supervisors access
+    if session.get("role") != "supervisor":
+        return redirect(url_for("auth.login"))
 
-    category_rows = (
-        db.session.query(Report.category, func.count(Report.id))
-        .filter(Report.portfolio == portfolio)
-        .group_by(Report.category)
-        .all()
-    )
+    user = User.query.get(session["user_id"])
 
-    status_labels = [row[0] or "Unknown" for row in status_rows]
-    status_values = [row[1] for row in status_rows]
-
-    category_labels = [row[0] or "Uncategorized" for row in category_rows]
-    category_values = [row[1] for row in category_rows]
-
-    stats = {
-        "total": sum(status_values),
-        "pending": next((v for l, v in zip(status_labels, status_values) if l == "Pending"), 0),
-        "in_progress": next((v for l, v in zip(status_labels, status_values) if l == "In Progress"), 0),
-        "completed": next((v for l, v in zip(status_labels, status_values) if l == "Completed"), 0),
-    }
+    # ✅ Filter reports by supervisor portfolio
+    reports = Report.query.filter_by(portfolio=user.portfolio).all()
 
     return render_template(
         "supervisor/dashboard.html",
-        portfolio=portfolio,
-        stats=stats,
-        status_labels=status_labels,
-        status_values=status_values,
-        category_labels=category_labels,
-        category_values=category_values
+        reports=reports,
+        portfolio=user.portfolio
     )
+@supervisor_bp.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session or session.get('role') != 'supervisor':
+        return redirect(url_for('auth.login'))
+
+    user_id = session.get('user_id')
+    user = User.query.get(session[user_id]).portfolio
+
+    if not user or not user.portfolio:
+        return "No portfolio assigned", 403
+
+    # 🔥 FILTER BY PORTFOLIO
+    reports = Report.query.filter_by(portfolio=user.portfolio).all()
+
+    announcements = Announcement.query.filter_by(
+        portfolio=user.portfolio
+    ).order_by(Announcement.created_at.desc()).all()
+
+    # 📊 STATS
+    total_reports = len(reports)
+
+    category_counts = Counter([r.category for r in reports])
+
+    return render_template(
+        'supervisor/dashboard.html',
+        reports=reports,
+        announcements=announcements,
+        total_reports=total_reports,
+        category_counts=category_counts,
+        portfolio=user.portfolio
+    )
+
 
 # ─────────────────────────────────────────────
 # VIEW REPORTS

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Manage Users</h2>
+
+<table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Portfolio</th>
+            <th>Assign</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role.name if user.role else 'user' }}</td>
+
+<td>
+    <form method="POST"
+          action="{{ url_for('admin.assign_role', user_id=user.id) }}">
+        
+        <select name="role" onchange="this.form.submit()">
+            <option disabled selected>Change</option>
+            <option value="user">User</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="admin">Admin</option>
+        </select>
+
+    </form>
+</td>
+             
+            <!-- ✅ Current Portfolio -->
+            <td>
+                {% if user.portfolio %}
+                    <span style="color:green;">{{ user.portfolio }}</span>
+                {% else %}
+                    <span style="color:red;">Not Assigned</span>
+                {% endif %}
+            </td>
+
+            <!-- ✅ Inline Assign -->
+            <td>
+                <form method="POST"
+                      action="{{ url_for('admin.assign_portfolio', user_id=user.id) }}">
+                    
+                    <select name="portfolio" onchange="this.form.submit()">
+                        <option disabled selected>Select</option>
+                        <option value="Health">Health</option>
+                        <option value="Water">Water</option>
+                        <option value="Electricity">Electricity</option>
+                        <option value="Roads">Roads</option>
+                        <option value="Safety">Safety</option>
+                    </select>
+
+                </form>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

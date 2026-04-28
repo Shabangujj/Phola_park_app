@@ -3,6 +3,7 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
+
 <h1>🛠 Admin Dashboard</h1>
 <h3>🔔 Notifications</h3>
 <div class="dashboard">
@@ -78,5 +79,10 @@
    Export Reports (CSV)
 </a>
 <a href="{{ url_for('admin.admin_users') }}">Manage Users</a>
-<a href="{{ url_for('admin.admin_announcements') }}">Manage Announcements</a>
+<a href="{{ url_for('admin.announcements') }}">Manage Announcements</a>
+<a href="{{ url_for('admin.add_survey') }}">Manage Surveys</a>
+<a href="{{ url_for('admin.view_reports') }}">Manage Reports</a>
+
+
+
 {% endblock %}

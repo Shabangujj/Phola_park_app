@@ -1,54 +1,64 @@
-<nav class="navbar">
-    <div class="brand">
-        Phola Park
+<nav style="background:#1e293b; 
+padding:10px; color:white; display:flex; 
+justify-content:space-between; 
+align-items:center;">
+
+<!-- LEFT -->
+<div>
+<strong>Phola Park App</strong>
+</div>
+
+    <!-- CENTER -->
+    <div style="display:flex; gap:15px;">
+
+        {% if session.get("role") == "admin" %}
+            <a href="{{ url_for('main.admin_dashboard') }}" style="color:white;">Dashboard</a>
+            <a href="{{ url_for('admin.admin_users') }}" style="color:white;">Users</a>
+            <a href="{{ url_for('admin.view_reports') }}" style="color:white;">Reports</a>
+            <a href="{{ url_for('admin.announcements') }}" style="color:white;">Announcements</a>
+            <a href="{{ url_for('admin.audit_logs') }}" style="color:white;">Audit Logs</a>
+        {% endif %}
+
+        {% if session.get("role") == "supervisor" %}
+            <a href="{{ url_for('supervisor.dashboard') }}" style="color:white;">Dashboard</a>
+        {% endif %}
+
+        {% if session.get("role") == "user" %}
+            <a href="{{ url_for('user.dashboard') }}" style="color:white;">Dashboard</a>
+        {% endif %}
+
     </div>
 
-    <ul>
-        {# ---------------- GUEST ---------------- #}
-        {% if not current_user.is_authenticated %}
-            <li><a href="{{ url_for('main.index') }}">Home</a></li>
-            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-            <li><a href="{{ url_for('auth.register') }}">Register</a></li>
-        {% else %}
+    <!-- RIGHT -->
+    <div style="display:flex; align-items:center; gap:20px;">
 
-        {# ---------------- LOGGED-IN USERS ---------------- #}
-            <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+        <!-- 🔔 Notifications -->
+        <div style="position:relative; cursor:pointer;" onclick="toggleNotifications()">
+            🔔 <span id="notif-count" style="color:red;">0</span>
 
-            {# ---------------- USER ---------------- #}
-            {% if current_user.role.name == 'user' %}
-                <li><a href="{{ url_for('web.dashboard') }}">My Dashboard</a></li>
-                <li><a href="{{ url_for('surveys.get_surveys') }}">Surveys</a></li>
-                <li><a href="{{ url_for('reports.get_reports') }}">My Reports</a></li>
-            {% endif %}
+            <div id="notif-dropdown" style="
+                display:none;
+                position:absolute;
+                right:0;
+                top:30px;
+                background:white;
+                color:black;
+                width:300px;
+                max-height:300px;
+                overflow:auto;
+                border-radius:5px;
+                padding:10px;
+            ">
+                <ul id="notif-list" style="list-style:none; padding:0;"></ul>
+            </div>
+        </div>
 
-            {# ---------------- SUPERVISOR ---------------- #}
-            {% if current_user.role.name == 'supervisor' %}
-                <li><a href="{{ url_for('supervisor.dashboard') }}">Supervisor Dashboard</a></li>
-                <li><a href="{{ url_for('supervisor.reports') }}">Reports</a></li>
-                <li><a href="{{ url_for('supervisor.surveys') }}">Surveys</a></li>
-            {% endif %}
+        <!-- USER -->
+        <span>{{ session.get("role") }}</span>
 
-            {# ---------------- ADMIN ---------------- #}
-            {% if current_user.role.name == 'admin' %}
-                <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
-                <li><a href="{{ url_for('admin.admin_users') }}">Users</a></li>
-                <li><a href="{{ url_for('admin.admin_surveys') }}">Surveys</a></li>
-                <li><a href="{{ url_for('admin.admin_reports') }}">Reports</a></li>
-                <li><a href="{{ url_for('admin.admin_announcements') }}">Announcements</a></li>
-            {% endif %}
+        <!-- LOGOUT -->
+        <a href="{{ url_for('auth.logout') }}" style="color:white;">Logout</a>
 
-            {# ---------------- NOTIFICATIONS (ALL ROLES) ---------------- #}
-            <li>
-                <a href="{{ url_for('main.notifications_page') }}">
-                    Notifications
-                    {% if unread_notifications|length > 0 %}
-                        <span class="badge">{{ unread_notifications|length }}</span>
-                    {% endif %}
-                </a>
-            </li>
+    </div>
 
-            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
-
-        {% endif %}
-    </ul>
 </nav>
