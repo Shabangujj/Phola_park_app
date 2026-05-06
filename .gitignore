@@ -2,18 +2,47 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
 
 # Virtual environment
 venv/
+env/
+ENV/
 
 # Flask
 instance/
 .env
+.env.local
+*.db
 *.sqlite3
 
-# Editors
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Editors
+*.sublime-project
+*.sublime-workspace
 
 # Uploads
-phola_park_app/uploads/
 phola_park_app/static/uploads/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+pytest_cache/
+.pytest_cache/
