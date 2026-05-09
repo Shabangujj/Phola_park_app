@@ -1,64 +1,75 @@
 {% extends "base.html" %}
-{% block Content %}
-    <div class="admin-layout">
-    <title>Admin Panel - Phola Park App</title>
-    </div>
+
+{% block content %}
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-{% block admin_content %}
-        <h1>Admin Panel</h1>
-        <nav>
-          <a href="{{ url_for('admin_bp.admin_db_home') }}">Dashboard</a>
-          <a href="{{ url_for('admin_bp.admin_users') }}">Manage Users</a>
-          <a href="{{ url_for('admin_bp.admin_assign_portfolio') }}">Assign Portfolios</a>
-         <a href="{{ url_for('admin_bp.admin_notices') }}">Manage Notices</a>
-         <a href="{{ url_for('admin_bp.admin_reports') }}">View Reports</a>
-         <a href="{{ url_for('admin_bp.admin_create_announcement') }}">Create Announcement</a>
-        <a href="{{ url_for('admin_bp.admin_export_data') }}">Export Data</a>
-        <a href="{{ url_for('admin_bp.admin_db_tools') }}">Database Tools</a>
-        </nav>
+
+<div class="d-flex">
+
+    <!-- 🔹 Sidebar -->
+    <div class="bg-dark text-white p-3" style="width: 250px; min-height: 100vh;">
+        <h4 class="text-center">Admin Panel</h4>
         <hr>
- <li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle position-relative"
-     href="#"
-     data-bs-toggle="dropdown">
 
-    🔔
-    {% if unread_notifications|length %}
-      <span class="position-absolute top-0 start-100 translate-middle
-                   badge rounded-pill bg-danger">
-        {{ unread_notifications|length }}
-      </span>
-    {% endif %}
-  </a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_db_home') }}">🏠 Dashboard</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_users') }}">👥 Manage Users</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_assign_portfolio') }}">📌 Assign Portfolios</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_notices') }}">📢 Notices</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_reports') }}">📊 Reports</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_create_announcement') }}">➕ Announcement</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_export_data') }}">📤 Export</a>
+        <a class="d-block text-white mb-2" href="{{ url_for('admin_bp.admin_db_tools') }}">🛠 DB Tools</a>
 
-  <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px;">
-    {% if unread_notifications %}
-      {% for n in unread_notifications[:5] %}
-        <li>
-          <a class="dropdown-item small"
-             href="{{ url_for('main.mark_notification_read', notification_id=n.id) }}">
-            <strong>{{ n.title }}</strong><br>
-            <span class="text-muted">{{ n.message }}</span>
-          </a>
-        </li>
-      {% endfor %}
-      <li><hr class="dropdown-divider"></li>
-      <li>
-        <a class="dropdown-item text-center"
-           href="{{ url_for('main.notifications_page') }}">
-          View all notifications
-        </a>
-      </li>
-    {% else %}
-      <li class="dropdown-item text-muted text-center">
-        No new notifications
-      </li>
-    {% endif %}
-  </ul>
-</li>
+        <hr>
 
-    {% endblock %}
-    <main>
-        {% block content %}
+        <!-- 🔔 Notifications -->
+        <div class="dropdown">
+            <button class="btn btn-light w-100 dropdown-toggle" data-bs-toggle="dropdown">
+                🔔 Notifications
+                {% if unread_notifications|length %}
+                <span class="badge bg-danger">{{ unread_notifications|length }}</span>
+                {% endif %}
+            </button>
+
+            <ul class="dropdown-menu w-100">
+                {% if unread_notifications %}
+                    {% for n in unread_notifications[:5] %}
+                    <li>
+                        <a class="dropdown-item small"
+                           href="{{ url_for('main.mark_notification_read', notification_id=n.id) }}">
+                            <strong>{{ n.title }}</strong><br>
+                            <small>{{ n.message }}</small>
+                        </a>
+                    </li>
+                    {% endfor %}
+                    <li><hr></li>
+                    <li>
+                        <a class="dropdown-item text-center"
+                           href="{{ url_for('main.notifications_page') }}">
+                            View all
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="dropdown-item text-muted text-center">
+                        No notifications
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- 🔹 Main Content -->
+    <div class="flex-grow-1 p-4">
+
+        <h2 class="mb-4">Admin Dashboard</h2>
+
+        {% block admin_content %}
+        <!-- Your page content will go here -->
         {% endblock %}
-    </main>
+
+    </div>
+
+</div>
+
+{% endblock %}

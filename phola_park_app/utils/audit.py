@@ -1,12 +1,13 @@
-def log_action(action, description, user_id):
-    from phola_park_app import db
-    from phola_park_app.model import AuditLog
+from datetime import datetime
+from app import db
+from app.models import AuditLog
 
+def log_action(user_id, action, description):
     log = AuditLog(
+        user_id=user_id,
         action=action,
         description=description,
-        user_id=user_id
+        timestamp=datetime.utcnow()
     )
-
     db.session.add(log)
     db.session.commit()

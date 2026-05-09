@@ -1,53 +1,155 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Audit Logs</h2>
+<div class="container mt-4">
 
-<!-- 🔍 Filters -->
-<form method="GET" style="margin-bottom:15px;">
-    <label>Action:</label>
-    <input type="text" name="action">
+    <h2 class="mb-4">Audit Logs Dashboard</h2>
 
-    <label>User ID:</label>
-    <input type="number" name="user_id">
+    <!-- 🔍 Filters -->
+    <div class="card p-3 mb-4">
+        <form method="GET" class="row g-2">
 
-    <button type="submit">Filter</button>
-</form>
+            <div class="col-md-3">
+                <input type="text" name="action" placeholder="Action (LOGIN)" class="form-control">
+            </div>
 
-<!-- 📤 Export -->
-<a href="{{ url_for('admin.export_audit_logs') }}">
-    <button>Export CSV</button>
-</a>
+            <div class="col-md-2">
+                <input type="number" name="user_id" placeholder="User ID" class="form-control">
+            </div>
 
-<br><br>
+            <div class="col-md-2">
+                <input type="date" name="start_date" class="form-control">
+            </div>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Action</th>
-        <th>Description</th>
-        <th>User</th>
-        <th>Date</th>
-        <th>Delete</th>
-    </tr>
+            <div class="col-md-2">
+                <input type="date" name="end_date" class="form-control">
+            </div>
 
-    {% for log in logs %}
-    <tr>
-        <td>{{ log.id }}</td>
-        <td>{{ log.action }}</td>
-        <td>{{ log.description }}</td>
-        <td>{{ log.user_id }}</td>
-        <td>{{ log.timestamp }}</td>
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-primary w-100">Filter</button>
+                <a href="{{ url_for('admin.export_audit_logs') }}" class="btn btn-success w-100">
+                    Export CSV
+                </a>
+            </div>
 
-        <td>
-            <form method="POST"
-                  action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
-                  onsubmit="return confirm('Delete this log?');">
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        </form>
+    </div>
+
+    <!-- 📊 SUMMARY CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card text-center p-3 shadow-sm">
+                <h6>Total Logs</h6>
+                <h3>{{ total_logs }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3 shadow-sm">
+                <h6>Active Users</h6>
+                <h3>{{ active_users }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3 shadow-sm">
+                <h6>Top Action</h6>
+                <h3>{{ most_common_action }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3 shadow-sm">
+                <h6>Today Logs</h6>
+                <h3>{{ today_logs }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📊 CHARTS -->
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+            <canvas id="logsChart"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <canvas id="actionsChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- 📋 TABLE -->
+    <div class="card p-3">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Action</th>
+                    <th>Description</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.user_id }}</td>
+                    <td>{{ log.timestamp }}</td>
+                    <td>
+                        <form method="POST"
+                              action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
+                              onsubmit="return confirm('Delete this log?');">
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const dates = JSON.parse('{{ dates | tojson | safe }}');
+    const counts = JSON.parse('{{ counts | tojson | safe }}');
+    const actionLabels = JSON.parse('{{ action_labels | tojson | safe }}');
+    const actionCounts = JSON.parse('{{ action_counts | tojson | safe }}');
+
+    new Chart(document.getElementById("logsChart"), {
+        type: "bar",
+        data: {
+            labels: dates,
+            datasets: [{
+                label: "Logs per Day",
+                data: counts
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("actionsChart"), {
+        type: "pie",
+        data: {
+            labels: actionLabels,
+            datasets: [{
+                data: actionCounts
+            }]
+        }
+    });
+
+});
+</script>
 
 {% endblock %}

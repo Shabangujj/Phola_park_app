@@ -270,10 +270,34 @@ class Notice(db.Model):
 
     def __repr__(self):
         return f"<Notice {self.id}>"
-    
+# ───────────────────────────────────────────
+# AUDIT LOG
+# ───────────────────────────────────────────
+from datetime import datetime
+from phola_park_app import db
+
 class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
     id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     action = db.Column(db.String(100))
     description = db.Column(db.Text)
-    user_id = db.Column(db.Integer)
+
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref="audit_logs")
+    #----------------------------
+    #----------Project Models----------
+    #------------------------------
+class Project(db.Model):
+    __tablename__ = "projects"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150))
+    description = db.Column(db.Text)
+    image = db.Column(db.String(255))
+    link = db.Column(db.String(255))
+    def __repr__(self):
+        return f"<Project {self.title}>"

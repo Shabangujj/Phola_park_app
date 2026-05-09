@@ -4,85 +4,116 @@
 
 {% block content %}
 
-<h1>🛠 Admin Dashboard</h1>
-<h3>🔔 Notifications</h3>
-<div class="dashboard">
+<div class="d-flex">
+
+    <!-- 🔹 Sidebar -->
     {% include "partials/sidebar.html" %}
-    <div class="content">
-    
+
+    <!-- 🔹 Main Content -->
+    <div class="flex-grow-1 p-4">
+
+        <h2 class="mb-4">🛠 Admin Dashboard</h2>
+
+        <!-- 🔔 Notifications -->
+        <div class="mb-4">
+            <h4>🔔 Notifications</h4>
+
+            {% if notifications %}
+                {% for note in notifications %}
+                    <div class="alert alert-info">
+                        <strong>{{ note.title }}</strong><br>
+                        {{ note.message }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No notifications</p>
+            {% endif %}
+        </div>
+
+        <!-- 📊 Stats Cards -->
+        <div class="row mb-4">
+
+            <div class="col-md-3">
+                <div class="card text-center p-3 shadow-sm">
+                    <h6>Total Users</h6>
+                    <h3>{{ stats.users }}</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center p-3 shadow-sm">
+                    <h6>Supervisors</h6>
+                    <h3>{{ stats.supervisors }}</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center p-3 shadow-sm">
+                    <h6>Total Reports</h6>
+                    <h3>{{ stats.reports }}</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center p-3 shadow-sm">
+                    <h6>Total Surveys</h6>
+                    <h3>{{ stats.surveys }}</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 📋 Recent Reports -->
+        <div class="card p-3 mb-4">
+            <h5>🧾 Recent Reports</h5>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in recent_reports %}
+                    <tr>
+                        <td>{{ report.id }}</td>
+                        <td>{{ report.category }}</td>
+                        <td>{{ report.status }}</td>
+                        <td>{{ report.created_at.strftime("%Y-%m-%d") }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No reports yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <a href="{{ url_for('admin.export_reports_csv') }}"
+               class="btn btn-outline-secondary">
+               Export Reports (CSV)
+            </a>
+        </div>
+
+        <!-- 🔗 Quick Links -->
+        <div class="card p-3">
+            <h5>Quick Actions</h5>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-primary" href="{{ url_for('admin.admin_users') }}">Users</a>
+                <a class="btn btn-outline-primary" href="{{ url_for('admin.announcements') }}">Announcements</a>
+                <a class="btn btn-outline-primary" href="{{ url_for('admin.add_survey') }}">Surveys</a>
+                <a class="btn btn-outline-primary" href="{{ url_for('admin.view_reports') }}">Reports</a>
+                <a class="btn btn-outline-dark" href="{{ url_for('admin.audit_logs') }}">Audit Logs</a>
+                <a class="btn btn-outline-dark" href="{{ url_for('admin.add_project') }}">Projects</a>
+            </div>
+        </div>
+
     </div>
-</div>
-<h3>Notifications (<span id="notification-count">0</span>)</h3>
-<ul id="notification-list"></ul>
-{% for note in notifications %}
-  <div class="alert alert-info">
-    <strong>{{ note.title }}</strong><br>
-    {{ note.message }}
-  </div>
-{% else %}
-  <p>No notifications</p>
-{% endfor %}
-<div class="dashboard-grid">
-
-  <div class="card">
-    <h3>Total Users</h3>
-    <p>{{ stats.users }}</p>
-  </div>
-
-  <div class="card">
-    <h3>Supervisors</h3>
-    <p>{{ stats.supervisors }}</p>
-  </div>
-
-  <div class="card">
-    <h3>Total Reports</h3>
-    <p>{{ stats.reports }}</p>
-  </div>
-
-  <div class="card">
-    <h3>Total Surveys</h3>
-    <p>{{ stats.surveys }}</p>
-  </div>
 
 </div>
-
-<hr>
-
-<h2>🧾 Recent Reports</h2>
-
-<table class="table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Category</th>
-      <th>Status</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for report in recent_reports %}
-    <tr>
-      <td>{{ report.id }}</td>
-      <td>{{ report.category }}</td>
-      <td>{{ report.status }}</td>
-      <td>{{ report.created_at.strftime("%Y-%m-%d") }}</td>
-    </tr>
-    {% else %}
-    <tr>
-      <td colspan="4">No reports yet.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<a href="{{ url_for('admin.export_reports_csv') }}"
-   class="btn btn-outline-secondary">
-   Export Reports (CSV)
-</a>
-<a href="{{ url_for('admin.admin_users') }}">Manage Users</a>
-<a href="{{ url_for('admin.announcements') }}">Manage Announcements</a>
-<a href="{{ url_for('admin.add_survey') }}">Manage Surveys</a>
-<a href="{{ url_for('admin.view_reports') }}">Manage Reports</a>
-
-
 
 {% endblock %}

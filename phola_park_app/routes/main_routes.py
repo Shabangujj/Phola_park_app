@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 
 from phola_park_app.extensions import db
 from phola_park_app.model import (
-    Report, Notification, Announcement
+    Report, Notification, Announcement, User, UserRole, Project
 )
 from phola_park_app.utils.navigation import home_url
 from phola_park_app.decorators import role_required
@@ -211,3 +211,7 @@ def notifications_page():
         "notifications.html",
         notifications=notifications
     )
+@main_bp.route("/")
+def portfolio():
+    projects = Project.query.all()
+    return render_template("portfolio.html", projects=projects)

@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from phola_park_app.decorators import role_required
-from phola_park_app.model import db, User, Survey, Report, Announcement, UserRole
-from datetime import datetime
+from phola_park_app.model import AuditLog, db, User, Survey, Report, Announcement, UserRole, Project
+from datetime import datetime, date
 from functools import wraps
+from flask_login import current_user
 
 from phola_park_app.routes.web_routes import login_required
 
@@ -493,57 +494,100 @@ def update_report_status(report_id):
 # ===============
 # AUDIT LOGS
 # =================
-@admin_bp.route("/audit_logs")
+from sqlalchemy import func
+from collections import defaultdict
+from flask import request, Response
+from datetime import datetime
+import csv
+
+@admin_bp.route("/audit-logs")
 @login_required
-@role_required("admin")
+@admin_required
 def audit_logs():
     from phola_park_app.model import AuditLog
-    from flask import render_template, request
+    
+    query = AuditLog.query
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
 
+    # 📊 Logs per day
+    logs_per_day = db.session.query(
+        func.date(AuditLog.timestamp),
+        func.count(AuditLog.id)
+    ).group_by(func.date(AuditLog.timestamp)).all()
+
+    dates = [str(row[0]) for row in logs_per_day]
+    counts = [row[1] for row in logs_per_day]
+
+    # 📊 Actions breakdown
+    actions_data = db.session.query(
+        AuditLog.action,
+        func.count(AuditLog.id)
+    ).group_by(AuditLog.action).all()
+
+    action_labels = [row[0] for row in actions_data]
+    action_counts = [row[1] for row in actions_data]
+
+    # 🔢 Total logs
+    total_logs = AuditLog.query.count()
+
+    # 👤 Unique users (active users)
+    active_users = db.session.query(
+        func.count(func.distinct(AuditLog.user_id))
+    ).scalar()
+
+    # 🔁 Most common action
+    most_common = db.session.query(
+        AuditLog.action,
+        func.count(AuditLog.id).label("count")
+    ).group_by(AuditLog.action).order_by(func.count(AuditLog.id).desc()).first()
+
+    most_common_action = most_common[0] if most_common else "N/A"
+
+    # 📅 Today's logs
+    today = date.today()
+    today_logs = db.session.query(func.count(AuditLog.id)).filter(
+        func.date(AuditLog.timestamp) == today
+    ).scalar()
+
+    # 🔍 FILTERS
     action = request.args.get("action")
     user_id = request.args.get("user_id")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
 
-    query = AuditLog.query
+    query = db.session.query(AuditLog)
 
-    # 🔍 Filter by action
     if action:
         query = query.filter(AuditLog.action == action)
 
-    # 🔍 Filter by user
     if user_id:
         query = query.filter(AuditLog.user_id == user_id)
 
+    if start_date:
+        query = query.filter(AuditLog.timestamp >= datetime.strptime(start_date, "%Y-%m-%d"))
+
+    if end_date:
+        query = query.filter(AuditLog.timestamp <= datetime.strptime(end_date, "%Y-%m-%d"))
+
     logs = query.order_by(AuditLog.timestamp.desc()).all()
-
-    return render_template("admin/audit_logs.html", logs=logs)
-# ================================
-# EXPORT AUDIT LOGS(CVS$PDF)
-# ================================
-@admin_bp.route("/export_audit_logs")
-@login_required
-@role_required("admin")
-def export_audit_logs():
-    from phola_park_app.model import AuditLog
-    from flask import Response
-
-    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
-
-    def generate():
-        yield "ID,Action,Description,User,Date\n"
-        for log in logs:
-            yield f"{log.id},{log.action},{log.description},{log.user_id},{log.timestamp}\n"
-
-    return Response(
-        generate(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment;filename=audit_logs.csv"}
+    return render_template(
+        "admin/audit_logs.html",
+        logs=logs,
+        dates=dates,
+        counts=counts,
+        action_labels=action_labels,
+        action_counts=action_counts,
+        total_logs=total_logs,
+        active_users=active_users,
+        most_common_action=most_common_action,
+        today_logs=today_logs
     )
-    # ==================
-    # LOGS DELETES
-    # =====================
+# ==================
+# LOGS DELETES
+# =====================
 @admin_bp.route("/delete_audit_log/<int:log_id>", methods=["POST"])
 @login_required
-@role_required("admin")
+@admin_required
 def delete_audit_log(log_id):
     from phola_park_app.model import AuditLog
     from phola_park_app.extensions import db
@@ -556,3 +600,85 @@ def delete_audit_log(log_id):
 
     flash("Audit log deleted", "success")
     return redirect(url_for("admin.audit_logs"))
+# ==================
+# audit log export
+# ==================
+@admin_bp.route("/audit-logs/export")
+@login_required
+@admin_required
+def export_audit_logs():
+
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+
+    def generate():
+        yield "User,Action,Description,Date\n"
+
+        for log in logs:
+            user = log.user.username if log.user else "N/A"
+            yield f"{user},{log.action},{log.description},{log.timestamp}\n"
+
+    return Response(
+        generate(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=audit_logs.csv"}
+    )
+    ## =========================
+    ## Project management (placeholder)
+    ## =========================
+@admin_bp.route("/projects")
+@login_required
+def admin_projects():
+    projects = Project.query.all()
+    return render_template("admin_projects.html", projects=projects)
+
+
+@admin_bp.route("/add_project", methods=["GET", "POST"])
+@login_required
+def add_project():
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        image = request.form.get("image")
+        link = request.form.get("link")
+
+        new_project = Project(
+            title=title,
+            description=description,
+            image=image,
+            link=link
+        )
+
+        db.session.add(new_project)
+        db.session.commit()
+
+        flash("Project added successfully", "success")
+        return redirect(url_for("admin.admin_projects"))
+
+    return render_template("add_project.html")
+@admin_bp.route("/edit_project/<int:id>", methods=["GET", "POST"])
+@login_required
+def edit_project(id):
+    project = Project.query.get_or_404(id)
+
+    if request.method == "POST":
+        project.title = request.form.get("title")
+        project.description = request.form.get("description")
+        project.image = request.form.get("image")
+        project.link = request.form.get("link")
+
+        db.session.commit()
+
+        flash("Project updated successfully", "success")
+        return redirect(url_for("admin.admin_projects"))
+
+    return render_template("edit_project.html", project=project)
+@admin_bp.route("/delete_project/<int:id>")
+@login_required
+def delete_project(id):
+    project = Project.query.get_or_404(id)
+
+    db.session.delete(project)
+    db.session.commit()
+
+    flash("Project deleted successfully", "danger")
+    return redirect(url_for("admin.admin_projects"))
