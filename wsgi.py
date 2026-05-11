@@ -1,13 +1,9 @@
 import sys
-import os
+path = '/home/shabanguj/phola_park_app'
 
-# add project root to PYTHONPATH
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE_DIR)
+if path not in sys.path:
+    sys.path.append(path)
 
-from phola_park_app import create_app
+from phola_park_app import create_app 
 
-app = create_app()
-
-if __name__ == "__main__":
-    app.run(debug=True)
+application = create_app()
