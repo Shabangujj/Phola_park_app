@@ -1,2 +1,4 @@
-from phola_park_app.forms.report_form import ReportForm
-from phola_park_app.forms.auth_forms import RegisterForm, LoginForm
+"""Forms module initialization."""
+from .base_forms import LoginForm, RegisterForm
+
+__all__ = ['LoginForm', 'RegisterForm']

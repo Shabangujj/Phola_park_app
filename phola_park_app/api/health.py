@@ -1,26 +1,22 @@
-from flask import jsonify
-from . import api_bp
+"""Health check API endpoints."""
 from flask import Blueprint, jsonify
-from phola_park_app.extensions import db
-from sqlalchemy import text
 
-health_api = Blueprint("health_api", __name__, url_prefix="/health")
+health_api = Blueprint('health_api', __name__, url_prefix='/health')
 
-@health_api.route(
-    "",
-    methods=["GET"],
-    endpoint="health_check_api"
-)
+
+@health_api.route('/', methods=['GET'])
 def health_check():
-    try:
-        # simple DB ping
-        db.session.execute(text("SELECT 1"))
-        db_status = "ok"
-    except Exception:
-        db_status = "error"
-
+    """Health check endpoint."""
     return jsonify({
-        "status": "ok",
-        "service": "Phola Park API",
-        "database": db_status
+        'status': 'healthy',
+        'version': '1.0.0'
+    }), 200
+
+
+@health_api.route('/status', methods=['GET'])
+def status():
+    """Get system status."""
+    return jsonify({
+        'status': 'online',
+        'timestamp': 'now'
     }), 200
