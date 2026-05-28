@@ -75,7 +75,7 @@ Phola Park is a role-based community management web application built with Flask
 - Keep changes scoped and add / update migrations if models change
 
 ## License
-Specify license here (e.g., MIT). If you want, I can add a LICENSE file.
+Specify license here 
 
 ## Contact
 Maintainer: Shabangujj — shabangujj2014@gmail.com
