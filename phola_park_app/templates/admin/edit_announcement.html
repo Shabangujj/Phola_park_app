@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+
 <h2>Edit Announcement</h2>
 
 <form method="POST">
@@ -17,5 +20,16 @@
 
 <br>
 <a href="{{ url_for('admin.announcements') }}">⬅ Back</a>
+ <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+
 
 {% endblock %}

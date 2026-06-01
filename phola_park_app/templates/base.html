@@ -1,176 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        {% block title %}
-            Phola Park App
-        {% endblock %}
-    </title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Phola Park App{% endblock %}</title>
+    <style>
+    </style>
 </head>
-
 <body>
+    <!-- NAVBAR -->
+    </nav>
 
-{% if current_user.is_authenticated %}
+    <!-- PAGE LAYOUT -->
+    <div class="dashboard-container">
 
-<div class="layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+            <div class="logo">
+                  Phola Park
+            </div>
 
-        <div class="sidebar-header">
-            <h3>Phola Park</h3>
-
-            <span class="role-badge">
-                {{ current_user.role.name }}
-            </span>
-        </div>
-
-        <ul class="sidebar-menu">
-
-            {% if current_user.role.name == "admin" %}
-
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        Dashboard
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.admin_users') }}">
-                        Users
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.view_reports') }}">
-                        Reports
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.announcements') }}">
-                        Announcements
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.audit_logs') }}">
-                        Audit Logs
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.add_survey') }}">
-                        Surveys
-                    </a>
-                </li>
-
-            {% endif %}
-
-            {% if current_user.role.name == "supervisor" %}
-
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        Supervisor Dashboard
-                    </a>
-                </li>
-
-            {% endif %}
-
-            {% if current_user.role.name == "user" %}
-
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        My Dashboard
-                    </a>
-                </li>
-
-            {% endif %}
-
-            <li>
-                <a href="{{ url_for('notifications.notifications') }}"
-                   class="notification-link">
-
-                    Notifications
-
-                    {% set unread =
-                    current_user.notifications
-                    | selectattr("is_read", "equalto", False)
-                    | list | length %}
-
-                    {% if unread > 0 %}
-                        <span class="notification-badge">
-                            {{ unread }}
-                        </span>
-                    {% endif %}
+                <a href="{{ url_for('main.admin_dashboard') }}">
+                    Dashboard
                 </a>
-            </li>
 
-            <li class="logout">
-                <a href="{{ url_for('auth.logout') }}">
-                    Logout
+                <a href="{{ url_for('admin.admin_users') }}">
+                    Users
                 </a>
-            </li>
 
-        </ul>
+                <a href="{{ url_for('admin.view_reports') }}">
+                    Reports
+                </a>
 
-    </aside>
+                <a href="{{ url_for('admin.announcements') }}">
+                    Announcements
+                </a>
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
+                <a href="{{ url_for('admin.audit_logs') }}">
+                    Audit Logs
+                </a>
 
-        <!-- TOPBAR -->
-        <div class="topbar">
+            
 
-            Welcome,
-            {{ current_user.name | default('User') }}
+        </aside>
 
-        </div>
-
-        <!-- FLASH MESSAGES -->
-        <div class="page-content">
-
-            {% with messages =
-            get_flashed_messages(with_categories=true) %}
-
-                {% if messages %}
-
-                    {% for category, message in messages %}
-
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
+        <!-- CONTENT -->
+        <main class="main-content">
 
             {% block content %}
             {% endblock %}
 
-        </div>
+        </main>
 
     </div>
+   
+    <!-- Bootstrap JS -->
+    
 
-</div>
-
-{% else %}
-
-{% block content %}
-{% endblock %}
-
-{% endif %}
-
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

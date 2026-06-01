@@ -1,119 +1,398 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
-
 {% block content %}
 
-<div class="d-flex">
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- 🔹 Sidebar -->
-    {% include "partials/sidebar.html" %}
+<div class="dashboard-container">
 
-    <!-- 🔹 Main Content -->
-    <div class="flex-grow-1 p-4">
-
-        <h2 class="mb-4">🛠 Admin Dashboard</h2>
-
-        <!-- 🔔 Notifications -->
-        <div class="mb-4">
-            <h4>🔔 Notifications</h4>
-
-            {% if notifications %}
-                {% for note in notifications %}
-                    <div class="alert alert-info">
-                        <strong>{{ note.title }}</strong><br>
-                        {{ note.message }}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No notifications</p>
-            {% endif %}
-        </div>
-
-        <!-- 📊 Stats Cards -->
-        <div class="row mb-4">
-
-            <div class="col-md-3">
-                <div class="card text-center p-3 shadow-sm">
-                    <h6>Total Users</h6>
-                    <h3>{{ stats.users }}</h3>
+    <main class="main-content">
+    
+        <!-- PAGE HEADER -->
+         <!--TOP BAR-->
+         <header class="topbar">  
+        <div class="page-header">
+            <p>Welcome back, Admin! 
+                Here's an overview of the latest 
+                activity in Phola Park.</p>
                 </div>
-            </div>
+                </header>
+       
+        <!-- TOP GRID -->
+        <div class="dashboard-grid">
 
-            <div class="col-md-3">
-                <div class="card text-center p-3 shadow-sm">
-                    <h6>Supervisors</h6>
-                    <h3>{{ stats.supervisors }}</h3>
-                </div>
-            </div>
+            <!-- NOTIFICATIONS -->
+            <div class="announcement-card">
 
-            <div class="col-md-3">
-                <div class="card text-center p-3 shadow-sm">
-                    <h6>Total Reports</h6>
-                    <h3>{{ stats.reports }}</h3>
-                </div>
-            </div>
+                <h3>{{ announcements.title }}</h3>
+                <p>{{ announcements.message }}</p>
 
-            <div class="col-md-3">
-                <div class="card text-center p-3 shadow-sm">
-                    <h6>Total Surveys</h6>
-                    <h3>{{ stats.surveys }}</h3>
-                </div>
-            </div>
+                {% if notifications %}
 
-        </div>
+                    {% for note in notifications %}
 
-        <!-- 📋 Recent Reports -->
-        <div class="card p-3 mb-4">
-            <h5>🧾 Recent Reports</h5>
+                        <div class="alert alert-info">
 
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in recent_reports %}
-                    <tr>
-                        <td>{{ report.id }}</td>
-                        <td>{{ report.category }}</td>
-                        <td>{{ report.status }}</td>
-                        <td>{{ report.created_at.strftime("%Y-%m-%d") }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4">No reports yet.</td>
-                    </tr>
+                            <strong>{{ note.title }}</strong>
+
+                            <br>
+
+                            {{ note.message }}
+
+                        </div>
+
                     {% endfor %}
-                </tbody>
-            </table>
 
-            <a href="{{ url_for('admin.export_reports_csv') }}"
-               class="btn btn-outline-secondary">
-               Export Reports (CSV)
-            </a>
-        </div>
+                {% else %}
 
-        <!-- 🔗 Quick Links -->
-        <div class="card p-3">
-            <h5>Quick Actions</h5>
+                    <small>
+                      Posted by Admin
+                    </small>
 
-            <div class="d-flex flex-wrap gap-2">
-                <a class="btn btn-outline-primary" href="{{ url_for('admin.admin_users') }}">Users</a>
-                <a class="btn btn-outline-primary" href="{{ url_for('admin.announcements') }}">Announcements</a>
-                <a class="btn btn-outline-primary" href="{{ url_for('admin.add_survey') }}">Surveys</a>
-                <a class="btn btn-outline-primary" href="{{ url_for('admin.view_reports') }}">Reports</a>
-                <a class="btn btn-outline-dark" href="{{ url_for('admin.audit_logs') }}">Audit Logs</a>
-                <a class="btn btn-outline-dark" href="{{ url_for('admin.add_project') }}">Projects</a>
+                {% endif %}
+
             </div>
+
+            <!-- RECENT ACTIVITIES -->
+            <div class="dashboard-card activity-section">
+
+                <h2>Recent Activities</h2>
+
+                <div class="activity-item">
+                    ✅ Supervisor uploaded Survey 1
+                </div>
+
+                <div class="activity-item">
+                    📢 New announcement posted
+                </div>
+
+                <div class="activity-item">
+                    🚨 Water issue reported
+                </div>
+
+                <div class="activity-item">
+                    👤 New user registered
+                </div>
+
+            </div>
+
+            <!-- RECENT REPORTS -->
+            <div class="report-card">
+
+                <h4>📋 Recent Reports</h4>
+                <h2>{{ reports.category }}</h2>
+                <p>{{ reports.description }}</p>
+
+                <div class="table-section">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for report in recent_reports %}
+
+                            <tr>
+
+                                <td>{{ report.id }}</td>
+
+                                <td>{{ report.category }}</td>
+
+                                <td>
+                                    <span class="status {{ report.status|lower|replace(' ', '-') }}">
+                                        {{ report.status }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ report.created_at.strftime("%Y-%m-%d") }}
+                                </td>
+
+                            </tr>
+
+                            {% else %}
+
+                            <tr>
+
+                                <td colspan="4">
+                                    No reports yet.
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                    <div class="report-footer">
+                         <span>{{ reports.portfolio }}</span>
+                         <span>{{ reports.created_at }}</span>
+                    </div>
+                </div>
+
+                <br>
+
+                <a href="{{ url_for('admin.export_reports_csv') }}"
+                   class="dashboard-btn">
+
+                   Export Reports (CSV)
+
+                </a>
+
+            </div>
+
         </div>
+
+        <!-- STATS -->
+        <div class="stats-container">
+
+            <div class="card">
+
+                <h6>Total Users</h6>
+
+                <h3>{{ stats.users }}</h3>
+
+            </div>
+
+            <div class="card">
+
+                <h6>Supervisors</h6>
+
+                <h3>{{ stats.supervisors }}</h3>
+
+            </div>
+
+            <div class="card">
+
+                <h6>Total Reports</h6>
+
+                <h3>{{ stats.reports }}</h3>
+
+            </div>
+
+            <div class="card">
+
+                <h6>Total Surveys</h6>
+
+                <h3>{{ stats.surveys }}</h3>
+
+            </div>
+
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-container">
+
+            <!-- BAR CHART -->
+            <div class="chart-card">
+
+                <h3>Reports Overview</h3>
+
+                <div class="fake-chart">
+
+                    <div class="bar" style="height:70%">
+                        <span>Water</span>
+                    </div>
+
+                    <div class="bar" style="height:45%">
+                        <span>Roads</span>
+                    </div>
+
+                    <div class="bar" style="height:90%">
+                        <span>Crime</span>
+                    </div>
+
+                    <div class="bar" style="height:60%">
+                        <span>Health</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- CIRCLE CHART -->
+            <div class="chart-card">
+
+                <h3>Survey Activity</h3>
+
+                <div class="circle-chart">
+                    75%
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="dashboard-card">
+
+            <h4>⚡ Quick Actions</h4>
+
+            <div class="quick-actions">
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.admin_users') }}">
+                    Users
+                </a>
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.announcements') }}">
+                    Announcements
+                </a>
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.add_survey') }}">
+                    Surveys
+                </a>
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.view_reports') }}">
+                    Reports
+                </a>
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.audit_logs') }}">
+                    Audit Logs
+                </a>
+
+                <a class="dashboard-btn"
+                   href="{{ url_for('admin.add_project') }}">
+                    Projects
+                </a>
+                <button onclick="openModal()">
+                 Add User
+                </button>
+
+            </div>
+
+        </div>
+<!-- AUDIT LOGS SECTION -->
+ <table class="styled-table">
+
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Action</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.user }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.timestamp }}</td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+
+</table>
+<div class="pagination">
+
+    {% if users.has_prev %}
+        <a href="{{ url_for('admin.users',
+            page=users.prev_num) }}">
+            Previous
+        </a>
+    {% endif %}
+
+    <span>
+        Page {{ users.page }}
+        of {{ users.pages }}
+    </span>
+
+    {% if users.has_next %}
+        <a href="{{ url_for('admin.users',
+            page=users.next_num) }}">
+            Next
+        </a>
+    {% endif %}
+
+</div>
+<button id="menu-toggle">
+    ☰
+</button>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+
+    </main>
+
+</div>
+<div id="modal"
+     class="modal">
+
+    <div class="modal-content">
+
+        <span class="close"
+              onclick="closeModal()">
+              &times;
+        </span>
+
+        <h2>Add User</h2>
+
+        <form>
+
+            <input type="text"
+                   placeholder="Username">
+
+            <input type="password"
+                   placeholder="Password">
+
+            <button type="submit">
+                Save
+            </button>
+
+        </form>
 
     </div>
 
 </div>
+<script>
 
+const toggle =
+document.getElementById("menu-toggle");
+
+const sidebar =
+document.querySelector(".sidebar");
+
+toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+});
+function openModal(){
+    document
+    .getElementById("modal")
+    .style.display = "flex";
+}
+
+function closeModal(){
+    document
+    .getElementById("modal")
+    .style.display = "none";
+}
+
+</script>
 {% endblock %}

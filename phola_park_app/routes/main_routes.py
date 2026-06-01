@@ -40,7 +40,17 @@ def dashboard():
         return render_template("supervisor_dashboard.html")
 
     return render_template("user_dashboard.html")
-
+# ─────────────────────────────────────
+# test user
+# _____________________________________
+@main_bp.route("/test-auth")
+@login_required
+def test_auth():
+    return f"""
+    Logged in: {current_user.is_authenticated}<br>
+    User: {current_user.username}<br>
+    Role: {current_user.role.name}
+    """
 
 # ─────────────────────────────────────
 # FILE UPLOAD SETTINGS

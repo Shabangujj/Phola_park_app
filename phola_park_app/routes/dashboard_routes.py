@@ -10,7 +10,8 @@ from phola_park_app.decorators import role_required
 
    
 @dashboard_bp.route("", methods=["GET"])
-#@role_required("admin", "supervisor")
+@jwt_required()
+@role_required("admin", "supervisor")
 def dashboard():
     user_id = get_jwt_identity()
 
