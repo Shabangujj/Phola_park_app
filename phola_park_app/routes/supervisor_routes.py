@@ -1,107 +1,94 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from datetime import datetime
-from flask import Blueprint
-
-
-from sqlalchemy import func
-
-from phola_park_app.extensions import db
-from phola_park_app.model import Survey, Report, User, Announcement
-from phola_park_app.utils.permissions import role_required
 from collections import Counter
 
+from phola_park_app.extensions import db
+from phola_park_app.model import Survey, Report, User, Announcement, Committee
+from phola_park_app.utils.permissions import role_required
+
 supervisor_bp = Blueprint('supervisor', __name__, url_prefix='/supervisor')
-@supervisor_bp.route("/dashboard")
-def supervisor_dashboard():
 
-    # 🔒 Ensure only supervisors access
-    if session.get("role") != "supervisor":
-        return redirect(url_for("auth.login"))
 
-    user = User.query.get(session["user_id"])
-
-    # ✅ Filter reports by supervisor portfolio
-    reports = Report.query.filter_by(portfolio=user.portfolio).all()
-
-    return render_template(
-        "supervisor/dashboard.html",
-        reports=reports,
-        portfolio=user.portfolio
-    )
 @supervisor_bp.route('/dashboard')
+@login_required
+@role_required('supervisor')
 def dashboard():
-    if 'user_id' not in session or session.get('role') != 'supervisor':
+    portfolio = current_user.portfolio
+    if not portfolio:
+        flash('No portfolio assigned for your supervisor account.', 'warning')
         return redirect(url_for('auth.login'))
 
-    user_id = session.get('user_id')
-    user = User.query.get(session[user_id]).portfolio
+    reports = Report.query.filter_by(portfolio=portfolio).all()
+    announcements = Announcement.query.filter_by(portfolio=portfolio).order_by(Announcement.created_at.desc()).all()
 
-    if not user or not user.portfolio:
-        return "No portfolio assigned", 403
+    status_counts = {
+        'Pending': 0,
+        'In Progress': 0,
+        'Completed': 0,
+        'Rejected': 0
+    }
 
-    # 🔥 FILTER BY PORTFOLIO
-    reports = Report.query.filter_by(portfolio=user.portfolio).all()
+    for report in reports:
+        status_counts[report.status] = status_counts.get(report.status, 0) + 1
 
-    announcements = Announcement.query.filter_by(
-        portfolio=user.portfolio
-    ).order_by(Announcement.created_at.desc()).all()
-
-    # 📊 STATS
-    total_reports = len(reports)
-
-    category_counts = Counter([r.category for r in reports])
+    category_counts = Counter([r.category for r in reports if r.category])
 
     return render_template(
-        'supervisor/dashboard.html',
-        reports=reports,
-        announcements=announcements,
-        total_reports=total_reports,
-        category_counts=category_counts,
-        portfolio=user.portfolio
+        'supervisor_dashboard.html',
+        portfolio=portfolio,
+        stats={
+            'total': len(reports),
+            'open': status_counts.get('Pending', 0) + status_counts.get('In Progress', 0),
+            'closed': status_counts.get('Completed', 0) + status_counts.get('Rejected', 0)
+        },
+        status_labels=list(status_counts.keys()),
+        status_values=list(status_counts.values()),
+        category_labels=list(category_counts.keys()),
+        category_values=list(category_counts.values())
     )
 
 
-# ─────────────────────────────────────────────
-# VIEW REPORTS
-# ─────────────────────────────────────────────
-@supervisor_bp.route("/reports")
+@supervisor_bp.route('/reports')
 @login_required
-@role_required("supervisor")
+@role_required('supervisor')
 def reports():
     portfolio = current_user.portfolio
+    if not portfolio:
+        flash('No portfolio assigned for your supervisor account.', 'warning')
+        return redirect(url_for('auth.login'))
 
-    status = request.args.get("status", "all")
-    keyword = request.args.get("keyword", "")
-    start = request.args.get("start_date")
-    end = request.args.get("end_date")
+    status = request.args.get('status', 'all')
+    keyword = request.args.get('keyword', '')
+    start = request.args.get('start_date')
+    end = request.args.get('end_date')
 
     query = Report.query.filter_by(portfolio=portfolio)
 
-    if status != "all":
+    if status != 'all':
         query = query.filter_by(status=status)
 
     if keyword:
-        query = query.filter(Report.description.ilike(f"%{keyword}%"))
+        query = query.filter(Report.description.ilike(f'%{keyword}%'))
 
     if start:
         try:
-            start_date = datetime.strptime(start, "%Y-%m-%d")
+            start_date = datetime.strptime(start, '%Y-%m-%d')
             query = query.filter(Report.created_at >= start_date)
         except ValueError:
-            flash("Invalid start date", "warning")
+            flash('Invalid start date', 'warning')
 
     if end:
         try:
-            end_date = datetime.strptime(end, "%Y-%m-%d")
+            end_date = datetime.strptime(end, '%Y-%m-%d')
             query = query.filter(Report.created_at <= end_date)
         except ValueError:
-            flash("Invalid end date", "warning")
+            flash('Invalid end date', 'warning')
 
     reports = query.order_by(Report.created_at.desc()).all()
 
     return render_template(
-        "supervisor.reports.html",
+        'supervisor.reports.html',
         reports=reports,
         status=status,
         keyword=keyword,
@@ -111,88 +98,81 @@ def reports():
     )
 
 
-# ─────────────────────────────────────────────
-# REPORT DETAIL
-# ─────────────────────────────────────────────
-@supervisor_bp.route("/reports/<int:report_id>")
+@supervisor_bp.route('/reports/<int:report_id>')
 @login_required
-@role_required("supervisor")
+@role_required('supervisor')
 def report_detail(report_id):
     report = Report.query.get_or_404(report_id)
 
     if report.portfolio != current_user.portfolio:
-        flash("Unauthorized access to this report.", "danger")
-        return redirect(url_for("supervisor.reports"))
+        flash('Unauthorized access to this report.', 'danger')
+        return redirect(url_for('supervisor.reports'))
 
-    return render_template(
-        "supervisor/report_detail.html",
-        report=report
-    )
+    return render_template('supervisor_report_details.html', report=report)
 
 
-# ─────────────────────────────────────────────
-# UPDATE REPORT STATUS
-# ─────────────────────────────────────────────
-@supervisor_bp.route("/reports/<int:report_id>/status", methods=["POST"])
+@supervisor_bp.route('/reports/<int:report_id>/status', methods=['POST'])
 @login_required
-@role_required("supervisor")
-def update_status(report_id):
+@role_required('supervisor')
+def update_report_status(report_id):
     report = Report.query.get_or_404(report_id)
 
     if report.portfolio != current_user.portfolio:
-        flash("Permission denied.", "danger")
-        return redirect(url_for("supervisor.reports"))
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('supervisor.reports'))
 
-    new_status = request.form.get("status")
+    new_status = request.form.get('status')
+    if new_status not in {'pending', 'in progress', 'completed', 'rejected', 'Pending', 'In Progress', 'Completed', 'Rejected'}:
+        flash('Invalid status.', 'danger')
+        return redirect(url_for('supervisor.report_detail', report_id=report.id))
 
-    if new_status not in {"Pending", "In Progress", "Completed", "Rejected"}:
-        flash("Invalid status.", "danger")
-        return redirect(url_for("supervisor.report_detail", report_id=report.id))
-
-    report.status = new_status
+    report.status = new_status.title() if new_status.islower() else new_status
+    comment = request.form.get('comment', '').strip()
+    if comment:
+        report.comment = comment
     db.session.commit()
 
-    flash("Report status updated.", "success")
-    return redirect(url_for("supervisor.report_detail", report_id=report.id))
+    flash('Report status updated.', 'success')
+    return redirect(url_for('supervisor.report_detail', report_id=report.id))
 
 
-# ─────────────────────────────────────────────
-# ADD COMMENT
-# ─────────────────────────────────────────────
-@supervisor_bp.route("/reports/<int:report_id>/comment", methods=["POST"])
+@supervisor_bp.route('/reports/<int:report_id>/comment', methods=['POST'])
 @login_required
-@role_required("supervisor")
+@role_required('supervisor')
 def add_comment(report_id):
     report = Report.query.get_or_404(report_id)
 
     if report.portfolio != current_user.portfolio:
-        flash("Permission denied.", "danger")
-        return redirect(url_for("supervisor.reports"))
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('supervisor.reports'))
 
-    comment = request.form.get("comment", "").strip()
+    comment = request.form.get('comment', '').strip()
     if comment:
         report.comment = comment
         db.session.commit()
-        flash("Comment added.", "success")
+        flash('Comment added.', 'success')
 
-    return redirect(url_for("supervisor.report_detail", report_id=report.id))
+    return redirect(url_for('supervisor.report_detail', report_id=report.id))
 
-    
-@supervisor_bp.route("/surveys")
+
+@supervisor_bp.route('/surveys')
 @login_required
-@role_required("supervisor")
+@role_required('supervisor')
 def surveys():
+    portfolio = current_user.portfolio
     surveys = Survey.query.order_by(Survey.created_at.desc()).all()
-    return render_template("supervisor.surveys.html", surveys=surveys)
-@supervisor_bp.route("/surveys/upload", methods=["GET", "POST"])
+    return render_template('supervisor.surveys.html', surveys=surveys, portfolio=portfolio)
+
+
+@supervisor_bp.route('/surveys/upload', methods=['GET', 'POST'])
 @login_required
-@role_required("supervisor")
+@role_required('supervisor')
 def upload_new_survey():
-    if request.method == "POST":
-        title = request.form.get("title")
-        description = request.form.get("description")
-        survey_type = request.form.get("survey_type")
-        link = request.form.get("link")
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        survey_type = request.form.get('survey_type')
+        link = request.form.get('link')
 
         survey = Survey(
             title=title,
@@ -204,8 +184,73 @@ def upload_new_survey():
         db.session.add(survey)
         db.session.commit()
 
-        flash("Survey uploaded successfully.", "success")
-        return redirect(url_for("supervisor.surveys"))
+        flash('Survey uploaded successfully.', 'success')
+        return redirect(url_for('supervisor.surveys'))
 
-    return render_template("supervisor.upload_new_survey.html")
-    
+    return render_template('supervisor.upload_new_survey.html')
+
+
+@supervisor_bp.route('/surveys/<int:survey_id>/edit', methods=['GET', 'POST'])
+@login_required
+@role_required('supervisor')
+def edit_survey(survey_id):
+    survey = Survey.query.get_or_404(survey_id)
+    if survey.portfolio != current_user.portfolio:
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('supervisor.surveys'))
+
+    if request.method == 'POST':
+        survey.title = request.form.get('title')
+        survey.description = request.form.get('description')
+        survey.survey_type = request.form.get('survey_type')
+        survey.link = request.form.get('link')
+        db.session.commit()
+        flash('Survey updated successfully.', 'success')
+        return redirect(url_for('supervisor.surveys'))
+
+    return render_template('edit_survey.html', survey=survey)
+
+
+@supervisor_bp.route('/surveys/<int:survey_id>/delete', methods=['POST'])
+@login_required
+@role_required('supervisor')
+def delete_survey(survey_id):
+    survey = Survey.query.get_or_404(survey_id)
+    if survey.portfolio != current_user.portfolio:
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('supervisor.surveys'))
+
+    db.session.delete(survey)
+    db.session.commit()
+    flash('Survey deleted successfully.', 'success')
+    return redirect(url_for('supervisor.surveys'))
+
+
+@supervisor_bp.route('/committees')
+@login_required
+@role_required('supervisor')
+def committees():
+    portfolio = current_user.portfolio
+    committees = Committee.query.filter_by(portfolio=portfolio).order_by(Committee.created_at.desc()).all()
+    return render_template('supervisor_committees.html', committees=committees, portfolio=portfolio)
+
+
+@supervisor_bp.route('/committees/new', methods=['GET', 'POST'])
+@login_required
+@role_required('supervisor')
+def add_committee():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        committee = Committee(
+            name=name,
+            description=description,
+            portfolio=current_user.portfolio,
+            created_by=current_user.id
+        )
+        db.session.add(committee)
+        db.session.commit()
+        flash('Committee created successfully.', 'success')
+        return redirect(url_for('supervisor.committees'))
+
+    return render_template('add_committee.html')

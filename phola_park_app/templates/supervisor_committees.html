@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    {% include "partials/sidebar.html" %}
+    <div class="content" style="padding:30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Committees for {{ portfolio }} Portfolio</h1>
+            <a href="{{ url_for('supervisor.add_committee') }}" class="btn btn-success">+ New Committee</a>
+        </div>
+
+        {% if committees %}
+        <table border="1" cellpadding="10" cellspacing="0" width="100%" style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for committee in committees %}
+                <tr>
+                    <td>{{ committee.id }}</td>
+                    <td>{{ committee.name }}</td>
+                    <td>{{ committee.description }}</td>
+                    <td>{{ committee.created_at.strftime('%d %b %Y') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No committees exist for your portfolio yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
