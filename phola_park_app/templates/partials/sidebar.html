@@ -4,7 +4,7 @@
 
     {% if current_user.is_authenticated %}
 
-        <a href="{{ url_for('main.user_dashboard') }}">
+        <a href="{{ url_for('main.dashboard') }}">
             Dashboard
         </a>
 
@@ -36,7 +36,7 @@
         </a>
 
     {% else %}
-        <p style="font-size:13px;color:#ccc;">
+        <p>
             Please login to access menu
         </p>
     {% endif %}

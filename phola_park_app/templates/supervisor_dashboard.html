@@ -1,130 +1,210 @@
 {% extends "supervisor_base.html" %}
 
 {% block content %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-<div class="container mt-4">
 
-  <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>Supervisor Dashboard</h3>
-    <span class="badge bg-primary">{{ portfolio }} Portfolio</span>
-  </div>
-<h3>Notifications (<span id="notification-count">0</span>)</h3>
-<ul id="notification-list"></ul>
-  <!-- Stats Cards -->
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body text-center">
-          <h6>Total Reports</h6>
-          <h3>{{ stats.total }}</h3>
+<link rel="stylesheet"
+href="{{ url_for('static', filename='supervisor.css') }}">
+
+<div class="dashboard-container">
+    <aside class="sidebar">
+        {% include "partials/supervisor_sidebar.html" %}
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <div class="dashboard-header">
+          <header class="topbar"
+                <h2>Supervisor Dashboard</h2>
+                <p class="portfolio-text">
+                    {{ portfolio }} Portfolio
+                </p>
+            
+          
+            <span class="portfolio-badge">
+                Supervisor Panel
+            </span>
+          </header>
         </div>
-      </div>
-    </div>
 
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body text-center">
-          <h6>Open Reports</h6>
-          <h3 class="text-warning">{{ stats.open }}</h3>
-        </div>
-      </div>
-    </div>
+        <!-- NOTIFICATIONS -->
+        <section class="card">
 
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body text-center">
-          <h6>Closed Reports</h6>
-          <h3 class="text-success">{{ stats.closed }}</h3>
-        </div>
-      </div>
-    </div>
-  </div>
+            <div class="card-header bg-info">
+                🔔 Notifications
+            </div>
 
-  <!-- Charts -->
-  <div class="row">
-    <!-- Status Chart -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Reports by Status</h5>
+            <div class="card-body">
 
-          {% if status_labels|length > 0 %}
-            <canvas id="statusChart"></canvas>
-          {% else %}
-            <p class="text-muted">No reports available for this portfolio.</p>
-          {% endif %}
+                <h4>
+                    Notifications
+                    (<span id="notification-count">0</span>)
+                </h4>
 
-        </div>
-      </div>
-    </div>
+                <ul id="notification-list"></ul>
 
-    <!-- Category Chart -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Reports by Category</h5>
+            </div>
 
-          {% if category_labels|length > 0 %}
-            <canvas id="categoryChart"></canvas>
-          {% else %}
-            <p class="text-muted">No category data available.</p>
-          {% endif %}
+        </section>
 
-        </div>
-      </div>
-    </div>
-  </div>
+        <!-- STATS -->
+        <section class="stats-grid">
+
+            <div class="stats-card">
+                <h6>Total Reports</h6>
+                <h2>{{ stats.total }}</h2>
+            </div>
+
+            <div class="stats-card warning">
+                <h6>Open Reports</h6>
+                <h2>{{ stats.open }}</h2>
+            </div>
+
+            <div class="stats-card success">
+                <h6>Closed Reports</h6>
+                <h2>{{ stats.closed }}</h2>
+            </div>
+
+        </section>
+
+        <!-- CHARTS -->
+        <section class="charts-grid">
+
+            <!-- STATUS CHART -->
+            <div class="card">
+
+                <div class="card-header bg-primary">
+                    📊 Reports by Status
+                </div>
+
+                <div class="card-body chart-container">
+
+                    {% if status_labels|length > 0 %}
+                        <canvas id="statusChart"></canvas>
+                    {% else %}
+                        <p class="text-muted">
+                            No reports available for this portfolio.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- CATEGORY CHART -->
+            <div class="card">
+
+                <div class="card-header bg-success">
+                    📂 Reports by Category
+                </div>
+
+                <div class="card-body chart-container">
+
+                    {% if category_labels|length > 0 %}
+                        <canvas id="categoryChart"></canvas>
+                    {% else %}
+                        <p class="text-muted">
+                            No category data available.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+<!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
 
 </div>
+
 {% endblock %}
 
 {% block scripts %}
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
 document.addEventListener("DOMContentLoaded", function () {
 
-  {% if status_labels|length > 0 %}
-  new Chart(document.getElementById("statusChart"), {
-    type: "pie",
-    data: {
-      labels: {{ status_labels | tojson }},
-      datasets: [{
-        data: {{ status_values | tojson }},
-        backgroundColor: [
-          "#ffc107",  // warning
-          "#28a745",  // success
-          "#dc3545",  // danger
-          "#0d6efd"   // primary
-        ]
-      }]
-    }
-  });
-  {% endif %}
+    {% if status_labels|length > 0 %}
 
-  {% if category_labels|length > 0 %}
-  new Chart(document.getElementById("categoryChart"), {
-    type: "bar",
-    data: {
-      labels: {{ category_labels | tojson }},
-      datasets: [{
-        label: "Reports",
-        data: {{ category_values | tojson }},
-        backgroundColor: "#0d6efd"
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
+    new Chart(document.getElementById("statusChart"), {
+
+        type: "pie",
+
+        data: {
+            labels: {{ status_labels | tojson }},
+
+            datasets: [{
+                data: {{ status_values | tojson }},
+
+                backgroundColor: [
+                    "#ffc107",
+                    "#28a745",
+                    "#dc3545",
+                    "#0d6efd"
+                ]
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
-      }
-    }
-  });
-  {% endif %}
+
+    });
+
+    {% endif %}
+
+
+    {% if category_labels|length > 0 %}
+
+    new Chart(document.getElementById("categoryChart"), {
+
+        type: "bar",
+
+        data: {
+
+            labels: {{ category_labels | tojson }},
+
+            datasets: [{
+                label: "Reports",
+                data: {{ category_values | tojson }},
+                backgroundColor: "#0d6efd"
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+
+    });
+
+    {% endif %}
 
 });
+
 </script>
+
 {% endblock %}
+

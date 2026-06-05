@@ -46,7 +46,9 @@
                               style="display:inline;"
                               onsubmit="return confirm('Delete this survey?');">
 
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if csrf_token is defined %}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% endif %}
                             <button type="submit" class="link-danger">
                                 Delete
                             </button>

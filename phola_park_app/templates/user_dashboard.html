@@ -3,148 +3,225 @@
 {% block title %}User Dashboard | Phola Park App{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
-<div class="dashboard">
-    {% include "partials/sidebar.html" %}
-</div>
+<link rel="stylesheet"
+href="{{ url_for('static', filename='user.css') }}">
 
-<div class="container mt-4">
-
-  <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2>👤 Welcome, {{ current_user.name }}</h2>
-      <p class="text-muted mb-0">Community Member | Phola Park</p>
-    </div>
-
-    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">
-      Logout
-    </a>
-  </div>
-
-  <!-- Navigation -->
-  <nav class="dashboard-nav mb-4">
-    <a href="{{ url_for('main.home') }}">Home</a>
-    <a href="{{ url_for('auth.logout') }}">Logout</a>
-  </nav>
-
-  <!-- Announcements -->
-  <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-primary text-white">📢 Community Announcements</div>
-    <div class="card-body">
-      {% if announcements %}
-        <ul class="list-group list-group-flush">
-          {% for notice in announcements %}
-            <li class="list-group-item">
-              <h6 class="mb-1">{{ notice.title }}</h6>
-              <p class="mb-1">{{ notice.message }}</p>
-              <small class="text-muted">
-                Posted on {{ notice.created_at.strftime('%d %b %Y') }}
-              </small>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted mb-0">No announcements available.</p>
-      {% endif %}
-    </div>
-  </div>
-  <h3>Notifications (<span id="notification-count">0</span>)</h3>
-<ul id="notification-list"></ul>
-
-
-  <!-- Surveys -->
-  <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-success text-white">📝 Community Surveys</div>
-    <div class="card-body">
-      {% if surveys %}
-        <div class="row">
-          {% for survey in surveys %}
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 border-success">
-                <div class="card-body">
-                  <h5 class="card-title">{{ survey.title }}</h5>
-                  <p class="card-text">
-                    {{ survey.description or "Please participate in this survey." }}
-                  </p>
-                </div>
-                <div class="card-footer bg-transparent text-end">
-                  <a href="{{ survey.link }}" target="_blank"
-                     class="btn btn-success btn-sm">
-                    Open Survey
-                  </a>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
+<div class="dashboard-container">
+          <!-- PAGE HEADER -->
+         <header class="topbar">  
+        <!-- Header -->
+        <div class="section-header">
+            
+                <h2>👤 Welcome, {{ current_user.name }}</h2>
+                <p class="text-muted">
+                    Community Member | Phola Park
+                </p>
         </div>
-      {% else %}
-        <p class="text-muted mb-0">No active surveys.</p>
-      {% endif %}
-    </div>
-  </div>
+                </header>
 
-  <!-- Submit Report -->
-  <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-warning">🚨 Submit a Community Report</div>
-    <div class="card-body">
-<a href="{{ url_for('user.submit_report') }}" class="btn btn-primary">
-    Submit Community Report
-</a>
-<a href="{{ url_for('user.user_reports') }}" class="btn btn-primary">
-    View all reports →
-</a>
 
-    </div>
-  </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        {% include "partials/sidebar.html" %}
+    </aside>
 
-  <!-- My Reports -->
-<div class="card mb-4 shadow-sm">
-<h4 class="card-header bg-secondary text-white">📝My Submitted Reports</h4>
-<div class="table-responsive">
-{% if recent_reports %}
-<table class="table table-sm table-striped">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Image</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for report in recent_reports %}
-        <tr>
-            <td>{{ report.created_at.strftime('%Y-%m-%d') }}</td>
-            <td>{{ report.category }}</td>
-            <td>
-                <span class="badge
-                    {% if report.status == 'Pending' %}bg-warning
-                    {% elif report.status == 'Reviewed' %}bg-info
-                    {% elif report.status == 'Resolved' %}bg-success
-                    {% endif %}">
-                    {{ report.status }}
-                </span>
-            </td>
-            <td>
-                {% if report.image %}
-                <a href="{{ url_for('static', filename='uploads/' ~ report.image) }}" target="_blank">
-                    View
-                </a>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Announcements -->
+        <section class="card">
+            <div class="card-header bg-primary">
+                📢 Community Announcements
+            </div>
+
+            <div class="card-body">
+
+                {% if announcements %}
+                    {% for notice in announcements %}
+                    <div class="announcement-item">
+                        <h6>{{ notice.title }}</h6>
+
+                        <p>{{ notice.message }}</p>
+
+                        <small>
+                            Posted on
+                            {{ notice.created_at.strftime('%d %b %Y') }}
+                        </small>
+                    </div>
+                    {% endfor %}
+
                 {% else %}
-                —
+                    <p>No announcements available.</p>
                 {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No reports submitted yet.</p>
-{% endif %}
+
+            </div>
+        </section>
+
+        <!-- Notifications -->
+        <section class="card">
+            <div class="card-header bg-info">
+                🔔 Notifications
+            </div>
+
+            <div class="card-body">
+                <h3>
+                    Notifications
+                    (<span id="notification-count">0</span>)
+                </h3>
+
+                <ul id="notification-list"></ul>
+            </div>
+        </section>
+
+        <!-- Surveys -->
+        <section class="card">
+
+            <div class="card-header bg-success">
+                📝 Community Surveys
+            </div>
+
+            <div class="card-body">
+
+                {% if surveys %}
+                <div class="survey-grid">
+
+                    {% for survey in surveys %}
+                    <div class="survey-card">
+
+                        <h5>{{ survey.title }}</h5>
+
+                        <p>
+                            {{ survey.description or
+                            "Please participate in this survey." }}
+                        </p>
+
+                        <a href="{{ survey.link }}"
+                           target="_blank"
+                           class="btn-primary">
+                           Open Survey
+                        </a>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+                    <p>No active surveys.</p>
+                {% endif %}
+
+            </div>
+        </section>
+
+        <!-- Report Buttons -->
+        <section class="card">
+
+            <div class="card-header bg-warning">
+                🚨 Submit a Community Report
+            </div>
+
+            <div class="card-body">
+
+                <a href="{{ url_for('user.submit_report') }}"
+                   class="btn-primary">
+                   Submit Community Report
+                </a>
+
+                <a href="{{ url_for('user.user_reports') }}"
+                   class="btn-secondary">
+                   View All Reports
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Reports Table -->
+        <section class="card">
+
+            <div class="card-header bg-secondary">
+                📝 My Submitted Reports
+            </div>
+
+            <div class="card-body">
+
+                {% if recent_reports %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Image</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for report in recent_reports %}
+                            <tr>
+
+                                <td>
+                                    {{ report.created_at.strftime('%Y-%m-%d') }}
+                                </td>
+
+                                <td>{{ report.category }}</td>
+
+                                <td>
+                                    <span class="status-badge">
+                                        {{ report.status }}
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    {% if report.image %}
+                                    <a href="{{ url_for('static',
+                                    filename='uploads/' ~ report.image) }}"
+                                    target="_blank">
+
+                                        View
+
+                                    </a>
+
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+                    <p>No reports submitted yet.</p>
+                {% endif %}
+
+            </div>
+
+        </section>
+<!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+    </main>
+
 </div>
-</div>
+
 {% endblock %}
+```

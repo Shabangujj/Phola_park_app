@@ -9,7 +9,9 @@
         <p>Create a new survey for community members.</p>
 
         <form method="POST" action="{{ url_for('supervisor.upload_new_survey') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if csrf_token is defined %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
 
             <div class="form-group">
                 <label>Survey Title</label>
