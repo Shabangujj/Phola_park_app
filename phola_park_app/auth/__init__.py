@@ -1,8 +1,22 @@
-"""Authentication module initialization."""
-from flask import Blueprint
+# Compatibility package for auth — re-export helpers defined in auth_helpers.py
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+"""phola_park_app.auth package
 
-from . import routes
+Provides role utilities and any auth-related blueprints in the future.
+"""
 
-__all__ = ['auth_bp']
+from phola_park_app.auth_helpers import (
+    role_required,
+    is_admin,
+    is_supervisor,
+    is_admin_or_supervisor,
+    redirect_by_role,
+)
+
+__all__ = [
+    "role_required",
+    "is_admin",
+    "is_supervisor",
+    "is_admin_or_supervisor",
+    "redirect_by_role",
+]
