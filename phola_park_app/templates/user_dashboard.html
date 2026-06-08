@@ -7,24 +7,14 @@
 <link rel="stylesheet"
 href="{{ url_for('static', filename='user.css') }}">
 
-<div class="dashboard-container">
-          <!-- PAGE HEADER -->
-         <header class="topbar">  
-        <!-- Header -->
-        <div class="section-header">
-            
-                <h2>👤 Welcome, {{ current_user.name }}</h2>
-                <p class="text-muted">
-                    Community Member | Phola Park
-                </p>
-        </div>
-                </header>
-
-
     <!-- Sidebar -->
     <aside class="sidebar">
-        {% include "partials/sidebar.html" %}
+        {% include "partials/user_sidebar.html" %}
     </aside>
+    {% include "partials/topbar.html" %}
+    {% include "partials/footer.html" %}
+    {% include "static/style.css" %}
+    
 
     <!-- Main Content -->
     <main class="main-content">

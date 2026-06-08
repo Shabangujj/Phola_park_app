@@ -17,6 +17,8 @@ body{
     flex:1;
     padding:25px;
     box-sizing:border-box;
+    margin-left: 120px;
+    margin-bottom: 60px;
 }
 
 /* HEADER */
@@ -39,6 +41,10 @@ body{
     padding:10px 16px;
     border-radius:30px;
     font-size:14px;
+    font-weight:bold;
+    margin-left: 400px;
+    margin-top: 10px;
+
 }
 
 /* CARD */
@@ -214,6 +220,7 @@ body{
 
 .footer{
     background: #166534;
+    height: 10px;
     left:0;
     right:0;
     position:fixed;

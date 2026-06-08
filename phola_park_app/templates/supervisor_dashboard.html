@@ -15,13 +15,12 @@ href="{{ url_for('static', filename='supervisor.css') }}">
 
         <!-- HEADER -->
         <div class="dashboard-header">
-          <header class="topbar"
+          <header class="topbar">
                 <h2>Supervisor Dashboard</h2>
-                <p class="portfolio-text">
-                    {{ portfolio }} Portfolio
-                </p>
+                <h2 class="portfolio-text">
+                    {{ portfolio }}
+                </h2>
             
-          
             <span class="portfolio-badge">
                 Supervisor Panel
             </span>
@@ -114,8 +113,6 @@ href="{{ url_for('static', filename='supervisor.css') }}">
             </div>
 
         </section>
-
-    </main>
 <!-- FOOTER -->
         <footer class="footer">
 
@@ -126,85 +123,107 @@ href="{{ url_for('static', filename='supervisor.css') }}">
             </p>
 
         </footer>
-
-</div>
+      </main>
+      </div>
 
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
 
-    {% if status_labels|length > 0 %}
+    const statusChartEl = document.getElementById("statusChart");
+    const categoryChartEl = document.getElementById("categoryChart");
 
-    new Chart(document.getElementById("statusChart"), {
+    // STATUS CHART
+    {% if status_labels and status_values %}
 
-        type: "pie",
+    if (statusChartEl) {
 
-        data: {
-            labels: {{ status_labels | tojson }},
+        const statusLabels = {{ status_labels | tojson }};
+        const statusValues = {{ status_values | tojson }};
 
-            datasets: [{
-                data: {{ status_values | tojson }},
+        new Chart(statusChartEl, {
 
-                backgroundColor: [
-                    "#ffc107",
-                    "#28a745",
-                    "#dc3545",
-                    "#0d6efd"
-                ]
-            }]
-        },
+            type: "pie",
 
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
+            data: {
+                labels: statusLabels,
 
-    });
+                datasets: [{
+                    data: statusValues,
+
+                    backgroundColor: [
+                        "#ffc107",
+                        "#28a745",
+                        "#dc3545",
+                        "#0d6efd"
+                    ]
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+
+        });
+
+    }
 
     {% endif %}
 
 
-    {% if category_labels|length > 0 %}
+    // CATEGORY CHART
+    {% if category_labels and category_values %}
 
-    new Chart(document.getElementById("categoryChart"), {
+    if (categoryChartEl) {
 
-        type: "bar",
+        const categoryLabels = {{ category_labels | tojson }};
+        const categoryValues = {{ category_values | tojson }};
 
-        data: {
+        new Chart(categoryChartEl, {
 
-            labels: {{ category_labels | tojson }},
+            type: "bar",
 
-            datasets: [{
-                label: "Reports",
-                data: {{ category_values | tojson }},
-                backgroundColor: "#0d6efd"
-            }]
-        },
+            data: {
 
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
+                labels: categoryLabels,
 
-            scales: {
-                y: {
-                    beginAtZero: true
+                datasets: [{
+                    label: "Reports",
+                    data: categoryValues,
+                    backgroundColor: "#0d6efd"
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
-            }
-        }
 
-    });
+            }
+
+        });
+
+    }
 
     {% endif %}
 
 });
-
 </script>
+</script>
+
 
 {% endblock %}
 

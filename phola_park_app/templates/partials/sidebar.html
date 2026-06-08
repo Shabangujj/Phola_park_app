@@ -11,11 +11,13 @@
         {% if current_user.role and current_user.role.name == 'user' %}
             <a href="{{ url_for('user.surveys') }}">Surveys</a>
             <a href="{{ url_for('user.user_reports') }}">My Reports</a>
+            <a href="{{ url_for('web.logout') }}">Logout</a>
         {% endif %}
 
         {% if current_user.role and current_user.role.name == 'supervisor' %}
             <a href="{{ url_for('supervisor.reports') }}">Reports</a>
             <a href="{{ url_for('supervisor.surveys') }}">Surveys</a>
+             <a href="{{ url_for('web.logout') }}">Logout</a>
         {% endif %}
 
         {% if current_user.role and current_user.role.name == 'admin' %}
@@ -23,6 +25,7 @@
             <a href="{{ url_for('admin.admin_surveys') }}">Surveys</a>
             <a href="{{ url_for('admin.admin_reports') }}">Reports</a>
             <a href="{{ url_for('admin.admin_announcements') }}">Announcements</a>
+             <a href="{{ url_for('web.logout') }}">Logout</a>
         {% endif %}
 
         <a href="{{ url_for('main.notifications_page') }}">

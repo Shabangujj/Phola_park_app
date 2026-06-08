@@ -1,27 +1,20 @@
 {% extends "base.html" %}
 
-{% block content %}
-
 <link rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}">
 
 <div class="dashboard-container">
-
+    <aside class="sidebar">
+        {% include "partials/admin_sidebar.html" %}
+    </aside>
+{% include "partials/topbar.html" %}
+{% include "partials/footer.html" %}
+{% include "static/style.css" %}
     <main class="main-content">
-    
-        <!-- PAGE HEADER -->
-         <!--TOP BAR-->
-         <header class="topbar">  
-        <div class="page-header">
-            <p>Welcome back, Admin! 
-                Here's an overview of the latest 
-                activity in Phola Park.</p>
-                </div>
-                </header>
-       
+        {% block content %}
         <!-- TOP GRID -->
         <div class="dashboard-grid">
-
+           
             <!-- NOTIFICATIONS -->
             <div class="announcement-card">
 
@@ -327,17 +320,6 @@
 <button id="menu-toggle">
     ☰
 </button>
-
-        <!-- FOOTER -->
-        <footer class="footer">
-
-            <p>
-                &copy; 2024 Phola Park |
-                All rights reserved |
-                Service Delivery System
-            </p>
-
-        </footer>
 
     </main>
 
