@@ -1,64 +1,80 @@
-<nav style="background:#1e293b; 
-padding:10px; color:white; display:flex; 
-justify-content:space-between; 
-align-items:center;">
+<div class="topbar">
 
-<!-- LEFT -->
-<div>
-<strong>Phola Park App</strong>
-</div>
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        flex-wrap:wrap;
+        gap:15px;
+    ">
 
-    <!-- CENTER -->
-    <div style="display:flex; gap:15px;">
-
-        {% if session.get("role") == "admin" %}
-            <a href="{{ url_for('main.admin_dashboard') }}" style="color:white;">Dashboard</a>
-            <a href="{{ url_for('admin.admin_users') }}" style="color:white;">Users</a>
-            <a href="{{ url_for('admin.view_reports') }}" style="color:white;">Reports</a>
-            <a href="{{ url_for('admin.announcements') }}" style="color:white;">Announcements</a>
-            <a href="{{ url_for('admin.audit_logs') }}" style="color:white;">Audit Logs</a>
-        {% endif %}
-
-        {% if session.get("role") == "supervisor" %}
-            <a href="{{ url_for('supervisor.dashboard') }}" style="color:white;">Dashboard</a>
-        {% endif %}
-
-        {% if session.get("role") == "user" %}
-            <a href="{{ url_for('user.dashboard') }}" style="color:white;">Dashboard</a>
-        {% endif %}
-
-    </div>
-
-    <!-- RIGHT -->
-    <div style="display:flex; align-items:center; gap:20px;">
-
-        <!-- 🔔 Notifications -->
-        <div style="position:relative; cursor:pointer;" onclick="toggleNotifications()">
-            🔔 <span id="notif-count" style="color:red;">0</span>
-
-            <div id="notif-dropdown" style="
-                display:none;
-                position:absolute;
-                right:0;
-                top:30px;
-                background:white;
-                color:black;
-                width:300px;
-                max-height:300px;
-                overflow:auto;
-                border-radius:5px;
-                padding:10px;
-            ">
-                <ul id="notif-list" style="list-style:none; padding:0;"></ul>
-            </div>
+        <!-- LEFT -->
+        <div>
+            <h3 style="margin:0;">
+                Phola Park App
+            </h3>
         </div>
 
-        <!-- USER -->
-        <span>{{ session.get("role") }}</span>
+        <!-- RIGHT -->
+        {% if current_user.is_authenticated %}
 
-        <!-- LOGOUT -->
-        <a href="{{ url_for('auth.logout') }}" style="color:white;">Logout</a>
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:20px;
+        ">
+
+            <!-- USER -->
+            <div>
+                Welcome,
+                <strong>
+                    {{ current_user.name | default('User') }}
+                </strong>
+            </div>
+
+            <!-- ROLE -->
+            <div class="role-badge">
+                {{ current_user.role.name }}
+            </div>
+
+            <!-- NOTIFICATIONS -->
+            <a href="{{ url_for('notifications.notifications') }}"
+               class="notification-link"
+               style="
+                    color:white;
+                    text-decoration:none;
+                    position:relative;
+               ">
+
+                🔔 Notifications
+
+                {% set unread =
+                current_user.notifications
+                | selectattr("is_read", "equalto", False)
+                | list | length %}
+
+                {% if unread > 0 %}
+                    <span class="notification-badge">
+                        {{ unread }}
+                    </span>
+                {% endif %}
+
+            </a>
+
+            <!-- LOGOUT -->
+            <a href="{{ url_for('auth.logout') }}"
+               class="btn-light"
+               style="
+                    padding:8px 16px;
+                    text-decoration:none;
+               ">
+                Logout
+            </a>
+
+        </div>
+
+        {% endif %}
 
     </div>
 
-</nav>
+</div>

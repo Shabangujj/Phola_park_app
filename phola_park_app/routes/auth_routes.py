@@ -65,6 +65,11 @@ def login():
     print("SESSION SAVED:", session)
 
     # =========================
+    # � LOGIN USER
+    # =========================
+    login_user(user)
+
+    # =========================
     # 🔁 API RESPONSE
     # =========================
     if api_request:
@@ -85,43 +90,6 @@ def login():
 
     elif role == "supervisor":
         return redirect(url_for("supervisor.dashboard"))
-
-    else:
-        return redirect(url_for("web.user_dashboard"))
-    
-
-    # =========================
-    # ✅ API LOGIN (JWT)
-    # =========================
-    if api_request:
-        access_token = create_access_token(
-            identity=str(user.id),
-            additional_claims={"role": role}
-        )
-
-        return jsonify({
-            "status": "success",
-            "access_token": access_token,
-            "user": {
-                "id": user.id,
-                "username": getattr(user, "username", getattr(user, "name", "")),
-                "email": user.email,
-                "role": role
-            }
-        }), 200
-
-    # =========================
-    # ✅ WEB LOGIN (SESSION)
-    # =========================
-    login_user(user)
-
-    flash("Login successful")
-
-    if role == "admin":
-        return redirect(url_for("web.admin_dashboard"))
-
-    elif role == "supervisor":
-        return redirect(url_for("web.supervisor_dashboard"))
 
     else:
         return redirect(url_for("web.user_dashboard"))

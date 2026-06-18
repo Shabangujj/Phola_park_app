@@ -1,12 +1,7 @@
-<h2>Edit Survey</h2>
-<form method="POST">
-    <input type="text" name="title" value="{{ survey.title }}" required><br><br>
-    <textarea name="description">{{ survey.description }}</textarea><br><br>
-    <input type="url" name="form_link" value="{{ survey.form_link }}" required><br><br>
-    <button type="submit">Save Changes</button>
-</form>
 {% extends "base.html" %}
+
 {% block title %}Edit Survey{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
@@ -16,23 +11,25 @@
                     <h4>Edit Survey</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('edit_survey', survey_id=survey['id']) }}">
+                    <form method="POST" action="{{ url_for('supervisor.edit_survey', survey_id=survey.id) }}">
                         <div class="mb-3">
                             <label for="title" class="form-label">Survey Title</label>
-                            <input type="text" class="form-control" id="title" name="title" 
-                                   value="{{ survey['title'] }}" required>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ survey.title }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" required>{{ survey['description'] }}</textarea>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ survey.description }}</textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="form_link" class="form-label">Form Link</label>
-                            <input type="url" class="form-control" id="form_link" name="form_link" 
-                                   value="{{ survey['form_link'] }}" required>
+                            <label for="survey_type" class="form-label">Survey Type</label>
+                            <input type="text" class="form-control" id="survey_type" name="survey_type" value="{{ survey.survey_type }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="link" class="form-label">Survey Link</label>
+                            <input type="url" class="form-control" id="link" name="link" value="{{ survey.link }}" required>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('uploaded_surveys') }}" class="btn btn-secondary">Cancel</a>
+                            <a href="{{ url_for('supervisor.surveys') }}" class="btn btn-secondary">Cancel</a>
                             <button type="submit" class="btn btn-success">Update Survey</button>
                         </div>
                     </form>

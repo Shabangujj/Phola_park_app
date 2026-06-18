@@ -3,9 +3,24 @@
 {% block title %}Admin – Announcements{% endblock %}
 
 {% block content %}
-<div class="container">
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
 
-  <h2 class="page-title">📢 Announcements</h2>
+<div class="dashboard-container">
+    <main class="main-content">
+    
+        <!-- PAGE HEADER -->
+         <!--TOP BAR-->
+         <header class="topbar">  
+        <div class="page-header">
+            <p>Welcome back, Admin! 
+                Here's an overview of the latest 
+                activity in Phola Park.</p>
+                </div>
+                </header>
+
+<div class="announcement-card">
+  <h2 class="page-title">📢 Create New Announcement </h2>
 
   <!-- FLASH MESSAGES -->
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -19,23 +34,20 @@
   {% endwith %}
 
   <!-- CREATE ANNOUNCEMENT -->
-  <div class="card">
-    <h3>Create New Announcement</h3>
-
-    <form method="POST" action="{{ url_for('admin.announcements') }}">
+    <form class="announcement-form" method="POST" action="{{ url_for('admin.announcements') }}">
       {{ csrf_token() if csrf_token }}
 
-      <div class="form-group">
+      <div class="text-input">
         <label>Title</label>
         <input type="text" name="title" required>
       </div>
 
-      <div class="form-group">
+      <div class="textarea">
         <label>Message</label>
         <textarea name="message" rows="4" required></textarea>
       </div>
 
-      <div class="form-group">
+      <div class="select">
         <label>Target Role (optional)</label>
         <select name="target_role">
           <option value="">All Roles</option>
@@ -45,7 +57,7 @@
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="select">
         <label>Target Portfolio (optional)</label>
         <select name="portfolio">
           <option value="">All Portfolios</option>
@@ -59,11 +71,10 @@
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="button">
         Publish Announcement
       </button>
     </form>
-  </div>
 
   <!-- ANNOUNCEMENTS LIST -->
   <div class="card">
@@ -109,5 +120,17 @@
     {% endif %}
   </div>
 
+</div>
+ <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+    </main>
 </div>
 {% endblock %}

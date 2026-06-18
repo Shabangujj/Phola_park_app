@@ -1,16 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Manage Users</h2>
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+<div class="dashboard-container">
 
-<table border="1" cellpadding="10">
+    <main class="main-content">
+    
+        <!-- PAGE HEADER -->
+         <!--TOP BAR-->
+         <header class="topbar">  
+        <div class="page-header">
+            <p>Welcome back, Admin! 
+                Here's an overview of the latest 
+                activity in Phola Park.</p>
+                </div>
+                </header>
+                <div class="card">
+                    <div class="section-header">
+                        <h2>Manage Users</h2>
+                    </div>
+
+<table class="styled-table">
     <thead>
         <tr>
             <th>ID</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Portfolio</th>
-            <th>Assign</th>
+            <th>Selected Portfolio</th>
+            <th>Committee</th>
+            <th>Assign Committee</th>
         </tr>
     </thead>
     <tbody>
@@ -33,6 +52,7 @@
 
     </form>
 </td>
+</div>
              
             <!-- ✅ Current Portfolio -->
             <td>
@@ -64,5 +84,16 @@
         {% endfor %}
     </tbody>
 </table>
+ <!-- FOOTER -->
+        <footer class="footer">
 
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+    </main>
+</div>
 {% endblock %}

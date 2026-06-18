@@ -1,4 +1,39 @@
-<div class="topbar">
-    <strong>Welcome, {{ current_user.full_name }}</strong><br>
-    <small>{{ current_user.role.name | title }} – Phola Park</small>
-</div>
+<!-- Top Navigation Bar -->
+<header class="topbar">
+    <div class="topbar-left">
+        <button id="sidebarToggle" class="menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <h2 class="app-title">
+            Phola Park Community App
+        </h2>
+    </div>
+
+    <div class="topbar-right">
+
+        <!-- Notifications -->
+        <a href="{{ url_for('main.notifications_page') }}" class="topbar-icon">
+            <i class="fas fa-bell"></i>
+        </a>
+
+        <!-- User Info -->
+        <div class="user-info">
+            <span>
+                Welcome,
+                {% if current_user.is_authenticated %}
+                    {{ current_user.username }}
+                {% else %}
+                    Guest
+                {% endif %}
+            </span>
+        </div>
+
+        <!-- Logout -->
+        <a href="{{ url_for('web.logout') }}" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </a>
+
+    </div>
+</header>

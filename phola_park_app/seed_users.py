@@ -16,6 +16,7 @@ with app.app_context():
     db.session.commit()
 
     admin_role = UserRole.query.filter_by(name="admin").first()
+    supervisor_role = UserRole.query.filter_by(name="supervisor").first()
 
     # Create admin
     if not User.query.filter_by(email="admin@pholapark.co.za").first():
@@ -29,6 +30,23 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
 
-        print("✅ Admin user created")
+        print("Admin user created")
     else:
         print("Admin already exists")
+
+    # Create supervisor
+    if not User.query.filter_by(email="supervisor@pholapark.co.za").first():
+        supervisor = User(
+            username="supervisor",
+            email="supervisor@pholapark.co.za",
+            role_id=supervisor_role.id,
+            portfolio="Portfolio A"
+        )
+        supervisor.set_password("Supervisor123!")
+
+        db.session.add(supervisor)
+        db.session.commit()
+
+        print("Supervisor user created")
+    else:
+        print("Supervisor already exists")

@@ -1,36 +1,102 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
 
-<h2>Reports Dashboard</h2>
-
-<!-- 🔍 Filters -->
- <label>Status:</label>
-<select name="status">
-    <option value="">All</option>
-    <option value="Open">Open</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Resolved">Resolved</option>
-</select>
-<form method="GET" style="margin-bottom:20px;">
+    <main class="main-content">
     
-    <label>Portfolio:</label>
-    <select name="portfolio">
-        <option value="">All</option>
-        <option value="Health">Health</option>
-        <option value="Water">Water</option>
-        <option value="Electricity">Electricity</option>
-        <option value="Roads">Roads</option>
-        <option value="Safety">Safety</option>
+        <!-- PAGE HEADER -->
+         <!--TOP BAR-->
+         <header class="topbar">  
+        <div class="page-header">
+            <p>Welcome back, Admin! 
+                Here's an overview of the latest 
+                activity in Phola Park.</p>
+                </div>
+                </header>
+
+
+<form method="GET"
+      class="filter-form">
+
+    <!-- Search -->
+    <input type="text"
+           name="search"
+           placeholder="Search reports...">
+
+    <!-- Category -->
+    <select name="category">
+
+        <option value="">
+            All Categories
+        </option>
+
+        <option value="water">
+            Water
+        </option>
+
+        <option value="electricity">
+            Electricity
+        </option>
+
+        <option value="roads">
+            Roads
+        </option>
+
+        <option value="crime">
+            Crime
+        </option>
+
     </select>
 
-    <label>Last:</label>
+    <!-- Status -->
+    <select name="status">
+
+        <option value="">
+            All Status
+        </option>
+
+        <option value="pending">
+            Pending
+        </option>
+
+        <option value="resolved">
+            Resolved
+        </option>
+
+    </select>
+
+    <!-- Portfolio -->
+    <select name="portfolio">
+
+        <option value="">
+            All Portfolios
+        </option>
+
+        <option value="water">
+            Water
+        </option>
+
+        <option value="health">
+            Health
+        </option>
+
+        <option value="safety">
+            Safety
+        </option>
+
+    </select>
+<label>Last:</label>
     <select name="days">
         <option value="">All</option>
         <option value="7">7 Days</option>
         <option value="30">30 Days</option>
     </select>
+    <!-- Button -->
+    <button type="submit">
+        Filter Reports
+    </button>
 
-    <button type="submit">Apply</button>
 </form>
 
 <!-- 📤 Export -->
@@ -47,52 +113,57 @@
 <hr>
 
 <!-- 📋 Table -->
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Portfolio</th>
-        <th>User</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Update</th>
-    </tr>
+<table class="styled-table">
 
-    {% for r in reports %}
-    <tr>
-        <td>{{ r.id }}</td>
-        <td>{{ r.report_type }}</td>
-        <td>{{ r.description }}</td>
-        <td>{{ r.portfolio }}</td>
-        <td>{{ r.user_id }}</td>
-        <td>{{ r.created_at }}</td>
-    </tr>
-    <td>
-    {% if r.status == "Open" %}
-        <span style="color:red;">Open</span>
-    {% elif r.status == "In Progress" %}
-        <span style="color:orange;">In Progress</span>
-    {% else %}
-        <span style="color:green;">Resolved</span>
-    {% endif %}
-</td>
+    <thead>
 
-<td>
-    <form method="POST"
-          action="{{ url_for('admin.update_report_status', report_id=r.id) }}">
-        
-        <select name="status" onchange="this.form.submit()">
-            <option disabled selected>Change</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-        </select>
-    </form>
-</td>
-    {% endfor %}
+        <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Portfolio</th>
+            <th>Date</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for report in reports %}
+
+        <tr>
+
+            <td>{{ report.id }}</td>
+
+            <td>{{ report.category }}</td>
+
+            <td>
+
+                <span class="badge
+                    {% if report.status == 'resolved' %}
+                        resolved
+                    {% else %}
+                        pending
+                    {% endif %}
+                ">
+
+                    {{ report.status }}
+
+                </span>
+
+            </td>
+
+            <td>{{ report.portfolio }}</td>
+
+            <td>{{ report.created_at }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
 </table>
-
 <!-- 📊 Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -125,4 +196,16 @@
         }
     });
 </script>
+ <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+    </main>
+    </div>
 {% endblock %}

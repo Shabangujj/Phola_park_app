@@ -1,31 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+<div class="dashboard-container">
+    <main class="main-content">
+    
+        <!-- PAGE HEADER -->
+         <!--TOP BAR-->
+         <header class="topbar">  
+        <div class="page-header">
+            <p>Welcome back, Admin! 
+                Here's an overview of the latest 
+                activity in Phola Park.</p>
+                </div>
+                </header>
 
-<div class="container mt-4">
 
-    <h2 class="mb-4">Audit Logs Dashboard</h2>
+
+    <h2 class="announcement-card">Audit Logs Dashboard</h2>
 
     <!-- 🔍 Filters -->
-    <div class="card p-3 mb-4">
-        <form method="GET" class="row g-2">
+    <div class="filter-form">
+         
+        <form method="GET" class="filter-form">
 
-            <div class="col-md-3">
+            <div class="input">
                 <input type="text" name="action" placeholder="Action (LOGIN)" class="form-control">
             </div>
 
-            <div class="col-md-2">
+            <div class="input">
                 <input type="number" name="user_id" placeholder="User ID" class="form-control">
             </div>
 
-            <div class="col-md-2">
+            <div class="input">
                 <input type="date" name="start_date" class="form-control">
             </div>
 
-            <div class="col-md-2">
+            <div class="input">
                 <input type="date" name="end_date" class="form-control">
             </div>
 
-            <div class="col-md-3 d-flex gap-2">
+            <div class="button">
                 <button class="btn btn-primary w-100">Filter</button>
                 <a href="{{ url_for('admin.export_audit_logs') }}" class="btn btn-success w-100">
                     Export CSV
@@ -36,54 +51,47 @@
     </div>
 
     <!-- 📊 SUMMARY CARDS -->
-    <div class="row mb-4">
+    <div class="stats-container">
 
-        <div class="col-md-3">
-            <div class="card text-center p-3 shadow-sm">
+        <div class="card">
                 <h6>Total Logs</h6>
                 <h3>{{ total_logs }}</h3>
-            </div>
+            
         </div>
 
-        <div class="col-md-3">
-            <div class="card text-center p-3 shadow-sm">
+        <div class="card">
                 <h6>Active Users</h6>
                 <h3>{{ active_users }}</h3>
-            </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card text-center p-3 shadow-sm">
+        <div class="card">
                 <h6>Top Action</h6>
                 <h3>{{ most_common_action }}</h3>
-            </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card text-center p-3 shadow-sm">
+        <div class="card">
                 <h6>Today Logs</h6>
                 <h3>{{ today_logs }}</h3>
-            </div>
         </div>
 
     </div>
 
     <!-- 📊 CHARTS -->
-    <div class="row mb-4">
+    <div class="charts-container">
 
-        <div class="col-md-6">
+        <div class="chart-card">
             <canvas id="logsChart"></canvas>
         </div>
 
-        <div class="col-md-6">
+        <div class="chart-card">
             <canvas id="actionsChart"></canvas>
         </div>
 
     </div>
 
     <!-- 📋 TABLE -->
-    <div class="card p-3">
-        <table class="table table-bordered table-striped">
+    <div class="table-section">
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -114,9 +122,6 @@
             </tbody>
         </table>
     </div>
-
-</div>
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -151,5 +156,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
+ <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                &copy; 2024 Phola Park |
+                All rights reserved |
+                Service Delivery System
+            </p>
+
+        </footer>
+
 
 {% endblock %}

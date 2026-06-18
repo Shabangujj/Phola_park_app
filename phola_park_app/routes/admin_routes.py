@@ -33,6 +33,7 @@ def admin_required(f):
 # =========================
 @admin_bp.route('/')
 @admin_required
+@login_required
 def dashboard():
     users = User.query.all()
     reports = Report.query.order_by(Report.created_at.desc()).all()
@@ -63,7 +64,24 @@ def dashboard():
 def view_users():
     users = User.query.all()
     return render_template('admin/users.html', users=users)
+# =========================
+# paginate users
+# =========================
+@admin_bp.route("/users")
+@login_required
+def users():
 
+    page = request.args.get("page", 1, type=int)
+
+    users = User.query.paginate(
+        page=page,
+        per_page=10
+    )
+
+    return render_template(
+        "admin/users.html",
+        users=users
+    )
 
 # =========================
 # ➕ ADD USER
@@ -145,6 +163,41 @@ def view_reports():
     for r in reports:
         key = r.portfolio or "Unknown"
         portfolio_counts[key] = portfolio_counts.get(key, 0) + 1
+
+    search = request.args.get("search")
+    category = request.args.get("category")
+    status = request.args.get("status")
+    portfolio = request.args.get("portfolio")
+
+    query = Report.query
+
+    # SEARCH
+    if search:
+        query = query.filter(
+            Report.description.contains(search)
+        )
+
+    # CATEGORY
+    if category:
+        query = query.filter_by(
+            category=category
+        )
+
+    # STATUS
+    if status:
+        query = query.filter_by(
+            status=status
+        )
+
+    # PORTFOLIO
+    if portfolio:
+        query = query.filter_by(
+            portfolio=portfolio
+        )
+
+    reports = query.order_by(
+        Report.created_at.desc()
+    ).all()
 
     return render_template(
         "admin/view_reports.html",

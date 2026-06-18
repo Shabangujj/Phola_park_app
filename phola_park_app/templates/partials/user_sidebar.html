@@ -1,0 +1,45 @@
+<!-- USER SIDEBAR -->
+<aside class="sidebar user-sidebar">
+
+    <div class="sidebar-header">
+        <h2>Phola Park</h2>
+        <p>User Panel</p>
+    </div>
+
+    <ul class="sidebar-menu">
+
+        <li>
+            <a href="{{ url_for('user.dashboard') }}">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('user.surveys') }}">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Survey</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ url_for('web.submit_report') }}">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Submit Report</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('admin.announcements') }}">
+                <i class="fas fa-bullhorn"></i>
+                <span>Announcements</span>
+            </a>
+        </li>
+        <li class="logout-btn">
+            <a href="{{ url_for('web.logout') }}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+
+    </ul>
+
+</aside>

@@ -1,3 +1,17 @@
+import flask as _flask
+try:
+    # Flask 3 removed `Markup` export from `flask`; some extensions expect it there.
+    from markupsafe import Markup as _Markup
+    setattr(_flask, 'Markup', _Markup)
+except Exception:
+    pass
+try:
+    import werkzeug.urls as _w_urls
+    if not hasattr(_w_urls, 'url_encode'):
+        from urllib.parse import urlencode as _url_encode
+        setattr(_w_urls, 'url_encode', _url_encode)
+except Exception:
+    pass
 from flask import Flask, jsonify, Blueprint
 from werkzeug.exceptions import HTTPException
 
@@ -49,7 +63,7 @@ def create_app():
 
     app.register_blueprint(api_bp)
 
-    print("✅ API v1 blueprint registered")
+    print("API v1 blueprint registered")
 
     # -------------------------
     # Login manager

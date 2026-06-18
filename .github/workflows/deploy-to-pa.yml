@@ -1,0 +1,29 @@
+name: Deploy to PythonAnywhere
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH to PythonAnywhere
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PA_HOST }}
+          username: ${{ secrets.PA_USER }}
+          key: ${{ secrets.PA_KEY }}
+          port: ${{ secrets.PA_PORT }}
+          script: |
+            set -euo pipefail
+            cd ~/Phola_park_app || git clone https://github.com/Shabangujj/Phola_park_app.git ~/Phola_park_app
+            cd ~/Phola_park_app
+            git fetch --all --prune
+            git checkout main
+            git reset --hard origin/main
+            bash scripts/pa_update.sh

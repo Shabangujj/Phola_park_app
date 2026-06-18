@@ -1,176 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
-        {% block title %}
-            Phola Park App
-        {% endblock %}
+        {% block title %}Phola Park App{% endblock %}
     </title>
 
+    <!-- MAIN CSS -->
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='style.css') }}">
 
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
 
-{% if current_user.is_authenticated %}
+    <!-- TOPBAR -->
+    {% include "partials/topbar.html" %}
 
-<div class="layout">
+    <!-- PAGE LAYOUT -->
+    <div class="dashboard-container">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
 
-        <div class="sidebar-header">
-            <h3>Phola Park</h3>
+            <div class="logo">
+                Phola Park
+            </div>
 
-            <span class="role-badge">
-                {{ current_user.role.name }}
-            </span>
-        </div>
+            <a href="{{ url_for('main.admin_dashboard') }}">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
 
-        <ul class="sidebar-menu">
+            <a href="{{ url_for('admin.admin_users') }}">
+                <i class="fas fa-users"></i>
+                Users
+            </a>
 
-            {% if current_user.role.name == "admin" %}
+            <a href="{{ url_for('admin.view_reports') }}">
+                <i class="fas fa-file-alt"></i>
+                Reports
+            </a>
 
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        Dashboard
-                    </a>
-                </li>
+            <a href="{{ url_for('admin.announcements') }}">
+                <i class="fas fa-bullhorn"></i>
+                Announcements
+            </a>
 
-                <li>
-                    <a href="{{ url_for('admin.admin_users') }}">
-                        Users
-                    </a>
-                </li>
+            <a href="{{ url_for('admin.audit_logs') }}">
+                <i class="fas fa-history"></i>
+                Audit Logs
+            </a>
 
-                <li>
-                    <a href="{{ url_for('admin.view_reports') }}">
-                        Reports
-                    </a>
-                </li>
+        </aside>
 
-                <li>
-                    <a href="{{ url_for('admin.announcements') }}">
-                        Announcements
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.audit_logs') }}">
-                        Audit Logs
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('admin.add_survey') }}">
-                        Surveys
-                    </a>
-                </li>
-
-            {% endif %}
-
-            {% if current_user.role.name == "supervisor" %}
-
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        Supervisor Dashboard
-                    </a>
-                </li>
-
-            {% endif %}
-
-            {% if current_user.role.name == "user" %}
-
-                <li>
-                    <a href="{{ url_for('main.home') }}">
-                        My Dashboard
-                    </a>
-                </li>
-
-            {% endif %}
-
-            <li>
-                <a href="{{ url_for('notifications.notifications') }}"
-                   class="notification-link">
-
-                    Notifications
-
-                    {% set unread =
-                    current_user.notifications
-                    | selectattr("is_read", "equalto", False)
-                    | list | length %}
-
-                    {% if unread > 0 %}
-                        <span class="notification-badge">
-                            {{ unread }}
-                        </span>
-                    {% endif %}
-                </a>
-            </li>
-
-            <li class="logout">
-                <a href="{{ url_for('auth.logout') }}">
-                    Logout
-                </a>
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-
-        <!-- TOPBAR -->
-        <div class="topbar">
-
-            Welcome,
-            {{ current_user.name | default('User') }}
-
-        </div>
-
-        <!-- FLASH MESSAGES -->
-        <div class="page-content">
-
-            {% with messages =
-            get_flashed_messages(with_categories=true) %}
-
-                {% if messages %}
-
-                    {% for category, message in messages %}
-
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
 
             {% block content %}
             {% endblock %}
 
-        </div>
+        </main>
 
     </div>
 
-</div>
+    <!-- FOOTER -->
+    {% include "partials/footer.html" %}
 
-{% else %}
-
-{% block content %}
-{% endblock %}
-
-{% endif %}
+    <!-- EXTRA JS -->
+    {% block extra_js %}
+    {% endblock %}
 
 </body>
 </html>

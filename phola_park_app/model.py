@@ -123,6 +123,9 @@ class Report(db.Model):
         db.ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
+
+    # Backwards-compatible alias for templates that reference timestamp
+    timestamp = db.synonym("created_at")
     def to_dict(self):
          return {
         "id": self.id,
@@ -145,8 +148,11 @@ class Survey(db.Model):
     __tablename__ = "surveys"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    topic = db.Column(db.String(50), nullable=False)  # Water, Health, Crime, etc.
+    title = db.Column("name", db.String(255), nullable=False)
+    survey_type = db.Column("topic", db.String(50), nullable=False)  # Water, Health, Crime, etc.
+    description = db.Column(db.Text, nullable=True)
+    link = db.Column(db.String(255), nullable=True)
+    portfolio = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
 
     questions = db.relationship(
@@ -245,6 +251,19 @@ class Announcement(db.Model):
 
     def __repr__(self):
         return f"<Announcement {self.id}>"
+
+
+class Committee(db.Model):
+    __tablename__ = "committees"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    portfolio = db.Column(db.String(50), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    creator = db.relationship("User", backref="committees_created")
 
 # ───────────────────────────────────────────
 # NOTICES
