@@ -1,26 +1,13 @@
-from flask_login import current_user
-from phola_park_app.model import User, Notification
-from phola_park_app.database import db
-from phola_park_app.admin_helpers import is_admin, is_supervisor, is_admin_or_supervisor, redirect_if_wrong_role
+"""Compatibility wrapper — moved to phola_park_app.admin.helpers
 
-def create_announcement_notifications(announcement):
-    query = User.query
+Deprecated: use phola_park_app.admin.helpers
+"""
 
-    if hasattr(announcement, 'target_role') and announcement.target_role:
-        query = query.filter_by(role=announcement.target_role)
+import warnings
 
-    if hasattr(announcement, 'portfolio') and announcement.portfolio:
-        query = query.filter_by(portfolio=announcement.portfolio)
+warnings.warn(
+    "phola_park_app.admin_helpers is deprecated; use phola_park_app.admin.helpers",
+    DeprecationWarning,
+)
 
-    users = query.all()
-
-    for u in users:
-        n = Notification(
-            user_id=current_user.id,
-            title=f"📢 {announcement.title}",
-            message=announcement.message,
-            link="/announcements"
-        )
-        db.session.add(n)
-
-    db.session.commit()
+from phola_park_app.admin.helpers import *  # noqa: F401,F403
