@@ -2,7 +2,7 @@
 
 Phola Park is a role-based community management web application built with Flask. It provides residents, supervisors, and administrators with tools to report incidents and service requests, manage portfolios, run surveys, send notifications, and review administrative dashboards and reports.
 
-## Key Features
+# Key Features
 - User authentication and role-based access (admin, supervisor, resident)
 - Incident & service report submission with image uploads
 - Admin dashboards for user, report, announcement, and notice management
