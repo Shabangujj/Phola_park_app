@@ -1,0 +1,35 @@
+# CODEOWNERS file for Phola Park App
+# This file defines code ownership and review requirements
+
+# Default owners for everything in the repo
+* @Shabangujj
+
+# Authentication and security-sensitive code
+/phola_park_app/auth/ @Shabangujj
+/phola_park_app/extensions.py @Shabangujj
+
+# Database models and migrations
+/phola_park_app/models/ @Shabangujj
+/migrations/ @Shabangujj
+
+# API endpoints
+/phola_park_app/api/ @Shabangujj
+
+# Admin dashboard
+/phola_park_app/admin/ @Shabangujj
+
+# Configuration and deployment
+/.env.example @Shabangujj
+/requirements.txt @Shabangujj
+/.github/ @Shabangujj
+
+# Documentation
+/README.md @Shabangujj
+/CONTRIBUTING.md @Shabangujj
+/DEVELOPMENT.md @Shabangujj
+/SECURITY.md @Shabangujj
+/CODE_OF_CONDUCT.md @Shabangujj
+/CHANGELOG.md @Shabangujj
+
+# Tests
+/tests/ @Shabangujj
