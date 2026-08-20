@@ -1,8 +1,29 @@
-"""Admin module initialization."""
-from flask import Blueprint
+# Compatibility package for admin — re-export names from flat admin.py
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+"""phola_park_app.admin package
 
-from . import routes
+This package provides a compatibility layer for code that imports
+from phola_park_app.admin.* while keeping the existing flat files working.
+"""
 
-__all__ = ['admin_bp']
+from phola_park_app.admin import (
+    admin_bp,
+    get_all_user,
+    get_user,
+    create_user,
+    update_user,
+    delete_user,
+    get_all_reports,
+    get_reports_by_portfolio,
+)
+
+__all__ = [
+    "admin_bp",
+    "get_all_user",
+    "get_user",
+    "create_user",
+    "update_user",
+    "delete_user",
+    "get_all_reports",
+    "get_reports_by_portfolio",
+]

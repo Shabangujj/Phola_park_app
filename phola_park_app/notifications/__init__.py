@@ -1,8 +1,10 @@
-"""Notifications module initialization."""
-from flask import Blueprint
+# Compatibility package for notifications — re-export names from flat notification modules
 
-notifications_bp = Blueprint('notifications', __name__, url_prefix='/notifications')
+"""phola_park_app.notifications package
 
-from . import routes
+Used by code that imports phola_park_app.notifications or specific helpers.
+"""
 
-__all__ = ['notifications_bp']
+from phola_park_app.notifications import *  # noqa: F401,F403
+
+__all__ = getattr(globals().get("__all__"), "__all__", None) or []

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length,TextAreaField, SelectField, FileField
@@ -110,3 +111,18 @@ class ReportForm(FlaskForm):
         validators=[DataRequired()]
     )
     image = FileField("Image")
+=======
+"""Compatibility wrapper — moved to phola_park_app.forms.base_forms
+
+Deprecated: use phola_park_app.forms.base_forms
+"""
+
+import warnings
+
+warnings.warn(
+    "phola_park_app.forms is deprecated as a flat module; use phola_park_app.forms.base_forms",
+    DeprecationWarning,
+)
+
+from phola_park_app.forms.base_forms import *  # noqa: F401,F403
+>>>>>>> origin/main
