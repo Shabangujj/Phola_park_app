@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
 
-from phola_park_app.model import User
+from phola_park_app.models import User
 
 auth_api = Blueprint("auth_api", __name__, url_prefix="/auth")
 

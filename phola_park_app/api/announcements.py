@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
-from phola_park_app.model import Announcement, db
+from phola_park_app.models import Announcement, db
 from datetime import datetime
 
-announcements_api = Blueprint("announcements_api", __name__)
+announcements_api = Blueprint("announcements_api", __name__, url_prefix="/announcements")
 
 @announcements_api.route("/announcements", methods=["POST"])
 @jwt_required()

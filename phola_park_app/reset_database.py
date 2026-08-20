@@ -1,60 +1,84 @@
 # phola_park_app/reset_database.py
 
-from phola_park_app import create_app, db
-from phola_park_app.model import UserRole, User
 from werkzeug.security import generate_password_hash
+
+from phola_park_app import create_app
+from phola_park_app.extensions import db
+from phola_park_app.models import UserRole, User
 
 
 def reset_db():
     app = create_app()
 
     with app.app_context():
+
+        print("=" * 60)
+        print("PHOLA PARK APP DATABASE RESET")
+        print("=" * 60)
+
         print("⚠️ Dropping all tables...")
         db.drop_all()
 
         print("📦 Creating all tables...")
         db.create_all()
 
-        # ─────────────────────────────
-        # 1️⃣ Create roles
-        # ─────────────────────────────
+        # -----------------------------
+        # Create roles
+        # -----------------------------
         print("🔐 Creating roles...")
-        role_names = ["admin", "supervisor", "user"]
+
+        role_names = [
+            "admin",
+            "supervisor",
+            "user"
+        ]
+
         role_map = {}
 
-        for name in role_names:
-            role = UserRole(name=name)
+        for role_name in role_names:
+            role = UserRole(name=role_name)
             db.session.add(role)
-            role_map[name] = role
+            role_map[role_name] = role
 
-        # 🔴 MUST commit so roles get IDs
         db.session.commit()
 
-        # ─────────────────────────────
-        # 2️⃣ Verify admin role exists
-        # ─────────────────────────────
-        admin_role = role_map.get("admin") or UserRole.query.filter_by(name="admin").first()
-        if not admin_role:
-            raise RuntimeError("❌ Admin role was not created!")
+        admin_role = UserRole.query.filter_by(name="admin").first()
 
-        # ─────────────────────────────
-        # 3️⃣ Create default admin user
-        # ─────────────────────────────
-        print("👤 Creating default admin user...")
+        if admin_role is None:
+            raise RuntimeError("Admin role could not be created.")
 
-        admin = User(
-            username="System Admin",
-            email="admin@pholapark.co.za",
-            password_hash=generate_password_hash("admin123"),
-            role=admin_role,     # ✅ relationship assignment
-            is_active=True       # ✅ explicit (important)
-        )
+        # -----------------------------
+        # Create default admin
+        # -----------------------------
+        print("👤 Creating default administrator...")
 
-        db.session.add(admin)
-        db.session.commit()
+        admin = User.query.filter_by(
+            email="admin@pholapark.co.za"
+        ).first()
 
+        if admin is None:
+
+            admin = User(
+                full_name="System Admin",
+                username="admin",
+                email="admin@pholapark.co.za",
+                role=admin_role,
+                is_active=True,
+                email_verified=True,
+                portfolio="administration"
+            )
+            admin.set_password("admin123")
+            db.session.add(admin)
+            db.session.commit()
+
+        print()
         print("✅ Database reset completed successfully!")
-        print("➡️ Admin login: admin@pholapark.co.za / admin123")
+        print()
+        print("Default Administrator")
+        print("----------------------------")
+        print("Email    : admin@pholapark.co.za")
+        print("Password : admin123")
+        print("=" * 60)
 
 
 if __name__ == "__main__":

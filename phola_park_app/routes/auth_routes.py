@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from phola_park_app.extensions import db
-from phola_park_app.model import User, UserRole
+from phola_park_app.models import User, UserRole
 from flask_login import login_required, login_user, logout_user
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -92,56 +92,146 @@ def login():
         return redirect(url_for("supervisor.dashboard"))
 
     else:
-        return redirect(url_for("web.user_dashboard"))
+        return redirect(url_for("user.user_dashboard"))
 
 
 # =========================
-# 📝 REGISTER
+# 📝 REGISTER / CREATE ACCOUNT
 # =========================
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        password = request.form.get("password")
 
-        if not name or not email or not password:
-            flash("All fields are required")
+        # -------------------------
+        # Get form data
+        # -------------------------
+        full_name = request.form.get("full_name", "").strip()
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        # -------------------------
+        # Validate required fields
+        # -------------------------
+        if not full_name or not username or not email or not password:
+            flash("All fields are required.", "danger")
             return redirect(url_for("auth.register"))
 
-        # Check if exists
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            flash("Email already registered")
+        # -------------------------
+        # Validate password length
+        # -------------------------
+        if len(password) < 8:
+            flash(
+                "Password must contain at least 8 characters.",
+                "danger"
+            )
             return redirect(url_for("auth.register"))
 
-        # Hash password
-        hashed_pw = generate_password_hash(password)
+        # -------------------------
+        # Confirm password
+        # -------------------------
+        if password != confirm_password:
+            flash(
+                "Passwords do not match.",
+                "danger"
+            )
+            return redirect(url_for("auth.register"))
 
-        # Get default role
-        role = UserRole.query.filter_by(name="user").first()
+        # -------------------------
+        # Check username
+        # -------------------------
+        existing_username = User.query.filter_by(
+            username=username
+        ).first()
+
+        if existing_username:
+            flash(
+                "Username already exists.",
+                "warning"
+            )
+            return redirect(url_for("auth.register"))
+
+        # -------------------------
+        # Check email
+        # -------------------------
+        existing_email = User.query.filter_by(
+            email=email
+        ).first()
+
+        if existing_email:
+            flash(
+                "Email already registered.",
+                "warning"
+            )
+            return redirect(url_for("auth.register"))
+
+        # -------------------------
+        # Get normal USER role
+        # -------------------------
+        role = UserRole.query.filter(
+            db.func.lower(UserRole.name) == "user"
+        ).first()
 
         if not role:
-            flash("Default role not configured")
+            flash(
+                "Default User role is not configured. "
+                "Please contact the administrator.",
+                "danger"
+            )
             return redirect(url_for("auth.register"))
 
+        # -------------------------
         # Create user
+        # -------------------------
         new_user = User(
-            username=name,
+            full_name=full_name,
+            username=username,
             email=email,
-            password_hash=hashed_pw,
-            role_id=role.id
+            role_id=role.id,
+            is_active=True
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        # -------------------------
+        # Secure password hash
+        # -------------------------
+        new_user.set_password(password)
 
-        flash("Registration successful. Please login.")
+        # -------------------------
+        # Save user
+        # -------------------------
+        try:
+
+            db.session.add(new_user)
+            db.session.commit()
+
+        except Exception as e:
+
+            db.session.rollback()
+
+            print("REGISTRATION ERROR:", e)
+
+            flash(
+                "Unable to create account. Please try again.",
+                "danger"
+            )
+
+            return redirect(url_for("auth.register"))
+
+        # -------------------------
+        # Success
+        # -------------------------
+        flash(
+            "Account created successfully. "
+            "You can now log in.",
+            "success"
+        )
+
         return redirect(url_for("auth.login"))
 
+    # GET request
     return render_template("register.html")
-
 
 # =========================
 # 🚪 LOGOUT

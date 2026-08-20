@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - Phola Park App{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="user-dashboard">
+
+    <!-- ========================================= -->
+    <!-- DASHBOARD HEADER -->
+    <!-- ========================================= -->
+
+    <div class="user-welcome">
+
+        <div>
+            <h1>Welcome, {{ current_user.full_name }}</h1>
+
+            <p>
+                Welcome to the Phola Park Community Service Delivery Platform.
+            </p>
+        </div>
+
+        <div class="user-badge">
+            👤 Community User
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- QUICK STATISTICS -->
+    <!-- ========================================= -->
+
+    <div class="user-stats">
+
+        <div class="user-stat-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    My Reports
+                </span>
+
+                <strong>
+                    {{ reports_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="user-stat-card">
+
+            <div class="stat-icon">
+                📢
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Notices
+                </span>
+
+                <strong>
+                    {{ notices|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="user-stat-card">
+
+            <div class="stat-icon">
+                📝
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Surveys
+                </span>
+
+                <strong>
+                    {{ active_surveys|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="user-stat-card">
+
+            <div class="stat-icon">
+                🔔
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Account
+                </span>
+
+                <strong class="active-text">
+                    Active
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- QUICK ACTIONS -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Quick Actions</h2>
+
+                <p>
+                    Access your most important services.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+            <a
+                href="{{ url_for('user.user_reports') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📋
+                </span>
+
+                <span>
+                    <strong>My Reports</strong>
+
+                    <small>
+                        View your submitted reports
+                    </small>
+                </span>
+
+            </a>
+             <a
+                href="{{ url_for('user.surveys') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📋
+                </span>
+
+                <span>
+                    <strong>My Surveys</strong>
+
+                    <small>
+                        View or take surveys
+                    </small>
+                </span>
+
+            </a>
+
+            <a
+                href="{{ url_for('user.user_notices') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📢
+                </span>
+
+                <span>
+                    <strong>Notices</strong>
+
+                    <small>
+                        View community announcements
+                    </small>
+                </span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('user.user_reports') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📝
+                </span>
+
+                <span>
+                    <strong>Submit Report</strong>
+
+                    <small>
+                        Report a community problem
+                    </small>
+                </span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- RECENT REPORTS -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>My Recent Reports</h2>
+
+                <p>
+                    Your latest community service reports.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('user.user_reports') }}"
+                class="section-link"
+            >
+                View All →
+            </a>
+
+        </div>
+
+
+        {% if recent_reports %}
+
+        <div class="report-list">
+
+            {% for report in recent_reports %}
+
+            <div class="user-report-card">
+
+                <div class="report-main">
+
+                    <h3>
+                        {{ report.title or "Community Report" }}
+                    </h3>
+
+                    <p>
+                        {{ report.category or "General" }}
+                    </p>
+
+                    <small>
+                        {{ report.created_at.strftime("%d %b %Y") if report.created_at else "" }}
+                    </small>
+
+                </div>
+
+
+                <div class="report-status">
+
+                    {% set status = report.status|lower if report.status else "pending" %}
+
+                    <span class="status-badge status-{{ status }}">
+                        {{ report.status or "Pending" }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                📋
+            </div>
+
+            <h3>No Reports Yet</h3>
+
+            <p>
+                You have not submitted any community reports yet.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- COMMUNITY NOTICES -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Community Notices</h2>
+
+                <p>
+                    Important announcements from Phola Park.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('user.user_notices') }}"
+                class="section-link"
+            >
+                View All →
+            </a>
+
+        </div>
+
+
+        {% if notices %}
+
+        <div class="notice-list">
+
+            {% for notice in notices %}
+
+            <div class="user-notice-card">
+
+                <div class="notice-icon">
+                    📢
+                </div>
+
+                <div class="notice-content">
+
+                    <h3>
+                        {{ notice.title }}
+                    </h3>
+
+                    <p>
+                        {{ notice.message }}
+                    </p>
+
+                    <small>
+                        {{ notice.created_at.strftime("%d %b %Y") if notice.created_at else "" }}
+                    </small>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                📢
+            </div>
+
+            <h3>No Notices</h3>
+
+            <p>
+                There are currently no community announcements.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- SURVEYS -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Community Surveys</h2>
+
+                <p>
+                    Participate in active community surveys.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if active_surveys %}
+
+        <div class="survey-list">
+
+            {% for survey in active_surveys %}
+
+            <div class="survey-card">
+
+                <div class="survey-icon">
+                    📝
+                </div>
+
+                <div class="survey-content">
+
+                    <h3>
+                        {{ survey.title }}
+                    </h3>
+
+                    {% if survey.description %}
+                    <p>
+                        {{ survey.description }}
+                    </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                📝
+            </div>
+
+            <h3>No Active Surveys</h3>
+
+            <p>
+                There are currently no community surveys available.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

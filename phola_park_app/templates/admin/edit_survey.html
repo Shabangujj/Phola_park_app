@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Survey - Admin{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-card">
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h2>✏️ Edit Survey</h2>
+
+            <p>
+                Update the survey information below.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for(
+                'admin.view_survey',
+                survey_id=survey.id
+            ) }}"
+            class="dashboard-btn"
+        >
+            ← Back to Survey
+        </a>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- FLASH MESSAGES -->
+    <!-- ========================================= -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- ========================================= -->
+    <!-- EDIT FORM -->
+    <!-- ========================================= -->
+
+    <form
+        method="POST"
+        action="{{ url_for(
+            'admin.edit_survey',
+            survey_id=survey.id
+        ) }}"
+        class="auth-form"
+    >
+
+        <!-- ===================================== -->
+        <!-- CSRF -->
+        <!-- ===================================== -->
+
+        {% if csrf_token is defined %}
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+        {% endif %}
+
+
+        <!-- ===================================== -->
+        <!-- TITLE -->
+        <!-- ===================================== -->
+
+        <div class="form-group">
+
+            <label for="title">
+                Survey Title
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ survey.title or '' }}"
+                placeholder="Enter survey title"
+                required
+            >
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- SURVEY TYPE -->
+        <!-- ===================================== -->
+
+        <div class="form-group">
+
+            <label for="survey_type">
+                Survey Type
+            </label>
+
+            <select
+                id="survey_type"
+                name="survey_type"
+                required
+            >
+
+                <option value="">
+                    Select Survey Type
+                </option>
+
+                <option
+                    value="Community Survey"
+                    {% if survey.survey_type == "Community Survey" %}
+                        selected
+                    {% endif %}
+                >
+                    Community Survey
+                </option>
+
+                <option
+                    value="Service Delivery"
+                    {% if survey.survey_type == "Service Delivery" %}
+                        selected
+                    {% endif %}
+                >
+                    Service Delivery
+                </option>
+
+                <option
+                    value="Water"
+                    {% if survey.survey_type == "Water" %}
+                        selected
+                    {% endif %}
+                >
+                    Water
+                </option>
+
+                <option
+                    value="Electricity"
+                    {% if survey.survey_type == "Electricity" %}
+                        selected
+                    {% endif %}
+                >
+                    Electricity
+                </option>
+
+                <option
+                    value="Roads"
+                    {% if survey.survey_type == "Roads" %}
+                        selected
+                    {% endif %}
+                >
+                    Roads
+                </option>
+
+                <option
+                    value="Safety"
+                    {% if survey.survey_type == "Safety" %}
+                        selected
+                    {% endif %}
+                >
+                    Safety
+                </option>
+
+                <option
+                    value="Other"
+                    {% if survey.survey_type == "Other" %}
+                        selected
+                    {% endif %}
+                >
+                    Other
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- DESCRIPTION -->
+        <!-- ===================================== -->
+
+        <div class="form-group">
+
+            <label for="description">
+                Description
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+                placeholder="Describe this survey..."
+            >{{ survey.description or '' }}</textarea>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- PORTFOLIO -->
+        <!-- ===================================== -->
+
+        <div class="form-group">
+
+            <label for="portfolio">
+                Portfolio
+            </label>
+
+            <select
+                id="portfolio"
+                name="portfolio"
+            >
+
+                <option value="">
+                    All Portfolios
+                </option>
+
+                <option
+                    value="Water"
+                    {% if survey.portfolio == "Water" %}
+                        selected
+                    {% endif %}
+                >
+                    Water
+                </option>
+
+                <option
+                    value="Electricity"
+                    {% if survey.portfolio == "Electricity" %}
+                        selected
+                    {% endif %}
+                >
+                    Electricity
+                </option>
+
+                <option
+                    value="Roads"
+                    {% if survey.portfolio == "Roads" %}
+                        selected
+                    {% endif %}
+                >
+                    Roads
+                </option>
+
+                <option
+                    value="Safety"
+                    {% if survey.portfolio == "Safety" %}
+                        selected
+                    {% endif %}
+                >
+                    Safety
+                </option>
+
+                <option
+                    value="Community"
+                    {% if survey.portfolio == "Community" %}
+                        selected
+                    {% endif %}
+                >
+                    Community
+                </option>
+
+                <option
+                    value="Other"
+                    {% if survey.portfolio == "Other" %}
+                        selected
+                    {% endif %}
+                >
+                    Other
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- EXTERNAL LINK -->
+        <!-- ===================================== -->
+
+        <div class="form-group">
+
+            <label for="link">
+                Survey Link
+            </label>
+
+            <input
+                type="url"
+                id="link"
+                name="link"
+                value="{{ survey.link or '' }}"
+                placeholder="https://example.com/survey"
+            >
+
+            <small>
+                Optional. Use this if the survey connects to an
+                external form or service.
+            </small>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CURRENT STATUS -->
+        <!-- ===================================== -->
+
+        <div class="account-info">
+
+            <strong>
+                Current Status
+            </strong>
+
+            {% if survey.is_active %}
+
+                <span class="status active">
+                    ● Active
+                </span>
+
+                <small>
+                    This survey is currently available.
+                </small>
+
+            {% else %}
+
+                <span class="status disabled">
+                    ● Inactive
+                </span>
+
+                <small>
+                    This survey is currently inactive.
+                </small>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- ACTION BUTTONS -->
+        <!-- ===================================== -->
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="register-button"
+            >
+                💾 Save Changes
+            </button>
+
+            <a
+                href="{{ url_for(
+                    'admin.view_survey',
+                    survey_id=survey.id
+                ) }}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

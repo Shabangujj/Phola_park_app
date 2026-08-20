@@ -1,0 +1,654 @@
+{% extends "base.html" %}
+
+{% block title %}Report Management{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-file-alt text-primary"></i>
+                Report Management
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage community service-delivery reports
+            </p>
+
+        </div>
+
+        <div>
+
+            <span class="badge bg-primary fs-6">
+                {{ reports.total }} Report{% if reports.total != 1 %}s{% endif %}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- SEARCH & FILTER -->
+    <!-- ================================================= -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-filter"></i>
+                Search & Filter Reports
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row g-3">
+
+                    <!-- Search -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="search"
+                            class="form-label"
+                        >
+                            Search
+                        </label>
+
+                        <input
+                            type="text"
+                            id="search"
+                            name="search"
+                            class="form-control"
+                            placeholder="Search reports..."
+                            value="{{ search }}"
+                        >
+
+                    </div>
+
+
+                    <!-- Status -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="status"
+                            class="form-label"
+                        >
+                            Status
+                        </label>
+
+                        <select
+                            id="status"
+                            name="status"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            {% for item in statuses %}
+
+                                <option
+                                    value="{{ item }}"
+                                    {% if selected_status == item %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Category -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="category"
+                            class="form-label"
+                        >
+                            Category
+                        </label>
+
+                        <select
+                            id="category"
+                            name="category"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for item in categories %}
+
+                                <option
+                                    value="{{ item }}"
+                                    {% if selected_category == item %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Portfolio -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="portfolio"
+                            class="form-label"
+                        >
+                            Portfolio
+                        </label>
+
+                        <select
+                            id="portfolio"
+                            name="portfolio"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Portfolios
+                            </option>
+
+                            {% for item in portfolios %}
+
+                                <option
+                                    value="{{ item }}"
+                                    {% if selected_portfolio == item %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Buttons -->
+
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary flex-grow-1"
+                        >
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+
+                        <a
+                            href="{{ url_for('admin.reports') }}"
+                            class="btn btn-outline-secondary"
+                            title="Clear Filters"
+                        >
+                            <i class="fas fa-times"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- REPORT TABLE -->
+    <!-- ================================================= -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0 fw-bold">
+
+                    <i class="fas fa-list"></i>
+                    Reports
+
+                </h5>
+
+                <span class="text-muted small">
+
+                    Page {{ reports.page }}
+                    of {{ reports.pages or 1 }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Title</th>
+
+                        <th>Category</th>
+
+                        <th>Portfolio</th>
+
+                        <th>Status</th>
+
+                        <th>Reporter</th>
+
+                        <th>Date</th>
+
+                        <th class="text-center">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for report in reports.items %}
+
+                    <tr>
+
+                        <!-- ID -->
+
+                        <td>
+                            <strong>
+                                #{{ report.id }}
+                            </strong>
+                        </td>
+
+
+                        <!-- Title -->
+
+                        <td>
+
+                            <div class="fw-semibold">
+
+                                {{ report.title or "Untitled Report" }}
+
+                            </div>
+
+                            {% if report.description %}
+
+                                <small class="text-muted">
+
+                                    {{ report.description[:80] }}
+
+                                    {% if report.description|length > 80 %}
+                                        ...
+                                    {% endif %}
+
+                                </small>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Category -->
+
+                        <td>
+
+                            {% if report.category %}
+
+                                <span class="badge bg-light text-dark border">
+                                    {{ report.category }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    N/A
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Portfolio -->
+
+                        <td>
+
+                            {% if report.portfolio %}
+
+                                <span class="badge bg-info text-dark">
+                                    {{ report.portfolio }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Unassigned
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Status -->
+
+                        <td>
+
+                            {% if report.status == "Pending" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-clock"></i>
+                                    Pending
+                                </span>
+
+                            {% elif report.status == "Assigned" %}
+
+                                <span class="badge bg-info text-dark">
+                                    <i class="fas fa-user-check"></i>
+                                    Assigned
+                                </span>
+
+                            {% elif report.status == "In Progress" %}
+
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-spinner"></i>
+                                    In Progress
+                                </span>
+
+                            {% elif report.status == "Resolved" %}
+
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i>
+                                    Resolved
+                                </span>
+
+                            {% elif report.status == "Closed" %}
+
+                                <span class="badge bg-dark">
+                                    <i class="fas fa-lock"></i>
+                                    Closed
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    {{ report.status or "Unknown" }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Reporter -->
+
+                        <td>
+
+                            {% if report.reporter %}
+
+                                <div class="fw-semibold">
+                                    {{ report.reporter.username }}
+                                </div>
+
+                                {% if report.reporter.full_name %}
+
+                                    <small class="text-muted">
+                                        {{ report.reporter.full_name }}
+                                    </small>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Unknown
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Date -->
+
+                        <td>
+
+                            {% if report.created_at %}
+
+                                <span
+                                    title="{{ report.created_at.strftime('%d %B %Y %H:%M') }}"
+                                >
+                                    {{ report.created_at.strftime(
+                                        "%d %b %Y"
+                                    ) }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    N/A
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Action -->
+
+                        <td class="text-center">
+                    <a
+    href="{{ url_for(
+        'admin.report_details',
+        report_id=report.id
+    ) }}"
+    class="btn btn-sm btn-outline-info"
+>
+    👁 View
+</a>
+      
+
+                        </td>
+
+                    </tr>
+
+
+                {% else %}
+
+                    <!-- NO REPORTS -->
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            class="text-center text-muted py-5"
+                        >
+
+                            <i
+                                class="fas fa-folder-open fa-3x mb-3"
+                            ></i>
+
+                            <h5>
+                                No Reports Found
+                            </h5>
+
+                            <p class="mb-3">
+                                There are no reports matching your
+                                current search or filters.
+                            </p>
+
+                            <a
+                                href="{{ url_for('admin.reports') }}"
+                                class="btn btn-outline-primary"
+                            >
+                                Clear Filters
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PAGINATION -->
+        <!-- ================================================= -->
+
+        {% if reports.pages > 1 %}
+
+            <div class="card-footer bg-white">
+
+                <nav
+                    aria-label="Reports pagination"
+                >
+
+                    <ul class="pagination mb-0 justify-content-center">
+
+
+                        <!-- Previous -->
+
+                        {% if reports.has_prev %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="{{ url_for(
+                                        'admin.reports',
+                                        page=reports.prev_num,
+                                        search=search,
+                                        status=selected_status,
+                                        category=selected_category,
+                                        portfolio=selected_portfolio
+                                    ) }}"
+                                >
+                                    ← Previous
+                                </a>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item disabled">
+
+                                <span class="page-link">
+                                    ← Previous
+                                </span>
+
+                            </li>
+
+                        {% endif %}
+
+
+                        <!-- Current Page -->
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+
+                                Page {{ reports.page }}
+                                of {{ reports.pages }}
+
+                            </span>
+
+                        </li>
+
+
+                        <!-- Next -->
+
+                        {% if reports.has_next %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="{{ url_for(
+                                        'admin.reports',
+                                        page=reports.next_num,
+                                        search=search,
+                                        status=selected_status,
+                                        category=selected_category,
+                                        portfolio=selected_portfolio
+                                    ) }}"
+                                >
+                                    Next →
+                                </a>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item disabled">
+
+                                <span class="page-link">
+                                    Next →
+                                </span>
+
+                            </li>
+
+                        {% endif %}
+
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

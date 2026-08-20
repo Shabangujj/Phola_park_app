@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-card">
+
+<h2>Project Management</h2>
+
+<a
+class="dashboard-btn"
+href="{{ url_for('admin.create_project') }}">
+
+➕ Add Project
+
+</a>
+
+<table class="table table-striped">
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+
+<th>Status</th>
+
+<th>Manager</th>
+
+<th>Deadline</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% if projects %}
+
+{% for project in projects %}
+
+<tr>
+
+<td>{{ project.name }}</td>
+
+<td>{{ project.status }}</td>
+
+<td>{{ project.manager }}</td>
+
+<td>{{ project.deadline }}</td>
+
+<td>
+
+<a
+class="btn btn-warning btn-sm"
+href="{{ url_for('admin.edit_project',
+project_id=project.id) }}">
+
+Edit
+
+</a>
+
+<a
+class="btn btn-danger btn-sm"
+href="{{ url_for('admin.delete_project',
+project_id=project.id) }}">
+
+Delete
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+{% else %}
+
+<tr>
+
+<td colspan="5">
+
+No projects available.
+
+</td>
+
+</tr>
+
+{% endif %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

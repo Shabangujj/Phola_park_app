@@ -1,29 +1,66 @@
-"""Report routes and endpoints."""
-from flask import Blueprint, render_template, request, jsonify
-from flask_login import login_required
+from flask import (
+    render_template,
+    redirect,
+    url_for,
+    flash
+)
 
-reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
+from flask_login import (
+    login_required,
+    current_user
+)
+
+from phola_park_app import db
+from phola_park_app.reports import reports_bp
+from phola_park_app.reports.forms import ReportForm
+from phola_park_app.model import Report
 
 
-@reports_bp.route('/')
+@reports_bp.route("/reports")
 @login_required
-def list_reports():
-    """List all reports."""
-    return render_template('reports/list.html')
+def reports():
+
+    my_reports = Report.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    return render_template(
+        "reports/my_reports.html",
+        reports=my_reports
+    )
 
 
-@reports_bp.route('/submit', methods=['GET', 'POST'])
+@reports_bp.route(
+    "/reports/create",
+    methods=["GET", "POST"]
+)
 @login_required
-def submit_report():
-    """Submit a new report."""
-    if request.method == 'POST':
-        # Handle report submission
-        pass
-    return render_template('reports/submit.html')
+def create_report():
 
+    form = ReportForm()
 
-@reports_bp.route('/<int:report_id>')
-@login_required
-def view_report(report_id):
-    """View a specific report."""
-    return render_template('reports/view.html')
+    if form.validate_on_submit():
+
+        report = Report(
+            title=form.title.data,
+            category=form.category.data,
+            description=form.description.data,
+            user_id=current_user.id
+        )
+
+        db.session.add(report)
+        db.session.commit()
+
+        flash(
+            "Report submitted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("reports.reports")
+        )
+
+    return render_template(
+        "reports/create_report.html",
+        form=form
+    )

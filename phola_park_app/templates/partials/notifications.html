@@ -1,0 +1,25 @@
+<div class="dashboard-card">
+
+    <h3>Notifications</h3>
+
+    {% if notifications %}
+
+        {% for note in notifications %}
+
+        <div class="notification-item">
+
+            <strong>{{ note.title }}</strong>
+
+            <p>{{ note.message }}</p>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No notifications available.</p>
+
+    {% endif %}
+
+</div>

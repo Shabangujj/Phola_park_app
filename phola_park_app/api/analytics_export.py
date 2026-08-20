@@ -8,7 +8,7 @@ from io import StringIO, BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from phola_park_app.model import Report
+from phola_park_app.models import Report
 from phola_park_app.api.analytics import apply_date_filters
 
 analytics_export_api = Blueprint(

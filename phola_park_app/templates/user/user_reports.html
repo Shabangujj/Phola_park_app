@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}My Reports - Phola Park App{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-container">
+
+    <!-- ==============================
+         PAGE HEADER
+    =============================== -->
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>📋 My Reports</h1>
+
+            <p>
+                View and track your community service delivery reports.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('web.submit_report') }}"
+            class="dashboard-btn"
+        >
+            ➕ Submit Report
+        </a>
+
+    </div>
+
+
+    <!-- ==============================
+         FLASH MESSAGES
+    =============================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- ==============================
+         REPORT SUMMARY
+    =============================== -->
+
+    <div class="dashboard-stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <div class="stat-content">
+
+                <h3>
+                    {{ reports|length }}
+                </h3>
+
+                <p>
+                    Reports
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <div class="stat-content">
+
+                <h3>
+                    {{ reports|selectattr("status", "equalto", "Pending")|list|length }}
+                </h3>
+
+                <p>
+                    Pending
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🔄
+            </div>
+
+            <div class="stat-content">
+
+                <h3>
+                    {{ reports|selectattr("status", "equalto", "In Progress")|list|length }}
+                </h3>
+
+                <p>
+                    In Progress
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✅
+            </div>
+
+            <div class="stat-content">
+
+                <h3>
+                    {{ reports|selectattr("status", "equalto", "Resolved")|list|length }}
+                </h3>
+
+                <p>
+                    Resolved
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         REPORT LIST
+    =============================== -->
+
+    <div class="dashboard-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+
+                <h2>
+                    My Submitted Reports
+                </h2>
+
+                <p>
+                    Reports submitted using your account.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if reports %}
+
+            <div class="table-responsive">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Title</th>
+
+                            <th>Category</th>
+
+                            <th>Portfolio</th>
+
+                            <th>Status</th>
+
+                            <th>Date</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for report in reports %}
+
+                            <tr>
+
+                                <td>
+                                    {{ report.id }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if report.title %}
+
+                                        {{ report.title }}
+
+                                    {% else %}
+
+                                        Report #{{ report.id }}
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+                                    {{ report.category or "General" }}
+                                </td>
+
+
+                                <td>
+                                    {{ report.portfolio or "Not Assigned" }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if report.status == "Pending" %}
+
+                                        <span class="status-badge pending">
+                                            Pending
+                                        </span>
+
+                                    {% elif report.status == "In Progress" %}
+
+                                        <span class="status-badge progress">
+                                            In Progress
+                                        </span>
+
+                                    {% elif report.status == "Resolved" %}
+
+                                        <span class="status-badge resolved">
+                                            Resolved
+                                        </span>
+
+                                    {% elif report.status == "Rejected" %}
+
+                                        <span class="status-badge rejected">
+                                            Rejected
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge">
+                                            {{ report.status or "Unknown" }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if report.created_at %}
+
+                                        {{ report.created_at.strftime("%d-%m-%Y") }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for('web.view_report', report_id=report.id) }}"
+                                        class="btn btn-primary btn-sm"
+                                    >
+                                        👁 View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📭
+                </div>
+
+                <h3>
+                    No Reports Yet
+                </h3>
+
+                <p>
+                    You have not submitted any community service delivery reports.
+                </p>
+
+                <a
+                    href="{{ url_for('web.submit_report') }}"
+                    class="dashboard-btn"
+                >
+                    ➕ Submit Your First Report
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ==============================
+         BACK TO DASHBOARD
+    =============================== -->
+
+    <div class="page-actions">
+
+        <a
+            href="{{ url_for('user.user_dashboard') }}"
+            class="dashboard-btn"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

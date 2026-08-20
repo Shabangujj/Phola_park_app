@@ -1,0 +1,745 @@
+{% extends "base.html" %}
+
+{% block title %}View Survey - Phola Park App{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                <i class="fas fa-poll text-primary"></i>
+                Survey Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage and review this community survey.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('admin.surveys') }}"
+            class="btn btn-secondary"
+        >
+            <i class="fas fa-arrow-left"></i>
+            Back to Surveys
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         FLASH MESSAGES
+    ================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =================================================
+         SURVEY HEADER CARD
+    ================================================== -->
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+
+                    <i class="fas fa-clipboard-list"></i>
+
+                    {{ survey.title }}
+
+                </h5>
+
+
+                {% if survey.is_active %}
+
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+
+                {% else %}
+
+                    <span class="badge bg-secondary">
+                        Closed
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <!-- =====================================
+                     TITLE
+                ====================================== -->
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>
+                        Survey Title
+                    </strong>
+
+                    <p class="mb-0">
+                        {{ survey.title }}
+                    </p>
+
+                </div>
+
+
+                <!-- =====================================
+                     TYPE
+                ====================================== -->
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>
+                        Survey Type
+                    </strong>
+
+                    <p class="mb-0">
+
+                        {{ survey.survey_type }}
+
+                    </p>
+
+                </div>
+
+
+                <!-- =====================================
+                     PORTFOLIO
+                ====================================== -->
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>
+                        Portfolio
+                    </strong>
+
+                    <p class="mb-0">
+
+                        {{ survey.portfolio or "All Portfolios" }}
+
+                    </p>
+
+                </div>
+
+
+                <!-- =====================================
+                     CREATED
+                ====================================== -->
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>
+                        Created
+                    </strong>
+
+                    <p class="mb-0">
+
+                        {% if survey.created_at %}
+
+                            {{ survey.created_at.strftime(
+                                "%d-%m-%Y %H:%M"
+                            ) }}
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+
+                <!-- =====================================
+                     DESCRIPTION
+                ====================================== -->
+
+                <div class="col-12 mb-3">
+
+                    <strong>
+                        Description
+                    </strong>
+
+                    <div class="mt-2 p-3 bg-light rounded">
+
+                        {% if survey.description %}
+
+                            {{ survey.description }}
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                No description provided.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================
+                     EXTERNAL LINK
+                ====================================== -->
+
+                {% if survey.link %}
+
+                    <div class="col-12 mb-3">
+
+                        <strong>
+                            External Survey Link
+                        </strong>
+
+                        <p class="mb-0">
+
+                            <a
+                                href="{{ survey.link }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {{ survey.link }}
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SURVEY STATISTICS
+    ================================================== -->
+
+    <div class="row mb-4">
+
+        <!-- Questions -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="fs-1 me-3">
+                        ❓
+                    </div>
+
+                    <div>
+
+                        <h6 class="text-muted mb-1">
+                            Questions
+                        </h6>
+
+                        <h3 class="mb-0">
+                            {{ survey.total_questions }}
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Responses -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="fs-1 me-3">
+                        📝
+                    </div>
+
+                    <div>
+
+                        <h6 class="text-muted mb-1">
+                            Responses
+                        </h6>
+
+                        <h3 class="mb-0">
+                            {{ survey.total_responses }}
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Status -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="fs-1 me-3">
+
+                        {% if survey.is_active %}
+                            🟢
+                        {% else %}
+                            ⚪
+                        {% endif %}
+
+                    </div>
+
+                    <div>
+
+                        <h6 class="text-muted mb-1">
+                            Status
+                        </h6>
+
+                        <h3 class="mb-0">
+
+                            {% if survey.is_active %}
+                                Active
+                            {% else %}
+                                Closed
+                            {% endif %}
+
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         QUESTIONS
+    ================================================== -->
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+
+                    <i class="fas fa-question-circle"></i>
+                    Survey Questions
+
+                </h5>
+
+
+                <a
+                    href="{{ url_for(
+                        'admin.add_question',
+                        survey_id=survey.id
+                    ) }}"
+                    class="btn btn-primary btn-sm"
+                >
+
+                    <i class="fas fa-plus"></i>
+                    Add Question
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            {% if survey.questions %}
+
+                {% for question in survey.questions|sort(attribute="order") %}
+
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <strong>
+                                    Question {{ loop.index }}
+                                </strong>
+
+                                <h6 class="mt-2 mb-2">
+                                    {{ question.text }}
+                                </h6>
+
+                            </div>
+
+
+                            <span class="badge bg-info text-dark">
+
+                                {{ question.question_type }}
+
+                            </span>
+
+                        </div>
+
+
+                        {% if question.options %}
+
+                            <div class="mt-2">
+
+                                <small class="text-muted">
+                                    Options:
+                                </small>
+
+                                <p class="mb-0">
+                                    {{ question.options }}
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="mt-3">
+
+                            <a
+                                href="{{ url_for(
+                                    'admin.edit_question',
+                                    question_id=question.id
+                                ) }}"
+                                class="btn btn-warning btn-sm"
+                            >
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </a>
+
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'admin.delete_question',
+                                    question_id=question.id
+                                ) }}"
+                                style="display:inline;"
+                            >
+
+                                {% if csrf_token is defined %}
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+
+                                {% endif %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm(
+                                        'Delete this question?'
+                                    );"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="text-center py-4">
+
+                    <div class="fs-1">
+                        ❓
+                    </div>
+
+                    <h5>
+                        No Questions Yet
+                    </h5>
+
+                    <p class="text-muted">
+                        Add questions to this survey before users can
+                        complete it.
+                    </p>
+
+                    <a
+                        href="{{ url_for(
+                            'admin.add_question',
+                            survey_id=survey.id
+                        ) }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="fas fa-plus"></i>
+                        Add First Question
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         MANAGEMENT ACTIONS
+    ================================================== -->
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                <i class="fas fa-cog"></i>
+                Survey Management
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <!-- Edit -->
+
+                <a
+                    href="{{ url_for(
+                        'admin.edit_survey',
+                        survey_id=survey.id
+                    ) }}"
+                    class="btn btn-warning"
+                >
+
+                    <i class="fas fa-edit"></i>
+                    Edit Survey
+
+                </a>
+
+
+                <!-- Responses -->
+
+                <a
+                    href="{{ url_for(
+                        'admin.survey_responses',
+                        survey_id=survey.id
+                    ) }}"
+                    class="btn btn-info"
+                >
+
+                    <i class="fas fa-users"></i>
+                    View Responses
+
+                </a>
+
+
+                <!-- Analytics -->
+
+                <a
+                    href="{{ url_for(
+                        'admin.survey_analytics',
+                        survey_id=survey.id
+                    ) }}"
+                    class="btn btn-dark"
+                >
+
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+
+                </a>
+
+
+                <!-- Close / Reopen -->
+
+                {% if survey.is_active %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin.close_survey',
+                            survey_id=survey.id
+                        ) }}"
+                        style="display:inline;"
+                    >
+
+                        {% if csrf_token is defined %}
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+                        {% endif %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-secondary"
+                            onclick="return confirm(
+                                'Close this survey?'
+                            );"
+                        >
+
+                            <i class="fas fa-lock"></i>
+                            Close Survey
+
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin.reopen_survey',
+                            survey_id=survey.id
+                        ) }}"
+                        style="display:inline;"
+                    >
+
+                        {% if csrf_token is defined %}
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+                        {% endif %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                        >
+
+                            <i class="fas fa-unlock"></i>
+                            Reopen Survey
+
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+
+                <!-- Delete -->
+
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'admin.delete_survey',
+                        survey_id=survey.id
+                    ) }}"
+                    style="display:inline;"
+                >
+
+                    {% if csrf_token is defined %}
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                    {% endif %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                        onclick="return confirm(
+                            'Are you sure you want to permanently delete this survey?'
+                        );"
+                    >
+
+                        <i class="fas fa-trash"></i>
+                        Delete Survey
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BACK
+    ================================================== -->
+
+    <a
+        href="{{ url_for('admin.surveys') }}"
+        class="btn btn-secondary"
+    >
+        <i class="fas fa-arrow-left"></i>
+        Back to Surveys
+    </a>
+
+</div>
+
+{% endblock %}

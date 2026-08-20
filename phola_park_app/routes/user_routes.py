@@ -10,8 +10,10 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from phola_park_app.extensions import db
-from phola_park_app.model import (
+from phola_park_app.models import (
     Report, Survey, Announcement,
+    SurveyQuestion, SurveyResponse,
+    SurveyAnswer,
     Notification, User
 )
 from phola_park_app.auth_helpers import role_required
@@ -30,48 +32,119 @@ def allowed_file(filename: str) -> bool:
 
 
 # ─────────────────────────────────────────────
-# USER DASHBOARD
+# USER ROUTES
 # ─────────────────────────────────────────────
+
+user_bp = Blueprint(
+    "user",
+    __name__,
+    url_prefix="/user"
+)
+
+
 @user_bp.route("/dashboard")
 @login_required
-@role_required("user")
-def dashboard():
-    reports_count = Report.query.filter_by(user_id=current_user.id).count()
+def user_dashboard():
+
+    # =================================================
+    # ROLE CHECK
+    # =================================================
+
+    if current_user.role_name != "user":
+        abort(403)
+
+    # =================================================
+    # USER REPORTS
+    # =================================================
+
+    reports_count = (
+        Report.query
+        .filter_by(
+            user_id=current_user.id
+        )
+        .count()
+    )
 
     recent_reports = (
         Report.query
-        .filter_by(user_id=current_user.id)
-        .order_by(Report.created_at.desc())
+        .filter_by(
+            user_id=current_user.id
+        )
+        .order_by(
+            Report.created_at.desc()
+        )
         .limit(5)
         .all()
     )
+
+    # =================================================
+    # ANNOUNCEMENTS
+    # =================================================
+    #
+    # Show announcements that:
+    #
+    # 1. Are active
+    # 2. Are not expired
+    # 3. Target everyone OR users
+    # 4. Match user's portfolio OR are for all portfolios
+    #
+    # =================================================
+
+    from sqlalchemy import or_, and_
 
     notices = (
         Announcement.query
         .filter(
-            (Announcement.target == "all") |
-            (Announcement.target == current_user.portfolio)
+            Announcement.is_active.is_(True),
+
+            # Target audience
+            or_(
+                Announcement.target_role.is_(None),
+                Announcement.target_role == "",
+                Announcement.target_role == "all",
+                Announcement.target_role == "user"
+            ),
+
+            # Portfolio
+            or_(
+                Announcement.portfolio.is_(None),
+                Announcement.portfolio == "",
+                Announcement.portfolio == current_user.portfolio
+            )
         )
-        .order_by(Announcement.created_at.desc())
+        .order_by(
+            Announcement.created_at.desc()
+        )
         .limit(5)
         .all()
     )
 
+    # =================================================
+    # ACTIVE SURVEYS
+    # =================================================
+
     active_surveys = (
-        Survey.query
-        .filter_by(is_active=True)
-        .order_by(Survey.created_at.desc())
-        .all()
-    )
+    Survey.query
+    .filter_by(is_active=True)
+    .order_by(Survey.created_at.desc())
+    .all()
+)
+
+    # =================================================
+    # DASHBOARD
+    # =================================================
 
     return render_template(
-        "user/dashboard.html",
+        "user/user_dashboard.html",
+
         reports_count=reports_count,
+
         recent_reports=recent_reports,
+
         notices=notices,
+
         active_surveys=active_surveys,
     )
-
 
 # ─────────────────────────────────────────────
 # SUBMIT REPORT
@@ -93,13 +166,17 @@ def submit_report():
             )
 
         report = Report(
-            report_type=form.report_type.data,
-            category=form.category.data,
-            description=form.description.data,
-            portfolio=form.portfolio.data,
-            image=filename,
-            user_id=current_user.id
-        )
+                    title=f"{form.category.data} Report",
+                    report_type=form.report_type.data,
+                    category=form.category.data,
+                    description=form.description.data,
+                    portfolio=form.portfolio.data,
+                    image=filename,
+                    user_id=current_user.id
+            )
+
+        db.session.add(report)
+        db.session.commit()
 
         db.session.add(report)
         db.session.commit()
@@ -161,57 +238,269 @@ def user_reports():
     )
 
     return render_template(
-        "user.user_reports.html",
+        "user/user_reports.html",
         reports=pagination.items,
         pagination=pagination,
         filters=filters if q else {}
     )
 
+# =====================================================
+# USER SURVEYS
+# =====================================================
 
-# ─────────────────────────────────────────────
-# SURVEYS
-# ─────────────────────────────────────────────
 @user_bp.route("/surveys")
 @login_required
 @role_required("user")
 def surveys():
-    surveys = Survey.query.order_by(Survey.created_at.desc()).all()
 
-    return render_template("user/surveys.html", surveys=surveys)
+    surveys = (
+        Survey.query
+        .filter_by(is_active=True)
+        .order_by(
+            Survey.created_at.desc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "user/surveys.html",
+        surveys=surveys
+    )
+
+# =====================================================
+# TAKE SURVEY
+# =====================================================
+
+@user_bp.route(
+    "/surveys/<int:survey_id>",
+    methods=["GET"]
+)
+@login_required
+@role_required("user")
+def take_survey(survey_id):
+
+    survey = Survey.query.get_or_404(
+        survey_id
+    )
+
+    # ---------------------------------------------
+    # Only active surveys can be completed
+    # ---------------------------------------------
+
+    if not survey.is_active:
+
+        flash(
+            "This survey is no longer available.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("user.surveys")
+        )
+
+    # ---------------------------------------------
+    # Load questions
+    # ---------------------------------------------
+
+    questions = (
+        SurveyQuestion.query
+        .filter_by(
+            survey_id=survey.id
+        )
+        .order_by(
+            SurveyQuestion.order.asc(),
+            SurveyQuestion.id.asc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "user/take_survey.html",
+        survey=survey,
+        questions=questions
+    )
 
 
-@user_bp.route("/surveys/<int:survey_id>/submit", methods=["POST"])
+# =====================================================
+# SUBMIT SURVEY
+# =====================================================
+
+@user_bp.route(
+    "/surveys/<int:survey_id>/submit",
+    methods=["POST"]
+)
 @login_required
 @role_required("user")
 def submit_survey(survey_id):
-    from phola_park_app.model import SurveyResponse, SurveyAnswer
-    from phola_park_app.notifications import notify_survey_submission
 
-    survey = Survey.query.get_or_404(survey_id)
+    survey = Survey.query.get_or_404(
+        survey_id
+    )
+
+    # ---------------------------------------------
+    # Check survey status
+    # ---------------------------------------------
+
+    if not survey.is_active:
+
+        flash(
+            "This survey is no longer available.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("user.surveys")
+        )
+
+    # ---------------------------------------------
+    # Load questions
+    # ---------------------------------------------
+
+    questions = (
+        SurveyQuestion.query
+        .filter_by(
+            survey_id=survey.id
+        )
+        .order_by(
+            SurveyQuestion.order.asc(),
+            SurveyQuestion.id.asc()
+        )
+        .all()
+    )
+
+    # ---------------------------------------------
+    # Make sure survey has questions
+    # ---------------------------------------------
+
+    if not questions:
+
+        flash(
+            "This survey has no questions yet.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "user.take_survey",
+                survey_id=survey.id
+            )
+        )
+
+    # ---------------------------------------------
+    # Prevent duplicate submission
+    # ---------------------------------------------
+
+    existing_response = (
+        SurveyResponse.query
+        .filter_by(
+            survey_id=survey.id,
+            user_id=current_user.id
+        )
+        .first()
+    )
+
+    if existing_response:
+
+        flash(
+            "You have already submitted this survey.",
+            "info"
+        )
+
+        return redirect(
+            url_for("user.surveys")
+        )
+
+    # ---------------------------------------------
+    # Validate answers
+    # ---------------------------------------------
+
+    answers = {}
+
+    for question in questions:
+
+        field_name = f"question_{question.id}"
+
+        value = request.form.get(
+            field_name,
+            ""
+        ).strip()
+
+        if not value:
+
+            flash(
+                f"Please answer Question {question.order}.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "user.take_survey",
+                    survey_id=survey.id
+                )
+            )
+
+        answers[question.id] = value
+
+    # ---------------------------------------------
+    # Create Survey Response
+    # ---------------------------------------------
 
     response = SurveyResponse(
         survey_id=survey.id,
         user_id=current_user.id
     )
-    db.session.add(response)
-    db.session.commit()
 
-    for key, value in request.form.items():
-        if key.startswith("q_"):
-            db.session.add(
-                SurveyAnswer(
-                    response_id=response.id,
-                    question_id=int(key[2:]),
-                    value=value
-                )
+    try:
+
+        db.session.add(response)
+
+        db.session.flush()
+
+        # -----------------------------------------
+        # Create Survey Answers
+        # -----------------------------------------
+
+        for question in questions:
+
+            answer = SurveyAnswer(
+                response_id=response.id,
+                question_id=question.id,
+                value=answers[question.id]
             )
 
-    db.session.commit()
-    notify_survey_submission(survey, current_user)
+            db.session.add(answer)
 
-    flash("Survey submitted successfully.", "success")
-    return redirect(url_for("user.dashboard"))
+        db.session.commit()
 
+        flash(
+            "Survey submitted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("user.surveys")
+        )
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        print(
+            "SURVEY SUBMISSION ERROR:",
+            e
+        )
+
+        flash(
+            "Unable to submit survey. Please try again.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "user.take_survey",
+                survey_id=survey.id
+            )
+        )
 
 # ─────────────────────────────────────────────
 # NOTICES

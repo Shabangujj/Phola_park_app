@@ -1,0 +1,83 @@
+<div class="dashboard-card">
+
+<h3>Recent Reports</h3>
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Category</th>
+
+<th>Status</th>
+
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% if recent_reports %}
+
+{% for report in recent_reports %}
+
+<tr>
+
+<td>{{ report.id }}</td>
+
+<td>{{ report.category }}</td>
+
+<td>
+
+<span class="status status-{{ report.status|lower|replace(' ','-') }}">
+
+{{ report.status }}
+
+</span>
+
+</td>
+
+<td>
+
+{{ report.created_at.strftime("%d-%m-%Y") }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+{% else %}
+
+<tr>
+
+<td colspan="4">
+
+No reports available.
+
+</td>
+
+</tr>
+
+{% endif %}
+
+</tbody>
+
+</table>
+{% if reports in recent_reports %}
+<a
+
+class="dashboard-btn"
+
+href="{{ url_for('admin.view_reports') }}">
+
+View All Reports
+
+</a>
+{% endif %}
+</div>

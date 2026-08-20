@@ -37,21 +37,21 @@
                 Dashboard
             </a>
 
-            <a href="{{ url_for('admin.admin_users') }}">
+            <a href="{{ url_for('admin.users') }}">
                 <i class="fas fa-users"></i>
                 Users
             </a>
-
-            <a href="{{ url_for('admin.view_reports') }}">
+              {% for report in reports %}
+            <a href="{{ url_for('admin.reports', report_id=report.id) }}">
                 <i class="fas fa-file-alt"></i>
                 Reports
             </a>
-
+            {% endfor %}
             <a href="{{ url_for('admin.announcements') }}">
                 <i class="fas fa-bullhorn"></i>
                 Announcements
             </a>
-
+    
             <a href="{{ url_for('admin.audit_logs') }}">
                 <i class="fas fa-history"></i>
                 Audit Logs

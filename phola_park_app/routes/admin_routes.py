@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from phola_park_app.decorators import role_required
-from phola_park_app.model import AuditLog, db, User, Survey, Report, Announcement, UserRole, Project
-from datetime import datetime, date
+from phola_park_app.models import AuditLog, User, Survey, Report, Announcement, UserRole, Project
+from datetime import datetime, date, timedelta
 from functools import wraps
 from flask_login import current_user
 
 from phola_park_app.routes.web_routes import login_required
-
+from phola_park_app.extensions import db
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 
@@ -27,7 +27,46 @@ def admin_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+from flask import jsonify
+from flask_login import login_required
+from sqlalchemy import func
 
+from phola_park_app.models import (
+    User,
+    Report,
+    Survey,
+    Announcement
+)
+from phola_park_app.decorators import role_required
+
+
+@admin_bp.route("/admin/dashboard/cards")
+@login_required
+@role_required("Admin")
+def dashboard_cards():
+    total_users = User.query.count()
+    total_reports = Report.query.count()
+    total_surveys = Survey.query.count()
+    total_announcements = Announcement.query.count()
+
+    pending_reports = Report.query.filter_by(status="Pending").count()
+    in_progress_reports = Report.query.filter_by(status="In Progress").count()
+    resolved_reports = Report.query.filter_by(status="Resolved").count()
+
+    rejected_reports = Report.query.filter_by(status="Rejected").count()
+    completed_reports = Report.query.filter_by(status="Completed").count()
+
+    return jsonify({
+        "total_users": total_users,
+        "total_reports": total_reports,
+        "total_surveys": total_surveys,
+        "total_announcements": total_announcements,
+        "pending_reports": pending_reports,
+        "in_progress_reports": in_progress_reports,
+        "resolved_reports": resolved_reports,
+        "rejected_reports": rejected_reports,
+        "completed_reports": completed_reports
+    })
 # =========================
 # 👑 ADMIN DASHBOARD
 # =========================
@@ -35,18 +74,19 @@ def admin_required(f):
 @admin_required
 @login_required
 def dashboard():
-    users = User.query.all()
+    page = request.args.get("page", 1, type=int)
+    users = User.query.paginate(page=page, per_page=10, error_out=False)
     reports = Report.query.order_by(Report.created_at.desc()).all()
     surveys = Survey.query.all()
     stats = {  # Placeholder stats
-        "users": len(users),
-        "reports": len(reports),
-        "surveys": len(surveys),
+        "total_users": User.query.count(),
+        "total_reports": Report.query.count(),
+        "surveys": Survey.query.count(),
         "announcements": Announcement.query.count()
     }
 
     return render_template(
-        'admin/dashboard.html',
+        'admin/admin_dashboard.html',
         stats=stats,
         users=users,
         reports=reports,
@@ -55,27 +95,101 @@ def dashboard():
        
     )
 
+from flask import render_template
+from flask_login import login_required
+from sqlalchemy import func
 
+from phola_park_app.models import (
+    User,
+    Report,
+    Survey,
+    Announcement
+)
+from phola_park_app.decorators import role_required
+
+
+@admin_bp.route("/admin/analytics-dashboard")
+@login_required
+@role_required("Admin")
+def analytics_dashboard():
+    # Dashboard Statistics
+    total_users = User.query.count()
+    total_reports = Report.query.count()
+    total_surveys = Survey.query.count()
+    total_announcements = Announcement.query.count()
+
+    pending_reports = Report.query.filter_by(status="Pending").count()
+    in_progress_reports = Report.query.filter_by(status="In Progress").count()
+    resolved_reports = Report.query.filter_by(status="Resolved").count()
+
+    # Reports by Category
+    category_stats = (
+        db.session.query(
+            Report.category,
+            func.count(Report.id)
+        )
+        .group_by(Report.category)
+        .all()
+    )
+
+    categories = [c[0] for c in category_stats]
+    category_counts = [c[1] for c in category_stats]
+
+    # Reports by Portfolio
+    portfolio_stats = (
+        db.session.query(
+            Report.portfolio,
+            func.count(Report.id)
+        )
+        .group_by(Report.portfolio)
+        .all()
+    )
+
+    portfolios = [p[0] for p in portfolio_stats]
+    portfolio_counts = [p[1] for p in portfolio_stats]
+
+    return render_template(
+        "admin/analytics_dashboard.html",
+        total_users=total_users,
+        total_reports=total_reports,
+        total_surveys=total_surveys,
+        total_announcements=total_announcements,
+        pending_reports=pending_reports,
+        in_progress_reports=in_progress_reports,
+        resolved_reports=resolved_reports,
+        categories=categories,
+        category_counts=category_counts,
+        portfolios=portfolios,
+        portfolio_counts=portfolio_counts,
+    )
 # =========================
 # 👥 VIEW USERS
 # =========================
-@admin_bp.route('/users')
-@admin_required
+@admin_bp.route('/admin/users')
+@login_required
+@role_required("admin")
 def view_users():
-    users = User.query.all()
+    page = request.args.get("page", 1, type=int)
+    users = User.query.order_by(User.id).paginate(
+        page=page,
+        per_page=10,
+        error_out=False
+    )
     return render_template('admin/users.html', users=users)
 # =========================
 # paginate users
 # =========================
-@admin_bp.route("/users")
+@admin_bp.route("/admin/users")
 @login_required
+@role_required("admin")
 def users():
 
     page = request.args.get("page", 1, type=int)
 
-    users = User.query.paginate(
+    users = User.query.order_by(User.id).paginate(
         page=page,
-        per_page=10
+        per_page=10,
+        error_out=False
     )
 
     return render_template(
@@ -86,31 +200,15 @@ def users():
 # =========================
 # ➕ ADD USER
 # =========================
-@admin_bp.route('/add_user', methods=['GET', 'POST'])
-@admin_required
-def add_user():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        role = request.form.get('role')
-        portfolio = request.form.get('portfolio')
+from flask import render_template, request, redirect, url_for, flash
+from flask_login import login_required
 
-        new_user = User(
-            username=username,
-            password=password,  # ⚠️ replace with hashing later
-            role=role,
-            portfolio=portfolio
-        )
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash("User added successfully", "success")
-        return redirect(url_for('admin.view_users'))
-
-    return render_template('admin/admin_user.html')
+from phola_park_app.model import db, User, UserRole
 
 
+# =========================
+# ➕ ADD USER
+# =========================
 # =========================
 # ✏ EDIT USER
 # =========================
@@ -131,112 +229,222 @@ def edit_user(id):
 
     return render_template('admin/edit_user.html', user=user)
 # =========================
-# 📊 VIEW REPORTS
+# 📋 ADMIN REPORTS
 # =========================
-@admin_bp.route("/view_reports")
-def view_reports():
-    from flask import render_template, request, session, redirect, url_for
-    from datetime import datetime, timedelta
+@admin_bp.route("/admin_reports")
+@login_required
+@admin_required
+def admin_reports():
 
-    if session.get("role") != "admin":
-        return redirect(url_for("auth.login"))
-
-    portfolio = request.args.get("portfolio")
-    days = request.args.get("days")
-
-    query = Report.query
-
-    # 📅 Date filter
-    if days:
-        days = int(days)
-        date_limit = datetime.utcnow() - timedelta(days=days)
-        query = query.filter(Report.created_at >= date_limit)
-
-    # 📂 Portfolio filter
-    if portfolio:
-        query = query.filter_by(portfolio=portfolio)
-
-    reports = query.all()
-
-    # 📊 Count per portfolio (for charts)
-    portfolio_counts = {}
-    for r in reports:
-        key = r.portfolio or "Unknown"
-        portfolio_counts[key] = portfolio_counts.get(key, 0) + 1
-
-    search = request.args.get("search")
-    category = request.args.get("category")
-    status = request.args.get("status")
-    portfolio = request.args.get("portfolio")
+    search = request.args.get("search", "")
+    category = request.args.get("category", "")
+    status = request.args.get("status", "")
+    portfolio = request.args.get("portfolio", "")
+    days = request.args.get("days", "")
 
     query = Report.query
 
-    # SEARCH
+    # Search
     if search:
         query = query.filter(
             Report.description.contains(search)
         )
 
-    # CATEGORY
+    # Category
     if category:
-        query = query.filter_by(
-            category=category
-        )
+        query = query.filter_by(category=category)
 
-    # STATUS
+    # Status
     if status:
-        query = query.filter_by(
-            status=status
-        )
+        query = query.filter_by(status=status)
 
-    # PORTFOLIO
+    # Portfolio
     if portfolio:
-        query = query.filter_by(
-            portfolio=portfolio
-        )
+        query = query.filter_by(portfolio=portfolio)
+
+    # Date Filter
+    if days:
+        try:
+            date_limit = datetime.utcnow() - timedelta(days=int(days))
+            query = query.filter(Report.created_at >= date_limit)
+        except ValueError:
+            pass
 
     reports = query.order_by(
         Report.created_at.desc()
     ).all()
+
+    # Dashboard Statistics
+    total_reports = Report.query.count()
+
+    pending_reports = Report.query.filter_by(
+        status="Pending"
+    ).count()
+
+    assigned_reports = Report.query.filter_by(
+        status="Assigned"
+    ).count()
+
+    in_progress_reports = Report.query.filter_by(
+        status="In Progress"
+    ).count()
+
+    resolved_reports = Report.query.filter_by(
+        status="Resolved"
+    ).count()
+
+    closed_reports = Report.query.filter_by(
+        status="Closed"
+    ).count()
+
+    # Portfolio Chart Data
+    portfolio_counts = {}
+
+    for report in reports:
+        key = report.portfolio or "Unknown"
+        portfolio_counts[key] = portfolio_counts.get(key, 0) + 1
+
+    return render_template(
+        "admin_reports.html",
+        reports=reports,
+        portfolio_counts=portfolio_counts,
+        total_reports=total_reports,
+        pending_reports=pending_reports,
+        assigned_reports=assigned_reports,
+        in_progress_reports=in_progress_reports,
+        resolved_reports=resolved_reports,
+        closed_reports=closed_reports
+    )
+# =========================
+# 📊 VIEW REPORTS
+# =========================
+@admin_bp.route("/admin/view_reports")
+@login_required
+@admin_required
+def view_reports():
+
+    search = request.args.get("search")
+    category = request.args.get("category")
+    status = request.args.get("status")
+    portfolio = request.args.get("portfolio")
+    days = request.args.get("days")
+
+    query = Report.query
+
+    if days:
+        date_limit = datetime.utcnow() - timedelta(days=int(days))
+        query = query.filter(Report.created_at >= date_limit)
+
+    if search:
+        query = query.filter(
+            Report.description.contains(search)
+        )
+
+    if category:
+        query = query.filter_by(category=category)
+
+    if status:
+        query = query.filter_by(status=status)
+
+    if portfolio:
+        query = query.filter_by(portfolio=portfolio)
+
+    reports = query.order_by(
+        Report.created_at.desc()
+    ).all()
+
+    portfolio_counts = {}
+
+    for report in reports:
+        key = report.portfolio or "Unknown"
+        portfolio_counts[key] = portfolio_counts.get(key, 0) + 1
 
     return render_template(
         "admin/view_reports.html",
         reports=reports,
         portfolio_counts=portfolio_counts
     )
+@admin_bp.route("/admin/report/<int:report_id>")
+@login_required
+@admin_required
+def view_report(report_id):
+
+    report = Report.query.get_or_404(report_id)
+
+    return render_template(
+        "admin/view_report.html",
+        report=report
+    ) 
 # =========================
 # ✏ EDIT REPORT
 # =========================
-@admin_bp.route('/edit_report/<int:id>', methods=['GET', 'POST'])
+ 
+@admin_bp.route(
+    "/admin/report/<int:report_id>/edit",
+    methods=["GET","POST"]
+)
+@login_required
 @admin_required
-def edit_report(id):
-    report = Report.query.get_or_404(id)
+def edit_report(report_id):
 
-    if request.method == 'POST':
-        report.description = request.form.get('description')
-        report.category = request.form.get('category')
+    report = Report.query.get_or_404(report_id)
+
+    if request.method == "POST":
+
+        report.title = request.form["title"]
+
+        report.category = request.form["category"]
+
+        report.description = request.form["description"]
+
+        report.portfolio = request.form["portfolio"]
+
+        report.location = request.form["location"]
+
+        report.comment = request.form["comment"]
 
         db.session.commit()
 
-        flash("Report updated", "success")
-        return redirect(url_for('admin.view_reports'))
+        flash(
+            "Report updated successfully.",
+            "success"
+        )
 
-    return render_template('admin/edit_report.html', report=report)
+        return redirect(
+            url_for(
+                "admin.view_report",
+                report_id=report.id
+            )
+        )
 
-
+    return render_template(
+        "admin/edit_report.html",
+        report=report
+    )
+   
 # =========================
 # 🗑 DELETE REPORT
 # =========================
-@admin_bp.route('/delete_report/<int:id>')
+
+@admin_bp.route("/admin/report/<int:report_id>/delete")
+@login_required
 @admin_required
-def delete_report(id):
-    report = Report.query.get_or_404(id)
+def delete_report(report_id):
+
+    report = Report.query.get_or_404(report_id)
 
     db.session.delete(report)
+
     db.session.commit()
 
-    flash("Report deleted", "success")
-    return redirect(url_for('admin.view_reports'))
+    flash(
+        "Report deleted successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for("admin.view_reports")
+    )
 # =========================
 # Export reports CSV
 # =========================
@@ -260,13 +468,26 @@ def export_reports():
 # =========================
 # 📝 VIEW SURVEYS
 # =========================
-@admin_bp.route('/surveys')
+from flask import render_template, request
+from flask_login import login_required
+
+# Import your models
+from phola_park_app.model import Survey
+
+@admin_bp.route("/admin/surveys")
+@login_required
 @admin_required
-def view_surveys():
-    surveys = Survey.query.all()
-    return render_template('admin/surveys.html', surveys=surveys)
+def admin_surveys():
+    """Admin - View all surveys"""
 
+    surveys = Survey.query.order_by(
+        Survey.created_at.desc()
+    ).all()
 
+    return render_template(
+        "admin/admin_surveys.html",
+        surveys=surveys
+    )
 # =========================
 # ➕ ADD SURVEY
 # =========================
@@ -292,9 +513,35 @@ def add_survey():
         db.session.commit()
 
         flash("Survey created successfully", "success")
-        return redirect(url_for("admin.admin_dashboard"))
+        return redirect(url_for("main.admin_dashboard"))
 
     return render_template("admin/add_survey.html")
+# =========================
+# ➕ CREATE SURVEY
+# =========================
+@admin_bp.route("/admin/surveys/create", methods=["GET", "POST"])
+@login_required
+@admin_required
+def create_survey():
+
+    if request.method == "POST":
+
+        survey = Survey(
+            title=request.form.get("title"),
+            survey_type=request.form.get("survey_type"),
+            description=request.form.get("description"),
+            portfolio=request.form.get("portfolio"),
+            link=request.form.get("link")
+        )
+
+        db.session.add(survey)
+        db.session.commit()
+
+        flash("Survey created successfully.", "success")
+
+        return redirect(url_for("admin.admin_surveys"))
+
+    return render_template("admin/create_survey.html")
 
 # =========================
 # 🗑 DELETE SURVEY
@@ -309,6 +556,34 @@ def delete_survey(id):
 
     flash("Survey deleted", "success")
     return redirect(url_for('admin.view_surveys'))
+# =========================
+# ✏️ EDIT SURVEY
+# =========================
+@admin_bp.route("/admin/surveys/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_survey(id):
+
+    survey = Survey.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        survey.title = request.form.get("title")
+        survey.description = request.form.get("description")
+        survey.survey_type = request.form.get("survey_type")
+        survey.portfolio = request.form.get("portfolio")
+        survey.link = request.form.get("link")
+
+        db.session.commit()
+
+        flash("Survey updated successfully.", "success")
+
+        return redirect(url_for("admin.admin_surveys"))
+
+    return render_template(
+        "admin/edit_survey.html",
+        survey=survey
+    )
 # =========================
 # 🚨EXPORT REPORTS CSV
 # =========================
@@ -383,6 +658,22 @@ def announcements():
 
     return render_template(
         'admin/announcements.html',
+        announcements=announcements
+    )
+    # =========================
+# 📢 ADMIN ANNOUNCEMENTS
+# =========================
+@admin_bp.route("/admin/announcements")
+@login_required
+@admin_required
+def admin_announcements():
+
+    announcements = Announcement.query.order_by(
+        Announcement.created_at.desc()
+    ).all()
+
+    return render_template(
+        "admin/admin_announcements.html",
         announcements=announcements
     )
     # =========================

@@ -1,8 +1,9 @@
-"""Reports module initialization."""
 from flask import Blueprint
 
-reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
+reports_bp = Blueprint(
+    "reports",
+    __name__,
+    template_folder="../templates/reports"
+)
 
-from . import routes
-
-__all__ = ['reports_bp']
+from phola_park_app.reports import routes

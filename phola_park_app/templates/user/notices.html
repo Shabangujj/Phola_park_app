@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Announcements - Phola Park App{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-container">
+
+    <!-- ==============================
+         PAGE HEADER
+    =============================== -->
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>
+                📢 Announcements
+            </h1>
+
+            <p>
+                Community service delivery announcements and important notices.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         FLASH MESSAGES
+    =============================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- ==============================
+         ANNOUNCEMENT LIST
+    =============================== -->
+
+    <div class="dashboard-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+
+                <h2>
+                    📢 Latest Announcements
+                </h2>
+
+                <p>
+                    Information relevant to your community.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if notices %}
+
+            <div class="announcements-list">
+
+                {% for announcement in notices %}
+
+                    <article class="announcement-card">
+
+                        <!-- Header -->
+
+                        <div class="announcement-header">
+
+                            <div>
+
+                                <h3>
+                                    {{ announcement.title }}
+                                </h3>
+
+                            </div>
+
+
+                            {% if announcement.priority %}
+
+                                {% set priority =
+                                    announcement.priority|lower
+                                %}
+
+                                <span
+                                    class="announcement-priority priority-{{ priority }}"
+                                >
+                                    {{ announcement.priority }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Message -->
+
+                        <div class="announcement-message">
+
+                            <p>
+                                {{ announcement.message }}
+                            </p>
+
+                        </div>
+
+
+                        <!-- Metadata -->
+
+                        <div class="announcement-meta">
+
+                            {% if announcement.publish_date %}
+
+                                <span>
+
+                                    📅 Published:
+
+                                    {{ announcement.publish_date.strftime(
+                                        "%d-%m-%Y %H:%M"
+                                    ) }}
+
+                                </span>
+
+                            {% elif announcement.created_at %}
+
+                                <span>
+
+                                    📅 Published:
+
+                                    {{ announcement.created_at.strftime(
+                                        "%d-%m-%Y %H:%M"
+                                    ) }}
+
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if announcement.portfolio %}
+
+                                <span>
+
+                                    🏘️ Portfolio:
+
+                                    {{ announcement.portfolio }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span>
+                                    🌍 Community Wide
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if announcement.target_role %}
+
+                                <span>
+
+                                    👥
+                                    {{ announcement.target_role|capitalize }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Expiry -->
+
+                        {% if announcement.expiry_date %}
+
+                            <div class="announcement-expiry">
+
+                                ⏰ Available until:
+
+                                {{ announcement.expiry_date.strftime(
+                                    "%d-%m-%Y %H:%M"
+                                ) }}
+
+                            </div>
+
+                        {% endif %}
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <!-- ==============================
+                 EMPTY STATE
+            =============================== -->
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📭
+                </div>
+
+                <h3>
+                    No Announcements
+                </h3>
+
+                <p>
+                    There are currently no announcements available for your account.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ==============================
+         NAVIGATION
+    =============================== -->
+
+    <div class="page-actions">
+
+        <a
+            href="{{ url_for('user.user_dashboard') }}"
+            class="dashboard-btn"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

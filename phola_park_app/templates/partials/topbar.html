@@ -1,39 +1,36 @@
-<!-- Top Navigation Bar -->
 <header class="topbar">
-    <div class="topbar-left">
-        <button id="sidebarToggle" class="menu-btn">
-            <i class="fas fa-bars"></i>
-        </button>
 
-        <h2 class="app-title">
-            Phola Park Community App
-        </h2>
-    </div>
+<button id="menu-toggle">
 
-    <div class="topbar-right">
+☰
 
-        <!-- Notifications -->
-        <a href="{{ url_for('main.notifications_page') }}" class="topbar-icon">
-            <i class="fas fa-bell"></i>
-        </a>
+</button>
 
-        <!-- User Info -->
-        <div class="user-info">
-            <span>
-                Welcome,
-                {% if current_user.is_authenticated %}
-                    {{ current_user.username }}
-                {% else %}
-                    Guest
-                {% endif %}
-            </span>
-        </div>
+<div>
 
-        <!-- Logout -->
-        <a href="{{ url_for('web.logout') }}" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
+<h2>
 
-    </div>
+Admin Dashboard
+
+</h2>
+
+<p>
+
+Welcome back {{ current_user.username }}
+
+</p>
+
+</div>
+
+<div class="topbar-actions">
+
+<a href="{{ url_for('auth.logout') }}"
+class="logout-btn">
+
+Logout
+
+</a>
+
+</div>
+
 </header>

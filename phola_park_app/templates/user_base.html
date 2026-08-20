@@ -8,7 +8,7 @@
 {% block content %}
 <div class="user-container">
   <div class="top-bar d-flex align-items-center justify-content-between">
-    <h4 class="mb-0">Hello, {{ current_user.name.split(' ')[0] }}</h4>
+    <h4 class="mb-0">Hello, {{ (current_user.full_name or current_user.username).split(' ')[0] }}</h4>
     <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
   </div>
   <div class="user-body mt-3">

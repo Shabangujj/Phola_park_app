@@ -1,211 +1,228 @@
 {% extends "base.html" %}
+
 {% block content %}
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}">
 
-    <main class="main-content">
-    
-        <!-- PAGE HEADER -->
-         <!--TOP BAR-->
-         <header class="topbar">  
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
         <div class="page-header">
-            <p>Welcome back, Admin! 
-                Here's an overview of the latest 
-                activity in Phola Park.</p>
-                </div>
-                </header>
+            <h2>Community Reports Management</h2>
+            <p>Welcome back, Admin! Here's an overview of community reports.</p>
+        </div>
+    </header>
 
+    <!-- FILTERS -->
+    <form method="GET" class="filter-form">
 
-<form method="GET"
-      class="filter-form">
+        <input type="text"
+               name="search"
+               placeholder="Search reports..."
+               value="{{ request.args.get('search','') }}">
 
-    <!-- Search -->
-    <input type="text"
-           name="search"
-           placeholder="Search reports...">
+        <select name="category">
+            <option value="">All Categories</option>
+            <option value="Water" {{ 'selected' if request.args.get('category')=='Water' else '' }}>Water</option>
+            <option value="Electricity" {{ 'selected' if request.args.get('category')=='Electricity' else '' }}>Electricity</option>
+            <option value="Roads" {{ 'selected' if request.args.get('category')=='Roads' else '' }}>Roads</option>
+            <option value="Crime" {{ 'selected' if request.args.get('category')=='Crime' else '' }}>Crime</option>
+        </select>
 
-    <!-- Category -->
-    <select name="category">
+        <select name="status">
+            <option value="">All Status</option>
+            <option value="Pending" {{ 'selected' if request.args.get('status')=='Pending' else '' }}>Pending</option>
+            <option value="Assigned" {{ 'selected' if request.args.get('status')=='Assigned' else '' }}>Assigned</option>
+            <option value="In Progress" {{ 'selected' if request.args.get('status')=='In Progress' else '' }}>In Progress</option>
+            <option value="Resolved" {{ 'selected' if request.args.get('status')=='Resolved' else '' }}>Resolved</option>
+            <option value="Closed" {{ 'selected' if request.args.get('status')=='Closed' else '' }}>Closed</option>
+        </select>
 
-        <option value="">
-            All Categories
-        </option>
+        <select name="portfolio">
+            <option value="">All Portfolios</option>
+            <option value="Water" {{ 'selected' if request.args.get('portfolio')=='Water' else '' }}>Water</option>
+            <option value="Health" {{ 'selected' if request.args.get('portfolio')=='Health' else '' }}>Health</option>
+            <option value="Safety" {{ 'selected' if request.args.get('portfolio')=='Safety' else '' }}>Safety</option>
+        </select>
 
-        <option value="water">
-            Water
-        </option>
+        <select name="days">
+            <option value="">All Time</option>
+            <option value="7" {{ 'selected' if request.args.get('days')=='7' else '' }}>Last 7 Days</option>
+            <option value="30" {{ 'selected' if request.args.get('days')=='30' else '' }}>Last 30 Days</option>
+        </select>
 
-        <option value="electricity">
-            Electricity
-        </option>
+        <button type="submit" class="btn btn-primary">
+            Filter
+        </button>
 
-        <option value="roads">
-            Roads
-        </option>
+        <a href="{{ url_for('admin.view_reports') }}" class="btn btn-secondary">
+            Reset
+        </a>
 
-        <option value="crime">
-            Crime
-        </option>
+    </form>
 
-    </select>
+    <br>
 
-    <!-- Status -->
-    <select name="status">
+    <a href="{{ url_for('admin.export_reports') }}" class="btn btn-success">
+        Export CSV
+    </a>
 
-        <option value="">
-            All Status
-        </option>
+    <hr>
 
-        <option value="pending">
-            Pending
-        </option>
-
-        <option value="resolved">
-            Resolved
-        </option>
-
-    </select>
-
-    <!-- Portfolio -->
-    <select name="portfolio">
-
-        <option value="">
-            All Portfolios
-        </option>
-
-        <option value="water">
-            Water
-        </option>
-
-        <option value="health">
-            Health
-        </option>
-
-        <option value="safety">
-            Safety
-        </option>
-
-    </select>
-<label>Last:</label>
-    <select name="days">
-        <option value="">All</option>
-        <option value="7">7 Days</option>
-        <option value="30">30 Days</option>
-    </select>
-    <!-- Button -->
-    <button type="submit">
-        Filter Reports
-    </button>
-
-</form>
-
-<!-- 📤 Export -->
-<a href="{{ url_for('admin.export_reports') }}">
-    <button>Export CSV</button>
-</a>
-
-<hr>
-
-<!-- 📊 Charts -->
-<canvas id="barChart" width="400" height="150"></canvas>
-<canvas id="pieChart" width="400" height="150"></canvas>
-
-<hr>
-
-<!-- 📋 Table -->
-<table class="styled-table">
-
-    <thead>
-
-        <tr>
-            <th>ID</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Portfolio</th>
-            <th>Date</th>
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-        {% for report in reports %}
-
-        <tr>
-
-            <td>{{ report.id }}</td>
-
-            <td>{{ report.category }}</td>
-
-            <td>
-
-                <span class="badge
-                    {% if report.status == 'resolved' %}
-                        resolved
-                    {% else %}
-                        pending
-                    {% endif %}
-                ">
-
-                    {{ report.status }}
-
-                </span>
-
-            </td>
-
-            <td>{{ report.portfolio }}</td>
-
-            <td>{{ report.created_at }}</td>
-
-        </tr>
-
-        {% endfor %}
-
-    </tbody>
-
-</table>
-<!-- 📊 Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    const data = JSON.parse('{{ portfolio_counts | tojson | safe }}');
-
-    const labels = Object.keys(data);
-    const values = Object.values(data);
-
-    // 📊 Bar Chart
-    new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Reports per Portfolio",
-                data: values
-            }]
-        }
-    });
-
-    // 🥧 Pie Chart
-    new Chart(document.getElementById("pieChart"), {
-        type: "pie",
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values
-            }]
-        }
-    });
-</script>
- <!-- FOOTER -->
-        <footer class="footer">
-
-            <p>
-                &copy; 2024 Phola Park |
-                All rights reserved |
-                Service Delivery System
-            </p>
-
-        </footer>
-    </main>
+    <!-- CHARTS -->
+    <div class="charts-container">
+        <canvas id="barChart"></canvas>
+        <canvas id="pieChart"></canvas>
     </div>
+
+    <hr>
+
+    <!-- REPORT TABLE -->
+    <div class="table-responsive">
+
+        <table class="table table-striped table-hover">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>User</th>
+                    <th>Portfolio</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% if reports %}
+
+                {% for report in reports %}
+
+                <tr>
+
+                    <td>{{ report.id }}</td>
+
+                    <td>{{ report.title }}</td>
+
+                    <td>{{ report.category }}</td>
+
+                    <td>
+                        <span class="status status-{{ report.status|lower|replace(' ','-') }}">
+                            {{ report.status }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ report.user.username if report.user else "Unknown" }}
+                    </td>
+
+                    <td>
+                        {{ report.portfolio or "-" }}
+                    </td>
+
+                    <td>
+                        {{ report.created_at.strftime("%d-%m-%Y") }}
+                    </td>
+
+                    <td>
+
+                        <a href="{{ url_for('admin.view_report', report_id=report.id) }}"
+                           class="btn btn-info btn-sm">
+                            View
+                        </a>
+
+                        <a href="{{ url_for('admin.edit_report', report_id=report.id) }}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a href="{{ url_for('admin.assign_report', report_id=report.id) }}"
+                           class="btn btn-primary btn-sm">
+                            Assign
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="8" style="text-align:center;">
+                        No reports found.
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        const data = {{ portfolio_counts | tojson }};
+
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+
+        new Chart(document.getElementById("barChart"), {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+                    label: "Reports per Portfolio",
+                    data: values
+                }]
+            }
+
+        });
+
+        new Chart(document.getElementById("pieChart"), {
+
+            type: "pie",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+                    data: values
+                }]
+            }
+
+        });
+
+    </script>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>
+            &copy; 2025 Phola Park Community App |
+            All Rights Reserved |
+            Developed by Jay and Pro Project (PTY) LTD
+        </p>
+    </footer>
+
+</main>
+
 {% endblock %}

@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}
+Take Survey - {{ survey.title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="user-dashboard">
+
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <div class="user-welcome">
+
+        <div>
+
+            <h1>
+                {{ survey.title }}
+            </h1>
+
+            <p>
+                {{ survey.description or
+                   "Please complete the community survey below." }}
+            </p>
+
+        </div>
+
+        <div class="user-badge">
+            📝 Community Survey
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         SURVEY INFORMATION
+    ========================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="survey-meta">
+
+            <span>
+                📂 {{ survey.survey_type }}
+            </span>
+
+            {% if survey.portfolio %}
+
+                <span>
+                    🏷 {{ survey.portfolio }}
+                </span>
+
+            {% else %}
+
+                <span>
+                    🌍 All Portfolios
+                </span>
+
+            {% endif %}
+
+            <span>
+                ❓ {{ questions|length }} Questions
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         SURVEY FORM
+    ========================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Survey Questions
+                </h2>
+
+                <p>
+                    Please answer every question before submitting.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if questions %}
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'user.submit_survey',
+                survey_id=survey.id
+            ) }}"
+        >
+
+            <!-- CSRF -->
+
+            {% if csrf_token is defined %}
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+            {% endif %}
+
+
+            {% for question in questions %}
+
+            <div class="survey-question-card">
+
+                <div class="question-number">
+                    Question {{ loop.index }}
+                </div>
+
+
+                <label class="survey-question-label">
+
+                    {{ question.text }}
+
+                    <span class="required-mark">
+                        *
+                    </span>
+
+                </label>
+
+
+                <!-- =================================
+                     SHORT TEXT
+                ================================== -->
+
+                {% if question.question_type == "text" %}
+
+                    <input
+                        type="text"
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                        required
+                    >
+
+
+                <!-- =================================
+                     LONG TEXT
+                ================================== -->
+
+                {% elif question.question_type == "textarea" %}
+
+                    <textarea
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                        rows="5"
+                        required
+                    ></textarea>
+
+
+                <!-- =================================
+                     NUMBER
+                ================================== -->
+
+                {% elif question.question_type == "number" %}
+
+                    <input
+                        type="number"
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                        required
+                    >
+
+
+                <!-- =================================
+                     YES / NO
+                ================================== -->
+
+                {% elif question.question_type == "yes_no" %}
+
+                    <div class="survey-options">
+
+                        <label class="survey-option">
+
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="Yes"
+                                required
+                            >
+
+                            <span>
+                                Yes
+                            </span>
+
+                        </label>
+
+
+                        <label class="survey-option">
+
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="No"
+                                required
+                            >
+
+                            <span>
+                                No
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                <!-- =================================
+                     MULTIPLE CHOICE
+                ================================== -->
+
+                {% elif question.question_type == "multiple_choice" %}
+
+                    <div class="survey-options">
+
+                        {% for option in question.options.split('\n') %}
+
+                            {% if option.strip() %}
+
+                            <label class="survey-option">
+
+                                <input
+                                    type="radio"
+                                    name="question_{{ question.id }}"
+                                    value="{{ option.strip() }}"
+                                    required
+                                >
+
+                                <span>
+                                    {{ option.strip() }}
+                                </span>
+
+                            </label>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+
+                <!-- =================================
+                     RATING
+                ================================== -->
+
+                {% elif question.question_type == "rating" %}
+
+                    <div class="rating-options">
+
+                        {% for rating in range(1, 6) %}
+
+                            <label class="rating-option">
+
+                                <input
+                                    type="radio"
+                                    name="question_{{ question.id }}"
+                                    value="{{ rating }}"
+                                    required
+                                >
+
+                                <span>
+                                    {{ rating }}
+                                </span>
+
+                            </label>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                <!-- =================================
+                     FALLBACK
+                ================================== -->
+
+                {% else %}
+
+                    <input
+                        type="text"
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                        required
+                    >
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+
+            <!-- =================================
+                 SUBMIT
+            ================================== -->
+
+            <div class="survey-submit-area">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-lg"
+                >
+
+                    <i class="fas fa-paper-plane"></i>
+
+                    Submit Survey
+
+                </button>
+
+
+                <a
+                    href="{{ url_for('user.surveys') }}"
+                    class="btn btn-secondary btn-lg"
+                >
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                ❓
+            </div>
+
+            <h3>
+                No Questions
+            </h3>
+
+            <p>
+                This survey does not have any questions yet.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

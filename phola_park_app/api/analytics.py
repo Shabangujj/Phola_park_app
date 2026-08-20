@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy import func
 from datetime import datetime, timedelta
 
-from phola_park_app.model import Report
+from phola_park_app.models import Report
 
 analytics_api = Blueprint("analytics_api", __name__, url_prefix="/analytics")
 

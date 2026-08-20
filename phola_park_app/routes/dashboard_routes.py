@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from phola_park_app.model import Report, Survey, User
+from phola_park_app.models import Report, Survey, User
 from phola_park_app.extensions import db
 
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/api/v1")

@@ -1,0 +1,943 @@
+{% extends "base.html" %}
+
+{% block title %}
+Survey Analytics - {{ survey.title }}
+{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-card">
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>📊 Survey Analytics</h1>
+
+            <p>
+                {{ survey.title }}
+            </p>
+        </div>
+
+        <div class="page-actions">
+
+            <a
+                href="{{ url_for('admin.view_survey', survey_id=survey.id) }}"
+                class="dashboard-btn"
+            >
+                ← Back to Survey
+            </a>
+
+            <a
+                href="{{ url_for('admin.survey_responses', survey_id=survey.id) }}"
+                class="dashboard-btn"
+            >
+                📋 Responses
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- SURVEY INFORMATION -->
+    <!-- ========================================= -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <div>
+
+                <h3>
+                    {{ survey.total_questions }}
+                </h3>
+
+                <p>
+                    Questions
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <div>
+
+                <h3>
+                    {{ total_responses }}
+                </h3>
+
+                <p>
+                    Responses
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📊
+            </div>
+
+            <div>
+
+                <h3>
+                    {% if total_responses > 0 %}
+                        Active
+                    {% else %}
+                        No Data
+                    {% endif %}
+                </h3>
+
+                <p>
+                    Survey Status
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- ANALYTICS -->
+    <!-- ========================================= -->
+
+    <div class="analytics-grid">
+
+
+        <!-- ===================================== -->
+        <!-- BAR CHART -->
+        <!-- ===================================== -->
+
+        <div class="analytics-card">
+
+            <div class="analytics-header">
+
+                <h2>
+                    📊 Response Summary
+                </h2>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="responseChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- DOUGHNUT CHART -->
+        <!-- ===================================== -->
+
+        <div class="analytics-card">
+
+            <div class="analytics-header">
+
+                <h2>
+                    📈 Response Distribution
+                </h2>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="distributionChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- RESPONSE TABLE -->
+    <!-- ========================================= -->
+
+    <div class="analytics-card">
+
+        <div class="analytics-header">
+
+            <h2>
+                Response Breakdown
+            </h2>
+
+        </div>
+
+
+        {% if labels %}
+
+        <div class="table-responsive">
+
+            <table class="table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Answer
+                        </th>
+
+                        <th>
+                            Responses
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for label in labels %}
+
+                    <tr>
+
+                        <td>
+                            {{ label }}
+                        </td>
+
+                        <td>
+                            {{ values[loop.index0] }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                📊
+            </div>
+
+            <h3>
+                No responses yet
+            </h3>
+
+            <p>
+                Analytics will appear here once users submit responses.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+<!-- ==========================================
+     QUESTION-BY-QUESTION ANALYTICS
+========================================== -->
+
+<div class="analytics-section">
+
+    <div class="section-header">
+
+        <h2>
+            Question Analytics
+        </h2>
+
+        <p>
+            Response breakdown for each survey question.
+        </p>
+
+    </div>
+
+
+    {% if question_analytics %}
+
+        {% for question in question_analytics %}
+
+            <div class="question-analytics-card">
+
+                <!-- Question -->
+                <div class="question-header">
+
+                    <span class="question-number">
+                        Question {{ loop.index }}
+                    </span>
+
+                    <h3>
+                        {{ question.text }}
+                    </h3>
+
+                    <span class="question-type">
+                        {{ question.question_type }}
+                    </span>
+
+                </div>
+
+
+                <!-- Statistics -->
+                <div class="question-stat">
+
+                    <strong>
+                        {{ question.total_answers }}
+                    </strong>
+
+                    <span>
+                        Answers
+                    </span>
+
+                </div>
+
+
+                {% if question.labels %}
+
+                    <!-- Chart -->
+                    <div class="question-chart-container">
+
+                        <canvas
+                            id="questionChart{{ question.id }}"
+                        ></canvas>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="no-data">
+
+                        No responses have been recorded
+                        for this question yet.
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="no-data">
+
+            This survey does not have any questions yet.
+
+        </div>
+
+    {% endif %}
+
+</div>
+<!-- ==========================================
+     CHART.JS
+========================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- ==========================================
+     SURVEY ANALYTICS DATA
+========================================== -->
+
+<script id="surveyAnalyticsData" type="application/json">
+{
+    "labels": {{ labels | default([]) | tojson | safe }},
+    "values": {{ values | default([]) | tojson | safe }}
+}
+</script>
+
+
+<!-- ==========================================
+     SURVEY ANALYTICS JAVASCRIPT
+========================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ------------------------------------------
+    // Get analytics data
+    // ------------------------------------------
+
+    const analyticsElement =
+        document.getElementById(
+            "surveyAnalyticsData"
+        );
+
+    if (!analyticsElement) {
+        console.error(
+            "Survey analytics data not found."
+        );
+        return;
+    }
+
+
+    // ------------------------------------------
+    // Parse JSON
+    // ------------------------------------------
+
+    let analyticsData;
+
+    try {
+
+        analyticsData =
+            JSON.parse(
+                analyticsElement.textContent
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read survey analytics data:",
+            error
+        );
+
+        return;
+    }
+
+
+    // ------------------------------------------
+    // Prepare data
+    // ------------------------------------------
+
+    const surveyLabels =
+        Array.isArray(analyticsData.labels)
+            ? analyticsData.labels
+            : [];
+
+    const surveyValues =
+        Array.isArray(analyticsData.values)
+            ? analyticsData.values.map(Number)
+            : [];
+
+
+    console.log(
+        "Survey Labels:",
+        surveyLabels
+    );
+
+    console.log(
+        "Survey Values:",
+        surveyValues
+    );
+
+
+    // ==========================================
+    // BAR CHART
+    // ==========================================
+
+    const responseCanvas =
+        document.getElementById(
+            "responseChart"
+        );
+
+
+    if (
+        responseCanvas &&
+        surveyLabels.length > 0
+    ) {
+
+        new Chart(
+            responseCanvas,
+            {
+
+                type: "bar",
+
+                data: {
+
+                    labels: surveyLabels,
+
+                    datasets: [
+                        {
+                            label:
+                                "Number of Responses",
+
+                            data: surveyValues,
+
+                            borderWidth: 1
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+
+                                precision: 0
+
+                            }
+
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+
+                            display: true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // DOUGHNUT CHART
+    // ==========================================
+
+    const distributionCanvas =
+        document.getElementById(
+            "distributionChart"
+        );
+
+
+    if (
+        distributionCanvas &&
+        surveyLabels.length > 0
+    ) {
+
+        new Chart(
+            distributionCanvas,
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: surveyLabels,
+
+                    datasets: [
+                        {
+                            label:
+                                "Responses",
+
+                            data: surveyValues,
+
+                            borderWidth: 1
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom"
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+</script>
+<!-- ==========================================
+     SURVEY ANALYTICS DATA
+========================================== -->
+
+<script id="surveyAnalyticsData" type="application/json">
+{
+    "labels": {{ labels | default([]) | tojson | safe }},
+    "values": {{ values | default([]) | tojson | safe }}
+}
+</script>
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        if (
+            !Array.isArray(questionAnalytics)
+        ) {
+            return;
+        }
+
+
+        questionAnalytics.forEach(
+            function (question) {
+
+                if (
+                    !question.labels ||
+                    question.labels.length === 0
+                ) {
+                    return;
+                }
+
+
+                const canvas =
+                    document.getElementById(
+                        "questionChart" +
+                        question.id
+                    );
+
+
+                if (!canvas) {
+                    return;
+                }
+
+
+                new Chart(
+                    canvas,
+                    {
+
+                        type: "bar",
+
+                        data: {
+
+                            labels:
+                                question.labels,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Responses",
+
+                                    data:
+                                        question.values,
+
+                                    borderWidth: 1
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero: true,
+
+                                    ticks: {
+
+                                        precision: 0
+
+                                    }
+
+                                }
+
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    display: true
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+);
+
+</script>
+<!-- ============================================= -->
+<!-- PAGE STYLING -->
+<!-- ============================================= -->
+
+<style>
+
+.page-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.page-header h1 {
+
+    margin: 0;
+
+}
+
+
+.page-header p {
+
+    margin-top: 6px;
+
+    opacity: 0.7;
+
+}
+
+
+.page-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.stats-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.stat-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    background: #f8f9fa;
+
+}
+
+
+.stat-icon {
+
+    font-size: 30px;
+
+}
+
+
+.stat-card h3 {
+
+    margin: 0;
+
+    font-size: 26px;
+
+}
+
+
+.stat-card p {
+
+    margin: 5px 0 0;
+
+}
+
+
+.analytics-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 25px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.analytics-card {
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 2px 8px rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
+
+}
+
+
+.analytics-header {
+
+    margin-bottom: 15px;
+
+}
+
+
+.analytics-header h2 {
+
+    margin: 0;
+
+    font-size: 20px;
+
+}
+
+
+.chart-container {
+
+    position: relative;
+
+    height: 320px;
+
+}
+
+
+.table-responsive {
+
+    overflow-x: auto;
+
+}
+
+
+.empty-state {
+
+    text-align: center;
+
+    padding: 40px;
+
+}
+
+
+.empty-icon {
+
+    font-size: 45px;
+
+    margin-bottom: 10px;
+
+}
+
+
+@media (
+    max-width: 768px
+) {
+
+    .page-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .stats-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .analytics-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .page-actions {
+
+        width: 100%;
+
+    }
+
+}
+
+</style>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

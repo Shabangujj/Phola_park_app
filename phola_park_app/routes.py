@@ -35,47 +35,6 @@ def index():
 # ─────────────────────────────────────────────
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
-@main_bp.route("/dashboard")
-@login_required
-def user_dashboard():
-    if current_user.role != "user":
-        abort(403)
-
-    reports_count = Report.query.filter_by(user_id=current_user.id).count()
-
-    recent_reports = (
-        Report.query
-        .filter_by(user_id=current_user.id)
-        .order_by(Report.created_at.desc())
-        .limit(5)
-        .all()
-    )
-
-    notices = (
-        Announcement.query
-        .filter(
-            (Announcement.target == "all") |
-            (Announcement.target == current_user.portfolio)
-        )
-        .order_by(Announcement.created_at.desc())
-        .limit(5)
-        .all()
-    )
-
-    active_surveys = (
-        Survey.query
-        .filter_by(active=True)
-        .order_by(Survey.created_at.desc())
-        .all()
-    )
-
-    return render_template(
-        "user_dashboard.html",
-        reports_count=reports_count,
-        recent_reports=recent_reports,
-        notices=notices,
-        active_surveys=active_surveys,
-    )
 
 
 # ─────────────────────────────────────────────

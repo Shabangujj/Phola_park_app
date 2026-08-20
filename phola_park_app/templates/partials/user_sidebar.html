@@ -1,45 +1,200 @@
-<!-- USER SIDEBAR -->
-<aside class="sidebar user-sidebar">
+<!-- =====================================================
+     PHOLA PARK APP
+     USER SIDEBAR
+     ===================================================== -->
 
-    <div class="sidebar-header">
-        <h2>Phola Park</h2>
-        <p>User Panel</p>
+<aside class="user-sidebar">
+
+    <!-- BRAND -->
+    <div class="user-sidebar-brand">
+
+        <div class="user-sidebar-logo">
+            🏘️
+        </div>
+
+        <div>
+            <h3>Phola Park</h3>
+            <small>Community Portal</small>
+        </div>
+
     </div>
 
-    <ul class="sidebar-menu">
 
-        <li>
-            <a href="{{ url_for('user.dashboard') }}">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url_for('user.surveys') }}">
-                <i class="fas fa-clipboard-list"></i>
-                <span>Survey</span>
-            </a>
-        </li>
+    <!-- USER PROFILE -->
+    <div class="user-sidebar-profile">
 
-        <li>
-            <a href="{{ url_for('web.submit_report') }}">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Submit Report</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url_for('admin.announcements') }}">
-                <i class="fas fa-bullhorn"></i>
-                <span>Announcements</span>
-            </a>
-        </li>
-        <li class="logout-btn">
-            <a href="{{ url_for('web.logout') }}">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
-        </li>
+        <div class="user-avatar">
+            {{ current_user.full_name[0]|upper
+               if current_user.full_name
+               else "U" }}
+        </div>
 
-    </ul>
+        <div class="user-profile-info">
+
+            <strong>
+                {{ current_user.full_name }}
+            </strong>
+
+            <small>
+                Community User
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+    <nav class="user-navigation">
+
+        <div class="user-nav-title">
+            MAIN MENU
+        </div>
+
+
+        <!-- DASHBOARD -->
+        <a
+            href="{{ url_for('user.user_dashboard') }}"
+            class="user-nav-link
+            {% if request.endpoint == 'user.user_dashboard' %}
+                active
+            {% endif %}"
+        >
+
+            <i class="fas fa-home"></i>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- MY REPORTS -->
+        <a
+            href="{{ url_for('user.user_reports') }}"
+            class="user-nav-link
+            {% if request.endpoint == 'user.user_reports' %}
+                active
+            {% endif %}"
+        >
+
+            <i class="fas fa-file-alt"></i>
+
+            <span>
+                My Reports
+            </span>
+
+        </a>
+
+
+        <!-- SUBMIT REPORT -->
+        <a
+            href="{{ url_for('user.submit_report') }}"
+            class="user-nav-link
+            {% if request.endpoint == 'user.submit_report' %}
+                active
+            {% endif %}"
+        >
+
+            <i class="fas fa-plus-circle"></i>
+
+            <span>
+                Submit Report
+            </span>
+
+        </a>
+
+
+        <!-- SURVEYS -->
+        <a
+            href="{{ url_for('user.surveys') }}"
+            class="user-nav-link
+            {% if request.endpoint == 'user.surveys' %}
+                active
+            {% endif %}"
+        >
+
+            <i class="fas fa-poll"></i>
+
+            <span>
+                Surveys
+            </span>
+
+        </a>
+
+
+        <!-- NOTICES -->
+        <a
+            href="{{ url_for('user.notices') }}"
+            class="user-nav-link
+            {% if request.endpoint == 'user.notices' %}
+                active
+            {% endif %}"
+        >
+
+            <i class="fas fa-bullhorn"></i>
+
+            <span>
+                Notices
+            </span>
+
+        </a>
+
+
+        <!-- SEPARATOR -->
+        <div class="user-nav-divider"></div>
+
+
+        <div class="user-nav-title">
+            ACCOUNT
+        </div>
+
+
+        <!-- PROFILE -->
+        <a
+            href="#"
+            class="user-nav-link"
+        >
+
+            <i class="fas fa-user"></i>
+
+            <span>
+                My Profile
+            </span>
+
+        </a>
+
+
+        <!-- NOTIFICATIONS -->
+        <a
+            href="#"
+            class="user-nav-link"
+        >
+
+            <i class="fas fa-bell"></i>
+
+            <span>
+                Notifications
+            </span>
+
+        </a>
+
+
+        <!-- LOGOUT -->
+        <a
+            href="{{ url_for('auth.logout') }}"
+            class="user-nav-link logout-link"
+        >
+
+            <i class="fas fa-sign-out-alt"></i>
+
+            <span>
+                Logout
+            </span>
+
+        </a>
+
+    </nav>
 
 </aside>

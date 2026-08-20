@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-card">
+
+    <h2>System Analytics</h2>
+
+    <div class="stats-container">
+
+        <div class="card">
+            <h3>{{ total_users }}</h3>
+            <p>Total Users</p>
+        </div>
+
+        <div class="card">
+            <h3>{{ total_reports }}</h3>
+            <p>Total Reports</p>
+        </div>
+
+        <div class="card">
+            <h3>{{ total_surveys }}</h3>
+            <p>Total Surveys</p>
+        </div>
+
+        <div class="card">
+            <h3>{{ total_projects }}</h3>
+            <p>Projects</p>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="charts-container">
+
+    <div class="dashboard-card">
+
+        <h3>Monthly Reports</h3>
+
+        <canvas id="monthlyReports"></canvas>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <h3>Category Distribution</h3>
+
+        <canvas id="categoryChart"></canvas>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const monthlyLabels = {{ monthly_labels|default([], true)|tojson }};
+const monthlyValues = {{ monthly_values|default([], true)|tojson }};
+
+new Chart(document.getElementById("monthlyReports"),{
+
+    type:"line",
+
+    data:{
+
+        labels:monthlyLabels,
+
+        datasets:[{
+
+            label:"Reports",
+
+            data:monthlyValues
+
+        }]
+
+    }
+
+});
+
+</script>
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

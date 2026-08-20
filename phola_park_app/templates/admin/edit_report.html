@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit Report</h2>
+
+<form method="POST">
+
+<label>Title</label>
+
+<input
+type="text"
+name="title"
+value="{{ report.title }}">
+
+<label>Category</label>
+
+<input
+type="text"
+name="category"
+value="{{ report.category }}">
+
+<label>Description</label>
+
+<textarea
+name="description">{{ report.description }}</textarea>
+
+<label>Portfolio</label>
+
+<input
+type="text"
+name="portfolio"
+value="{{ report.portfolio }}">
+
+<label>Location</label>
+
+<input
+type="text"
+name="location"
+value="{{ report.location }}">
+
+<label>Comment</label>
+
+<textarea
+name="comment">{{ report.comment }}</textarea>
+
+<button
+class="btn btn-success">
+
+Save Changes
+
+</button>
+
+</form>
+
+{% endblock %}

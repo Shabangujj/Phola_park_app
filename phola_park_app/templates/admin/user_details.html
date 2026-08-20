@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}User Details{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">
+                <i class="fas fa-user text-primary"></i>
+                User Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                Administrator view of user account
+            </p>
+        </div>
+
+        <div>
+
+            <a
+                href="{{ url_for('admin.users') }}"
+                class="btn btn-secondary"
+            >
+                ← Back to Users
+            </a>
+
+            <a
+                href="{{ url_for('admin.edit_user', user_id=user.id) }}"
+                class="btn btn-primary"
+            >
+                ✏️ Edit User
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- User Profile -->
+    <div class="row">
+
+        <!-- Main Information -->
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle"></i>
+                        Account Information
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!-- Full Name -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Full Name
+                            </label>
+
+                            <div class="fw-bold">
+                                {{ user.full_name }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- Username -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Username
+                            </label>
+
+                            <div class="fw-bold">
+                                @{{ user.username }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Email
+                            </label>
+
+                            <div>
+                                {{ user.email }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- Role -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Role
+                            </label>
+
+                            <div>
+
+                                {% if user.is_admin %}
+
+                                    <span class="badge bg-danger">
+                                        Administrator
+                                    </span>
+
+                                {% elif user.is_supervisor %}
+
+                                    <span class="badge bg-primary">
+                                        Supervisor
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-success">
+                                        User
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Portfolio -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Portfolio
+                            </label>
+
+                            <div class="fw-bold">
+
+                                {% if user.portfolio %}
+
+                                    {{ user.portfolio }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Not assigned
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Status -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Account Status
+                            </label>
+
+                            <div>
+
+                                {% if user.is_active %}
+
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+                                        Disabled
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Created -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Account Created
+                            </label>
+
+                            <div>
+                                {{ user.created_at.strftime('%d %B %Y') if user.created_at else 'N/A' }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- Last Login -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="text-muted">
+                                Last Login
+                            </label>
+
+                            <div>
+
+                                {% if user.last_login %}
+
+                                    {{ user.last_login.strftime('%d %B %Y %H:%M') }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Never logged in
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Permissions -->
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt"></i>
+                        Permissions
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    {% if user.is_admin %}
+
+                        <div class="alert alert-danger">
+                            <strong>Administrator</strong>
+                            has full system administration access.
+                        </div>
+
+                    {% elif user.is_supervisor %}
+
+                        <div class="alert alert-primary">
+                            <strong>Supervisor</strong>
+                            can manage reports within assigned responsibilities.
+                        </div>
+
+                    {% else %}
+
+                        <div class="alert alert-success">
+                            <strong>User</strong>
+                            can submit reports and participate in available surveys.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Actions -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs"></i>
+                        Administration
+                    </h5>
+                </div>
+
+                <div class="card-body d-grid gap-2">
+
+                    <a
+                        href="{{ url_for(
+                            'admin.edit_user',
+                            user_id=user.id
+                        ) }}"
+                        class="btn btn-primary"
+                    >
+                        ✏️ Edit User
+                    </a>
+
+
+                    {% if user.is_supervisor %}
+
+                    <a
+                        href="{{ url_for(
+                            'admin.assign_portfolio',
+                            user_id=user.id
+                        ) }}"
+                        class="btn btn-outline-primary"
+                    >
+                        📁 Assign Portfolio
+                    </a>
+
+                    {% endif %}
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin.toggle_user',
+                            user_id=user.id
+                        ) }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-warning w-100"
+                        >
+
+                            {% if user.is_active %}
+
+                                🔒 Disable Account
+
+                            {% else %}
+
+                                🔓 Activate Account
+
+                            {% endif %}
+
+                        </button>
+
+                    </form>
+
+
+                    <a
+                        href="{{ url_for('admin.users') }}"
+                        class="btn btn-secondary"
+                    >
+                        ← Back to User Management
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

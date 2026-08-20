@@ -1,99 +1,485 @@
 {% extends "base.html" %}
 
+{% block title %}User Management{% endblock %}
+
 {% block content %}
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}">
-<div class="dashboard-container">
 
-    <main class="main-content">
-    
-        <!-- PAGE HEADER -->
-         <!--TOP BAR-->
-         <header class="topbar">  
-        <div class="page-header">
-            <p>Welcome back, Admin! 
-                Here's an overview of the latest 
-                activity in Phola Park.</p>
-                </div>
-                </header>
-                <div class="card">
-                    <div class="section-header">
-                        <h2>Manage Users</h2>
-                    </div>
+<div class="container-fluid">
 
-<table class="styled-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Selected Portfolio</th>
-            <th>Committee</th>
-            <th>Assign Committee</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role.name if user.role else 'user' }}</td>
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
 
-<td>
-    <form method="POST"
-          action="{{ url_for('admin.assign_role', user_id=user.id) }}">
-        
-        <select name="role" onchange="this.form.submit()">
-            <option disabled selected>Change</option>
-            <option value="user">User</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="admin">Admin</option>
-        </select>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    </form>
-</td>
-</div>
-             
-            <!-- ✅ Current Portfolio -->
-            <td>
-                {% if user.portfolio %}
-                    <span style="color:green;">{{ user.portfolio }}</span>
-                {% else %}
-                    <span style="color:red;">Not Assigned</span>
-                {% endif %}
-            </td>
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-users text-primary"></i>
+                User Management
+            </h2>
 
-            <!-- ✅ Inline Assign -->
-            <td>
-                <form method="POST"
-                      action="{{ url_for('admin.assign_portfolio', user_id=user.id) }}">
-                    
-                    <select name="portfolio" onchange="this.form.submit()">
-                        <option disabled selected>Select</option>
-                        <option value="Health">Health</option>
-                        <option value="Water">Water</option>
-                        <option value="Electricity">Electricity</option>
-                        <option value="Roads">Roads</option>
-                        <option value="Safety">Safety</option>
-                    </select>
-
-                </form>
-            </td>
-
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
- <!-- FOOTER -->
-        <footer class="footer">
-
-            <p>
-                &copy; 2024 Phola Park |
-                All rights reserved |
-                Service Delivery System
+            <p class="text-muted mb-0">
+                Manage system users, roles, portfolios and account status.
             </p>
 
-        </footer>
-    </main>
+            <p class="mb-0 mt-2">
+                Total Users:
+                <span class="badge bg-primary">
+                    {{ users.total }}
+                </span>
+            </p>
+        </div>
+
+
+        <!-- Add User -->
+
+        <a
+            href="{{ url_for('admin.add_user') }}"
+            class="btn btn-success"
+        >
+            <i class="fas fa-user-plus"></i>
+            Add User
+        </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- SEARCH & FILTER -->
+    <!-- ================================================= -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row g-2">
+
+                    <!-- Search -->
+
+                    <div class="col-md-5">
+
+                        <label class="form-label">
+                            Search
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="search"
+                            placeholder="Search username or email..."
+                            value="{{ request.args.get('search', '') }}"
+                        >
+
+                    </div>
+
+
+                    <!-- Role -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Role
+                        </label>
+
+                        <select
+                            name="role"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Roles
+                            </option>
+
+                            {% for role in roles %}
+
+                                <option
+                                    value="{{ role.id }}"
+                                    {% if request.args.get('role') == role.id|string %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ role.name|title }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Search Button -->
+
+                    <div class="col-md-3 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- USER TABLE -->
+    <!-- ================================================= -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <strong>
+                    <i class="fas fa-users"></i>
+                    System Users
+                </strong>
+
+                <span class="text-muted small">
+                    {{ users.total }} user(s)
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <!-- TABLE HEADER -->
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>User</th>
+
+                        <th>Email</th>
+
+                        <th>Role</th>
+
+                        <th>Portfolio</th>
+
+                        <th>Status</th>
+
+                        <th class="text-center">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <!-- TABLE BODY -->
+
+                <tbody>
+
+                    {% for user in users.items %}
+
+                    <tr>
+
+                        <!-- Number -->
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+
+                        <!-- User -->
+
+                        <td>
+
+                            <div class="fw-semibold">
+                                {{ user.full_name }}
+                            </div>
+
+                            <small class="text-muted">
+                                @{{ user.username }}
+                            </small>
+
+                        </td>
+
+
+                        <!-- Email -->
+
+                        <td>
+
+                            <span>
+                                {{ user.email }}
+                            </span>
+
+                            {% if user.email_verified %}
+
+                                <span
+                                    class="badge bg-success ms-1"
+                                    title="Email verified"
+                                >
+                                    ✓
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Role -->
+
+                        <td>
+
+                            {% if user.is_admin %}
+
+                                <span class="badge bg-danger">
+                                    Admin
+                                </span>
+
+                            {% elif user.is_supervisor %}
+
+                                <span class="badge bg-primary">
+                                    Supervisor
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+                                    User
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Portfolio -->
+
+                        <td>
+
+                            {% if user.portfolio %}
+
+                                <span class="badge bg-info text-dark">
+                                    {{ user.portfolio }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Not Assigned
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Status -->
+
+                        <td>
+
+                            {% if user.is_active %}
+
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-ban"></i>
+                                    Disabled
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACTIONS -->
+
+                        <td class="text-center">
+
+                            <div class="btn-group" role="group">
+
+
+                                <!-- VIEW -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'admin.user_details',
+                                        user_id=user.id
+                                    ) }}"
+                                    class="btn btn-sm btn-outline-info"
+                                    title="View User"
+                                >
+                                    👁
+                                </a>
+
+
+                                <!-- EDIT -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'admin.edit_user',
+                                        user_id=user.id
+                                    ) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Edit User"
+                                >
+                                    ✏️
+                                </a>
+
+
+                                <!-- PORTFOLIO -->
+
+                                {% if user.is_supervisor %}
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.assign_portfolio',
+                                            user_id=user.id
+                                        ) }}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        title="Assign Portfolio"
+                                    >
+                                        📁
+                                    </a>
+
+                                {% endif %}
+
+
+                                <!-- TOGGLE -->
+
+                                {% if user.is_active %}
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.toggle_user',
+                                            user_id=user.id
+                                        ) }}"
+                                        class="btn btn-sm btn-outline-warning"
+                                        title="Disable User"
+                                    >
+                                        🔒
+                                    </a>
+
+                                {% else %}
+
+                                    <form
+    method="POST"
+    action="{{ url_for(
+        'admin.toggle_user',
+        user_id=user.id
+    ) }}"
+    class="d-inline"
+>
+
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    {% if user.is_active %}
+
+        <button
+            type="submit"
+            class="btn btn-sm btn-outline-warning"
+            title="Disable User"
+            onclick="return confirm(
+                'Are you sure you want to disable this user?'
+            );"
+        >
+            🔒
+        </button>
+
+    {% else %}
+
+        <button
+            type="submit"
+            class="btn btn-sm btn-outline-success"
+            title="Activate User"
+        >
+            🔓
+        </button>
+
+    {% endif %}
+
+</form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% else %}
+
+                    <!-- NO USERS -->
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5"
+                        >
+
+                            <div class="text-muted">
+
+                                <i
+                                    class="fas fa-users fa-3x mb-3"
+                                ></i>
+
+                                <h5>
+                                    No Users Found
+                                </h5>
+
+                                <p class="mb-3">
+                                    No users match your search criteria.
+                                </p>
+
+                                <a
+                                    href="{{ url_for('admin.users') }}"
+                                    class="btn btn-outline-primary"
+                                >
+                                    Clear Filters
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </div>
+
 {% endblock %}

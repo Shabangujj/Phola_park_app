@@ -4,7 +4,7 @@ from datetime import datetime
 from collections import Counter
 
 from phola_park_app.extensions import db
-from phola_park_app.model import Survey, Report, User, Announcement, Committee
+from phola_park_app.models import Survey, Report, User, Announcement, Committee
 from phola_park_app.utils.permissions import role_required
 
 supervisor_bp = Blueprint('supervisor', __name__, url_prefix='/supervisor')

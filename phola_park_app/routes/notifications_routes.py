@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, session, redirect, url_for, request
 from datetime import datetime
-from phola_park_app.model import Notification, User, Reports, Announcement
-from phola_park_app import db
+from phola_park_app.models import Notification, User, Reports, Announcement
+from phola_park_app.extensions import db
 notifications_bp = Blueprint("notifications", __name__, url_prefix="/notifications")
 
 

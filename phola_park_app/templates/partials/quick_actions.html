@@ -1,0 +1,51 @@
+<div class="dashboard-card">
+
+<h3>Quick Actions</h3>
+
+<div class="quick-actions">
+
+<a href="{{ url_for('admin.add_user') }}"
+class="dashboard-btn">
+
+👥 Users
+
+</a>
+{% for report in reports %}
+<a href="{{ url_for('admin.view_report', report_id=report.id) }}"
+class="dashboard-btn">
+
+📋 Reports
+
+</a>
+{% endfor %}
+<a href="{{ url_for('admin.surveys') }}"
+class="dashboard-btn">
+
+📊 Surveys
+
+</a>
+
+<a href="{{ url_for('admin.announcements') }}"
+class="dashboard-btn">
+
+📢 Announcements
+
+</a>
+
+<a href="{{ url_for('admin.projects') }}"
+class="dashboard-btn">
+
+🏗 Projects
+
+</a>
+
+<a href="{{ url_for('admin.audit_logs') }}"
+class="dashboard-btn">
+
+📝 Audit Logs
+
+</a>
+
+</div>
+
+</div>

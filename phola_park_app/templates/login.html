@@ -1,101 +1,201 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Phola Park Login</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            display: flex;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-        }
+{% block title %}Login | Phola Park{% endblock %}
 
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            width: 320px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+{% block content %}
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+<div class="container">
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+    <div class="row justify-content-center">
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #007BFF;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+        <div class="col-md-6 col-lg-5">
 
-        button:hover {
-            background: #0056b3;
-        }
+            <!-- Login Card -->
 
-        .message {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+            <div class="card shadow-sm mt-5">
 
-        .link {
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
+                <!-- Header -->
 
-<div class="login-box">
+                <div class="card-header text-center bg-primary text-white">
 
-    <h2>Phola Park Login</h2>
+                    <h2 class="mb-1">
+                        🔐 Phola Park
+                    </h2>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="message">
-                {% for msg in messages %}
-                    {{ msg }}
-                {% endfor %}
+                    <small>
+                        Community Service Portal
+                    </small>
+
+                </div>
+
+
+                <!-- Body -->
+
+                <div class="card-body p-4">
+
+                    <!-- Flash Messages -->
+
+                    {% with messages = get_flashed_messages(
+                        with_categories=true
+                    ) %}
+
+                        {% if messages %}
+
+                            {% for category, message in messages %}
+
+                                <div
+                                    class="alert alert-{{
+                                        'danger'
+                                        if category == 'error'
+                                        else category
+                                    }}"
+                                    role="alert"
+                                >
+                                    {{ message }}
+                                </div>
+
+                            {% endfor %}
+
+                        {% endif %}
+
+                    {% endwith %}
+
+
+                    <!-- Login Form -->
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('auth.login') }}"
+                    >
+
+                        <!-- CSRF -->
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+
+                        <!-- Email -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="email"
+                                class="form-label"
+                            >
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-control"
+                                placeholder="Enter your email"
+                                value="{{ request.form.get('email', '') }}"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Password -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="password"
+                                class="form-label"
+                            >
+                                Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-control"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Remember Me -->
+
+                        <div class="form-check mb-3">
+
+                            <input
+                                type="checkbox"
+                                class="form-check-input"
+                                id="remember"
+                                name="remember"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="remember"
+                            >
+                                Remember me
+                            </label>
+
+                        </div>
+
+
+                        <!-- Login Button -->
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            🔐 Login
+                        </button>
+
+                    </form>
+
+
+                    <!-- Register -->
+
+                    <div class="text-center mt-4">
+
+                        <span class="text-muted">
+                            Don't have an account?
+                        </span>
+
+                        <a
+                            href="{{ url_for('auth.register') }}"
+                            class="fw-semibold"
+                        >
+                            Register
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Footer -->
+
+                <div class="card-footer text-center text-muted">
+
+                    <small>
+                        © {{ now().year if now is defined else 2026 }}
+                        Phola Park
+                    </small>
+
+                </div>
+
             </div>
-        {% endif %}
-    {% endwith %}
 
-    <form method="POST" action="{{ url_for('auth.login') }}">
-        
-        <label>Email</label>
-        <input type="email" name="email" required value="{{ request.form.email }}">
+        </div>
 
-        <label>Password</label>
-        <input type="password" name="password" required>
-
-        <button type="submit">Login</button>
-    </form>
-
-    <div class="link">
-        Don't have an account?
-        <a href="{{ url_for('auth.register') }}">Register</a>
     </div>
 
 </div>
 
-</body>
-</html>
+{% endblock %}

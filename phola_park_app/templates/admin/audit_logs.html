@@ -103,23 +103,56 @@
                 </tr>
             </thead>
             <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.id }}</td>
-                    <td>{{ log.action }}</td>
-                    <td>{{ log.description }}</td>
-                    <td>{{ log.user_id }}</td>
-                    <td>{{ log.timestamp }}</td>
-                    <td>
-                        <form method="POST"
-                              action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
-                              onsubmit="return confirm('Delete this log?');">
-                            <button class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+
+{% if logs %}
+
+    {% for log in logs %}
+
+    <tr>
+        <td>{{ log.id }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.description }}</td>
+
+        <td>
+            {% if log.user %}
+                {{ log.user.username }}
+            {% else %}
+                Unknown
+            {% endif %}
+        </td>
+
+        <td>
+            {% if log.created_at %}
+                {{ log.created_at.strftime("%d %b %Y %H:%M") }}
+            {% endif %}
+        </td>
+
+        <td>
+            <form method="POST"
+                  action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
+                  onsubmit="return confirm('Delete this log?');">
+
+                <button class="btn btn-danger btn-sm">
+                    Delete
+                </button>
+
+            </form>
+        </td>
+    </tr>
+
+    {% endfor %}
+
+{% else %}
+
+<tr>
+    <td colspan="6" class="text-center">
+        No audit logs found.
+    </td>
+</tr>
+
+{% endif %}
+
+</tbody>
         </table>
     </div>
 <!-- Chart.js -->

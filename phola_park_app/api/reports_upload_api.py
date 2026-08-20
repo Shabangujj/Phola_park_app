@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, send_from_directory
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
-from phola_park_app.model import Report
+from phola_park_app.models import Report
 from phola_park_app.extensions import db
 from phola_park_app.utils.upload_utils import save_file
 from flask import current_app

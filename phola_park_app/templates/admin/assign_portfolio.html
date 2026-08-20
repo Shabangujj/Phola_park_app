@@ -1,38 +1,201 @@
 {% extends "base.html" %}
 
+{% block title %}Assign Portfolio{% endblock %}
+
 {% block content %}
-<h2>Assign Portfolio</h2>
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}">
 
-<p>User: {{ <user class="portfolio"></user> }}</p>
+<div class="container-fluid">
 
-<form method="POST"
-      action="{{ url_for('admin.assign_portfolio', user_id=user.id) }}">
+    <!-- Header -->
 
-    <label>Select Portfolio:</label><br><br>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <select name="portfolio" required>
-        <option value="Health">Health</option>
-        <option value="Water">Water</option>
-        <option value="Electricity">Electricity</option>
-        <option value="Roads">Roads</option>
-        <option value="Safety">Safety</option>
-    </select>
+        <div>
 
-    <br><br>
+            <h2 class="fw-bold">
+                📁 Assign Portfolio
+            </h2>
 
-    <button type="submit">Assign</button>
-</form>
- <!-- FOOTER -->
-        <footer class="footer">
-
-            <p>
-                &copy; 2024 Phola Park |
-                All rights reserved |
-                Service Delivery System
+            <p class="text-muted mb-0">
+                Assign a service-delivery portfolio to a supervisor.
             </p>
 
-        </footer>
+        </div>
+
+        <a
+            href="{{ url_for(
+                'admin.user_details',
+                user_id=user.id
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+
+    <!-- Assignment Card -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="mb-0 fw-bold">
+                        Supervisor Information
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Full Name
+                        </label>
+
+                        <div class="fw-semibold">
+                            {{ user.full_name }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Username
+                        </label>
+
+                        <div class="fw-semibold">
+                            @{{ user.username }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Current Portfolio
+                        </label>
+
+                        <div>
+
+                            {% if user.portfolio %}
+
+                                <span class="badge bg-info text-dark">
+                                    {{ user.portfolio }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Not Assigned
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <!-- FORM -->
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin.assign_portfolio',
+                            user_id=user.id
+                        ) }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+
+                        <div class="mb-3">
+
+                            <label
+                                for="portfolio"
+                                class="form-label fw-semibold"
+                            >
+                                Select Portfolio
+                            </label>
+
+                            <select
+                                id="portfolio"
+                                name="portfolio"
+                                class="form-select"
+                                required
+                            >
+
+                                <option value="">
+                                    -- Select Portfolio --
+                                </option>
+
+                                {% for portfolio in portfolios %}
+
+                                    <option
+                                        value="{{ portfolio }}"
+                                        {% if user.portfolio == portfolio %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ portfolio }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                💾 Save Portfolio
+                            </button>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'admin.user_details',
+                                    user_id=user.id
+                                ) }}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Cancel
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 {% endblock %}

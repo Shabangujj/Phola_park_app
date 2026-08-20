@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Surveys - Admin{% endblock %}
+
+{% block content %}
+
+{% include "partials/topbar.html" %}
+
+<div class="dashboard-card">
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-header">
+
+        <div>
+            <h2>📋 Surveys</h2>
+
+            <p>
+                Manage community surveys and responses.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('admin.create_survey') }}"
+            class="dashboard-btn"
+        >
+            ➕ Create Survey
+        </a>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- FLASH MESSAGES -->
+    <!-- ========================================= -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- ========================================= -->
+    <!-- SEARCH -->
+    <!-- ========================================= -->
+
+    <form
+        method="GET"
+        action="{{ url_for('admin.surveys') }}"
+        class="search-form"
+    >
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Search surveys..."
+            value="{{ search or '' }}"
+        >
+
+        <button
+            type="submit"
+            class="dashboard-btn"
+        >
+            🔍 Search
+        </button>
+
+    </form>
+
+
+    <!-- ========================================= -->
+    <!-- SURVEY TABLE -->
+    <!-- ========================================= -->
+
+    {% if surveys.items %}
+
+        <div class="table-container">
+
+            <table class="table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Title</th>
+
+                        <th>Type</th>
+
+                        <th>Portfolio</th>
+
+                        <th>Status</th>
+
+                        <th>Questions</th>
+
+                        <th>Responses</th>
+
+                        <th>Created</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for survey in surveys.items %}
+
+                        <tr>
+
+                            <!-- Number -->
+
+                            <td>
+                                {{ loop.index }}
+                            </td>
+
+
+                            <!-- Title -->
+
+                            <td>
+
+                                <strong>
+                                    {{ survey.title }}
+                                </strong>
+
+                                {% if survey.description %}
+
+                                    <br>
+
+                                    <small>
+                                        {{ survey.description[:80] }}
+                                        {% if survey.description|length > 80 %}
+                                            ...
+                                        {% endif %}
+                                    </small>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Type -->
+
+                            <td>
+                                {{ survey.survey_type }}
+                            </td>
+
+
+                            <!-- Portfolio -->
+
+                            <td>
+
+                                {% if survey.portfolio %}
+
+                                    {{ survey.portfolio }}
+
+                                {% else %}
+
+                                    All
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Status -->
+
+                            <td>
+
+                                {% if survey.is_active %}
+
+                                    <span class="status active">
+                                        ● Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status disabled">
+                                        ● Inactive
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Questions -->
+
+                            <td>
+
+                                {{ survey.total_questions }}
+
+                            </td>
+
+
+                            <!-- Responses -->
+
+                            <td>
+
+                                {{ survey.total_responses }}
+
+                            </td>
+
+
+                            <!-- Created -->
+
+                            <td>
+
+                                {% if survey.created_at %}
+
+                                    {{ survey.created_at.strftime("%d-%m-%Y") }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ================================= -->
+                            <!-- ACTIONS -->
+                            <!-- ================================= -->
+
+                            <td>
+
+                                <div class="action-buttons">
+
+
+                                    <!-- VIEW -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.view_survey',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        class="btn btn-info btn-sm"
+                                    >
+                                        👁 View
+                                    </a>
+
+
+                                    <!-- EDIT -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.edit_survey',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        ✏ Edit
+                                    </a>
+
+
+                                    <!-- RESPONSES -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.survey_responses',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        class="btn btn-success btn-sm"
+                                    >
+                                        📋 Responses
+                                    </a>
+
+
+                                    <!-- ANALYTICS -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'admin.survey_analytics',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        class="btn btn-primary btn-sm"
+                                    >
+                                        📊 Analytics
+                                    </a>
+
+
+                                    <!-- DELETE -->
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'admin.delete_survey',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        style="display:inline;"
+                                        onsubmit="return confirm(
+                                            'Are you sure you want to delete this survey?'
+                                        );"
+                                    >
+
+                                        {% if csrf_token is defined %}
+
+                                            <input
+                                                type="hidden"
+                                                name="csrf_token"
+                                                value="{{ csrf_token() }}"
+                                            >
+
+                                        {% endif %}
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            🗑 Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- PAGINATION -->
+        <!-- ========================================= -->
+
+        {% if surveys.pages > 1 %}
+
+            <div class="pagination">
+
+                {% if surveys.has_prev %}
+
+                    <a
+                        href="{{ url_for(
+                            'admin.surveys',
+                            page=surveys.prev_num,
+                            search=search
+                        ) }}"
+                        class="btn btn-secondary"
+                    >
+                        ← Previous
+                    </a>
+
+                {% endif %}
+
+
+                <span class="page-info">
+
+                    Page {{ surveys.page }}
+                    of {{ surveys.pages }}
+
+                </span>
+
+
+                {% if surveys.has_next %}
+
+                    <a
+                        href="{{ url_for(
+                            'admin.surveys',
+                            page=surveys.next_num,
+                            search=search
+                        ) }}"
+                        class="btn btn-secondary"
+                    >
+                        Next →
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+    {% else %}
+
+        <!-- ========================================= -->
+        <!-- NO SURVEYS -->
+        <!-- ========================================= -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                📋
+            </div>
+
+            <h3>
+                No Surveys Found
+            </h3>
+
+            <p>
+                There are currently no surveys available.
+            </p>
+
+            <a
+                href="{{ url_for('admin.create_survey') }}"
+                class="dashboard-btn"
+            >
+                ➕ Create First Survey
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

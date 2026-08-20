@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from phola_park_app.model import db, User, Report, Survey, Announcement
+from phola_park_app.models import User, Report, Survey, Announcement
+from phola_park_app.extensions import db
 from datetime import datetime
 from functools import wraps
 
@@ -40,7 +41,7 @@ def role_required(role):
 # =========================
 @web.route('/login')
 def login_redirect():
-    return redirect(url_for('login'))
+    return redirect(url_for('web.login'))
 @web.route('/auth/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -109,17 +110,79 @@ def supervisor_dashboard():
 
     return render_template('supervisor_dashboard.html', reports=reports)
 
+from flask import Blueprint, render_template, abort
+from flask_login import login_required, current_user
 
-# =========================
-# 👤 USER DASHBOARD
-# =========================
-@web.route('/user')
+from phola_park_app.models import Report
+
+
+# =====================================================
+# WEB ROUTES
+# =====================================================
+
+web_bp = Blueprint(
+    "web",
+    __name__,
+    url_prefix="/user"
+)
+
+
+# =====================================================
+# USER DASHBOARD
+# =====================================================
+
+@web_bp.route("/dashboard")
 @login_required
-@role_required('user')
 def user_dashboard():
-    surveys = Survey.query.all()
 
-    return render_template('user_dashboard.html', surveys=surveys)
+    # Make sure this is a normal user
+    if current_user.role_name != "user":
+        abort(403)
+
+    reports_count = (
+        Report.query
+        .filter_by(user_id=current_user.id)
+        .count()
+    )
+
+    recent_reports = (
+        Report.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Report.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return render_template(
+        "user/user_dashboard.html",
+        reports_count=reports_count,
+        recent_reports=recent_reports
+    )
+
+
+# =====================================================
+# MY REPORTS
+# =====================================================
+
+@web_bp.route("/reports")
+@login_required
+def user_reports():
+
+    # Make sure this is a normal user
+    if current_user.role_name != "user":
+        abort(403)
+
+    reports = (
+        Report.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Report.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "user/user_reports.html",
+        reports=reports
+    )
 
 
 # =========================
@@ -221,12 +284,6 @@ def submit_report():
 # =========================
 # 📂 VIEW REPORTS (ADMIN)
 # =========================
-@web.route('/admin/reports')
-@login_required
-@role_required('admin')
-def admin_reports():
-    reports = Report.query.order_by(Report.created_at.desc()).all()
-    return render_template('admin_reports.html', reports=reports)
 
 
 # =========================
@@ -277,4 +334,4 @@ def delete_report(id):
     db.session.commit()
 
     flash("Report deleted", "success")
-    return redirect(url_for('web.admin_reports'))
+    return redirect(url_for('web.reports'))

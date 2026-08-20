@@ -1,0 +1,74 @@
+<div class="charts-container">
+
+    <!-- Reports Chart -->
+    <div class="dashboard-card">
+
+        <h3>Reports by Portfolio</h3>
+
+        <canvas id="reportsChart"></canvas>
+
+    </div>
+
+    <!-- Survey Chart -->
+    <div class="dashboard-card">
+
+        <h3>Survey Participation</h3>
+
+        <canvas id="surveyChart"></canvas>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const portfolioData = {{ portfolio_counts|default({}, true)|tojson }};
+
+const labels = Object.keys(portfolioData);
+
+const values = Object.values(portfolioData);
+
+new Chart(document.getElementById("reportsChart"),{
+
+    type:"bar",
+
+    data:{
+
+        labels:labels,
+
+        datasets:[{
+
+            label:"Reports",
+
+            data:values
+
+        }]
+
+    }
+
+});
+
+new Chart(document.getElementById("surveyChart"),{
+
+    type:"doughnut",
+
+    data:{
+
+        labels:["Completed","Pending"],
+
+        datasets:[{
+
+            data:[
+                {{ survey_completed|default(0, true) }},
+                {{ survey_pending|default(0, true) }}
+            ]
+
+        }]
+
+    }
+
+});
+
+</script>

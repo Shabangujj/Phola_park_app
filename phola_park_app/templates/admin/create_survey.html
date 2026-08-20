@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Create Survey - Phola Park App{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                <i class="fas fa-clipboard-list text-primary"></i>
+                Create Survey
+            </h2>
+
+            <p class="text-muted mb-0">
+                Create a new community survey.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('admin.surveys') }}"
+            class="btn btn-secondary"
+        >
+            <i class="fas fa-arrow-left"></i>
+            Back to Surveys
+        </a>
+
+    </div>
+
+
+    <!-- =========================================
+         FLASH MESSAGES
+    ========================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =========================================
+         CREATE SURVEY CARD
+    ========================================== -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                <i class="fas fa-poll"></i>
+                Survey Information
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form
+                method="POST"
+                action="{{ url_for('admin.create_survey') }}"
+            >
+
+                <!-- CSRF -->
+
+                {% if csrf_token is defined %}
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                {% endif %}
+
+
+                <!-- =================================
+                     TITLE
+                ================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="title"
+                        class="form-label fw-bold"
+                    >
+                        Survey Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        class="form-control"
+                        placeholder="Enter survey title"
+                        maxlength="255"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- =================================
+                     SURVEY TYPE
+                ================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="survey_type"
+                        class="form-label fw-bold"
+                    >
+                        Survey Type
+                    </label>
+
+                    <select
+                        id="survey_type"
+                        name="survey_type"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select survey type
+                        </option>
+
+                        <option value="Community Survey">
+                            Community Survey
+                        </option>
+
+                        <option value="Service Delivery">
+                            Service Delivery
+                        </option>
+
+                        <option value="Water">
+                            Water
+                        </option>
+
+                        <option value="Electricity">
+                            Electricity
+                        </option>
+
+                        <option value="Roads">
+                            Roads
+                        </option>
+
+                        <option value="Safety">
+                            Safety
+                        </option>
+
+                        <option value="Infrastructure">
+                            Infrastructure
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================
+                     DESCRIPTION
+                ================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="description"
+                        class="form-label fw-bold"
+                    >
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        class="form-control"
+                        rows="5"
+                        placeholder="Explain what this survey is about..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- =================================
+                     PORTFOLIO
+                ================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="portfolio"
+                        class="form-label fw-bold"
+                    >
+                        Portfolio
+                    </label>
+
+                    <select
+                        id="portfolio"
+                        name="portfolio"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All Portfolios
+                        </option>
+
+                        <option value="Water">
+                            Water
+                        </option>
+
+                        <option value="Electricity">
+                            Electricity
+                        </option>
+
+                        <option value="Roads">
+                            Roads
+                        </option>
+
+                        <option value="Safety">
+                            Safety
+                        </option>
+
+                        <option value="Infrastructure">
+                            Infrastructure
+                        </option>
+
+                        <option value="Administration">
+                            Administration
+                        </option>
+
+                    </select>
+
+                    <small class="text-muted">
+                        Leave this as All Portfolios if the survey applies to everyone.
+                    </small>
+
+                </div>
+
+
+                <!-- =================================
+                     EXTERNAL LINK
+                ================================== -->
+
+                <div class="mb-4">
+
+                    <label
+                        for="link"
+                        class="form-label fw-bold"
+                    >
+                        External Survey Link
+                    </label>
+
+                    <input
+                        type="url"
+                        id="link"
+                        name="link"
+                        class="form-control"
+                        placeholder="https://example.com"
+                    >
+
+                    <small class="text-muted">
+                        Optional. Leave blank if the survey will use
+                        questions inside the Phola Park App.
+                    </small>
+
+                </div>
+
+
+                <!-- =================================
+                     STATUS
+                ================================== -->
+
+                <div class="alert alert-info">
+
+                    <strong>
+                        Survey Status
+                    </strong>
+
+                    <p class="mb-0 mt-1">
+                        The survey will be created as
+                        <strong>Active</strong>.
+                        You can close it later from the survey management page.
+                    </p>
+
+                </div>
+
+
+                <!-- =================================
+                     ACTIONS
+                ================================== -->
+
+                <div class="d-flex gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="fas fa-save"></i>
+                        Create Survey
+                    </button>
+
+
+                    <a
+                        href="{{ url_for('admin.surveys') }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Report Details{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">
+                📋 Report Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                Report #{{ report.id }}
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('admin.reports') }}"
+            class="btn btn-outline-secondary"
+        >
+            ← Back to Reports
+        </a>
+
+    </div>
+
+
+    <!-- Report Information -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>Report Information</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Title</strong>
+
+                    <div>
+                        {{ report.title or "No title" }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Category</strong>
+
+                    <div>
+                        {{ report.category or "Not specified" }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Portfolio</strong>
+
+                    <div>
+                        {{ report.portfolio or "Not assigned" }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Status</strong>
+
+                    <div>
+
+                        {% if report.status == "Pending" %}
+
+                            <span class="badge bg-warning text-dark">
+                                Pending
+                            </span>
+
+                        {% elif report.status == "Assigned" %}
+
+                            <span class="badge bg-info">
+                                Assigned
+                            </span>
+
+                        {% elif report.status == "In Progress" %}
+
+                            <span class="badge bg-primary">
+                                In Progress
+                            </span>
+
+                        {% elif report.status == "Resolved" %}
+
+                            <span class="badge bg-success">
+                                Resolved
+                            </span>
+
+                        {% elif report.status == "Closed" %}
+
+                            <span class="badge bg-dark">
+                                Closed
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+                                {{ report.status }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Reported By</strong>
+
+                    <div>
+                        {% if report.reporter %}
+                            {{ report.reporter.full_name }}
+                            (@{{ report.reporter.username }})
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Created</strong>
+
+                    <div>
+                        {{ report.created_at.strftime("%d %b %Y %H:%M") }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-12 mb-3">
+
+                    <strong>Description</strong>
+
+                    <div class="mt-2">
+
+                        {{ report.description or "No description provided." }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Status -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>Update Status</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'admin.update_report_status',
+                    report_id=report.id
+                ) }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <div class="row">
+
+                    <div class="col-md-8">
+
+                        <select
+                            name="status"
+                            class="form-select"
+                            required
+                        >
+
+                            {% for status in [
+                                "Pending",
+                                "Assigned",
+                                "In Progress",
+                                "Resolved",
+                                "Closed"
+                            ] %}
+
+                                <option
+                                    value="{{ status }}"
+                                    {% if report.status == status %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ status }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            Update Status
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Assignment -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>Assign Report</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'admin.assign_report',
+                    report_id=report.id
+                ) }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <div class="row">
+
+                    <div class="col-md-8">
+
+                        <select
+                            name="assigned_to"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select user
+                            </option>
+
+                            {% for user in users %}
+
+                                <option
+                                    value="{{ user.id }}"
+                                    {% if report.assigned_to == user.id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ user.full_name }}
+                                    (@{{ user.username }})
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-success w-100"
+                        >
+                            Assign Report
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

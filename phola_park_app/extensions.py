@@ -4,12 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
 from flask import jsonify
+from flask_wtf.csrf import CSRFProtect
 
+csrf = CSRFProtect()
 db = SQLAlchemy()
 migrate = Migrate()  
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"  # Redirect to this route if not logged in
-jwt = JWTManager()  
+jwt = JWTManager() 
+ 
 
 @jwt.unauthorized_loader
 def jwt_missing_token(reason):

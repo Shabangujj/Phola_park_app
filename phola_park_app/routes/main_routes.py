@@ -10,7 +10,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from phola_park_app.extensions import db
-from phola_park_app.model import (
+from phola_park_app.models import (
     Report, Notification, Announcement, User, UserRole, Project
 )
 from phola_park_app.utils.navigation import home_url
@@ -34,10 +34,10 @@ def dashboard():
     role = current_user.role.name
 
     if role == "admin":
-        return render_template("admin_dashboard.html")
+        return render_template("admin/admin_dashboard.html")
 
     elif role == "supervisor":
-        return render_template("supervisor_dashboard.html")
+        return render_template("supervisor/supervisor_dashboard.html")
 
     return render_template("user_dashboard.html")
 # ─────────────────────────────────────
@@ -101,9 +101,27 @@ def admin_dashboard():
     }
 
     return render_template(
-        "admin_dashboard.html",
-        stats=stats
+        "admin/admin_dashboard.html",
+        stats=stats,
+        total_reports=Report.query.count(),
+        total_users=User.query.count(),
+        total_supervisors=User.query.join(UserRole).filter(UserRole.name == "supervisor").count(),
+        total_surveys=Survey.query.count(),
+        total_announcements=Announcement.query.count(),
+        total_projects=Project.query.count()
     )
+from flask import jsonify
+from flask_login import login_required
+from sqlalchemy import func
+
+from phola_park_app.models import (
+    User,
+    Report,
+    Survey,
+    Announcement
+)
+from phola_park_app.decorators import role_required
+
 
 # ─────────────────────────────────────
 # SUPERVISOR DASHBOARD

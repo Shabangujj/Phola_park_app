@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, session, redirect, url_for, render_template
 from flask_jwt_extended import get_jwt_identity, jwt_required  # type: ignore[reportMissingImports]
-from phola_park_app.model import User, Report
+from phola_park_app.models import User, Report
 reports_bp = Blueprint("reports", __name__, url_prefix="/reports")
 @reports_bp.route("", methods=["GET"])
 @jwt_required()

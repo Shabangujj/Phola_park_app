@@ -46,3 +46,4 @@ Thumbs.db
 htmlcov/
 pytest_cache/
 .pytest_cache/
+phola_park_app/uploads/ 

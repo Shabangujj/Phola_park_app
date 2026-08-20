@@ -1,33 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet"
-href="{{ url_for('static', filename='supervisor.css') }}">
-<h2>Supervisor Dashboard</h2>
 
-<p><strong>Your Portfolio:</strong> {{ portfolio }}</p>
+{% include "partials/topbar.html" %}
 
-<table border="1" cellpadding="10">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Description</th>
-            <th>Portfolio</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in reports %}
-        <tr>
-            <td>{{ r.id }}</td>
-            <td>{{ r.report_type }}</td>
-            <td>{{ r.description }}</td>
-            <td>{{ r.portfolio }}</td>
-            <td>{{ r.created_at }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="stats-container">
+
+<div class="card">
+
+<h3>{{ assigned_reports }}</h3>
+
+<p>Assigned Reports</p>
+
+</div>
+
+<div class="card">
+
+<h3>{{ completed_reports }}</h3>
+
+<p>Completed Reports</p>
+
+</div>
+
+<div class="card">
+
+<h3>{{ pending_reports }}</h3>
+
+<p>Pending Reports</p>
+
+</div>
+
+</div>
+
+{% include "partials/recent_reports.html" %}
+
+{% include "partials/footer.html" %}
 
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from phola_park_app.model import Survey
+from phola_park_app.models import Survey
 
 surveys_bp = Blueprint("surveys", __name__, url_prefix="/api/v1/surveys")
 
