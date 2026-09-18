@@ -660,7 +660,83 @@ def announcements():
         'admin/announcements.html',
         announcements=announcements
     )
-    # =========================
+@admin_bp.route("/announcements/dashboard")
+@login_required
+@role_required("admin")
+def announcement_dashboard():
+
+    total = Announcement.query.count()
+
+    published = Announcement.query.filter_by(
+        is_active=True
+    ).count()
+
+    drafts = Announcement.query.filter_by(
+        is_active=False
+    ).count()
+
+    return render_template(
+        "admin/announcement_dashboard.html",
+        total=total,
+        published=published,
+        drafts=drafts,
+        archived=0
+    )   
+@admin_bp.route(
+    "/announcements/<int:announcement_id>/publish",
+    methods=["POST"]
+)
+@login_required
+@role_required("admin")
+def publish_announcement(announcement_id):
+
+    announcement = Announcement.query.get_or_404(
+        announcement_id
+    )
+
+    announcement.is_active = True
+
+    db.session.commit()
+
+    flash(
+        "Announcement published successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for(
+            "admin.view_announcement",
+            announcement_id=announcement.id
+        )
+    )
+@admin_bp.route(
+    "/announcements/<int:announcement_id>/unpublish",
+    methods=["POST"]
+)
+@login_required
+@role_required("admin")
+def unpublish_announcement(announcement_id):
+
+    announcement = Announcement.query.get_or_404(
+        announcement_id
+    )
+
+    announcement.is_active = False
+
+    db.session.commit()
+
+    flash(
+        "Announcement unpublished successfully.",
+        "warning"
+    )
+
+    return redirect(
+        url_for(
+            "admin.view_announcement",
+            announcement_id=announcement.id
+        )
+    )
+# =========================
 # 📢 ADMIN ANNOUNCEMENTS
 # =========================
 @admin_bp.route("/admin/announcements")
@@ -717,8 +793,21 @@ def edit_announcement(announcement_id):
         message = request.form.get("message")
 
         # ✅ Update fields
-        announcement.title = title
-        announcement.message = message
+        announcement.title = request.form.get(
+         "title"
+       )
+
+        announcement.message = request.form.get(
+         "message"
+        )
+
+        announcement.target_role = request.form.get(
+          "target_role"
+        )
+
+        announcement.portfolio = request.form.get(
+         "portfolio"
+        )
 
         try:
             db.session.commit()
@@ -843,88 +932,304 @@ from collections import defaultdict
 from flask import request, Response
 from datetime import datetime
 import csv
-
 @admin_bp.route("/audit-logs")
 @login_required
-@admin_required
+@role_required("admin")
 def audit_logs():
-    from phola_park_app.model import AuditLog
-    
+
+    page = request.args.get("page", 1, type=int)
+
+    # =========================
+    # FILTER VALUES
+    # =========================
+
+    action = request.args.get(
+        "action", ""
+    ).strip()
+
+    user_id = request.args.get(
+        "user_id", "",
+        type=str
+    ).strip()
+
+    start_date = request.args.get(
+        "start_date", ""
+    ).strip()
+
+    end_date = request.args.get(
+        "end_date", ""
+    ).strip()
+
+
+    # =========================
+    # BASE QUERY
+    # =========================
+
     query = AuditLog.query
-    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
 
-    # 📊 Logs per day
-    logs_per_day = db.session.query(
-        func.date(AuditLog.timestamp),
-        func.count(AuditLog.id)
-    ).group_by(func.date(AuditLog.timestamp)).all()
 
-    dates = [str(row[0]) for row in logs_per_day]
-    counts = [row[1] for row in logs_per_day]
-
-    # 📊 Actions breakdown
-    actions_data = db.session.query(
-        AuditLog.action,
-        func.count(AuditLog.id)
-    ).group_by(AuditLog.action).all()
-
-    action_labels = [row[0] for row in actions_data]
-    action_counts = [row[1] for row in actions_data]
-
-    # 🔢 Total logs
-    total_logs = AuditLog.query.count()
-
-    # 👤 Unique users (active users)
-    active_users = db.session.query(
-        func.count(func.distinct(AuditLog.user_id))
-    ).scalar()
-
-    # 🔁 Most common action
-    most_common = db.session.query(
-        AuditLog.action,
-        func.count(AuditLog.id).label("count")
-    ).group_by(AuditLog.action).order_by(func.count(AuditLog.id).desc()).first()
-
-    most_common_action = most_common[0] if most_common else "N/A"
-
-    # 📅 Today's logs
-    today = date.today()
-    today_logs = db.session.query(func.count(AuditLog.id)).filter(
-        func.date(AuditLog.timestamp) == today
-    ).scalar()
-
-    # 🔍 FILTERS
-    action = request.args.get("action")
-    user_id = request.args.get("user_id")
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
-
-    query = db.session.query(AuditLog)
+    # =========================
+    # ACTION FILTER
+    # =========================
 
     if action:
-        query = query.filter(AuditLog.action == action)
+
+        query = query.filter(
+            AuditLog.action.ilike(
+                f"%{action}%"
+            )
+        )
+
+
+    # =========================
+    # USER ID FILTER
+    # =========================
 
     if user_id:
-        query = query.filter(AuditLog.user_id == user_id)
+
+        if user_id.isdigit():
+
+            query = query.filter(
+                AuditLog.user_id == int(user_id)
+            )
+
+
+    # =========================
+    # START DATE FILTER
+    # =========================
 
     if start_date:
-        query = query.filter(AuditLog.timestamp >= datetime.strptime(start_date, "%Y-%m-%d"))
+
+        try:
+
+            start = datetime.strptime(
+                start_date,
+                "%Y-%m-%d"
+            )
+
+            query = query.filter(
+                AuditLog.created_at >= start
+            )
+
+        except ValueError:
+
+            flash(
+                "Invalid start date.",
+                "warning"
+            )
+
+
+    # =========================
+    # END DATE FILTER
+    # =========================
 
     if end_date:
-        query = query.filter(AuditLog.timestamp <= datetime.strptime(end_date, "%Y-%m-%d"))
 
-    logs = query.order_by(AuditLog.timestamp.desc()).all()
+        try:
+
+            end = datetime.strptime(
+                end_date,
+                "%Y-%m-%d"
+            )
+
+            # Include the entire end date
+            end = end.replace(
+                hour=23,
+                minute=59,
+                second=59,
+                microsecond=999999
+            )
+
+            query = query.filter(
+                AuditLog.created_at <= end
+            )
+
+        except ValueError:
+
+            flash(
+                "Invalid end date.",
+                "warning"
+            )
+
+
+    # =========================
+    # ORDER BY NEWEST
+    # =========================
+
+    query = query.order_by(
+        AuditLog.created_at.desc()
+    )
+
+
+    # =========================
+    # PAGINATION
+    # =========================
+
+    logs = query.paginate(
+        page=page,
+        per_page=20,
+        error_out=False
+    )
+
+
+    # =========================
+    # DASHBOARD STATISTICS
+    # =========================
+
+    total_logs = AuditLog.query.count()
+
+
+    active_users = (
+        db.session.query(
+            AuditLog.user_id
+        )
+        .filter(
+            AuditLog.user_id.isnot(None)
+        )
+        .distinct()
+        .count()
+    )
+
+
+    today_logs = AuditLog.query.filter(
+        func.date(
+            AuditLog.created_at
+        ) == date.today()
+    ).count()
+
+
+    # =========================
+    # MOST COMMON ACTION
+    # =========================
+
+    most_common = (
+        db.session.query(
+            AuditLog.action,
+            func.count(AuditLog.id)
+        )
+        .group_by(
+            AuditLog.action
+        )
+        .order_by(
+            func.count(
+                AuditLog.id
+            ).desc()
+        )
+        .first()
+    )
+
+
+    most_common_action = (
+        most_common[0]
+        if most_common
+        else "None"
+    )
+
+
+    # =========================
+    # LOGS PER DAY
+    # =========================
+
+    logs_per_day = (
+        db.session.query(
+            func.date(
+                AuditLog.created_at
+            ),
+            func.count(
+                AuditLog.id
+            )
+        )
+        .group_by(
+            func.date(
+                AuditLog.created_at
+            )
+        )
+        .order_by(
+            func.date(
+                AuditLog.created_at
+            )
+        )
+        .all()
+    )
+
+
+    dates = [
+        str(row[0])
+        for row in logs_per_day
+    ]
+
+    counts = [
+        row[1]
+        for row in logs_per_day
+    ]
+
+
+    # =========================
+    # ACTIONS CHART
+    # =========================
+
+    actions = (
+        db.session.query(
+            AuditLog.action,
+            func.count(AuditLog.id)
+        )
+        .group_by(
+            AuditLog.action
+        )
+        .order_by(
+            func.count(
+                AuditLog.id
+            ).desc()
+        )
+        .all()
+    )
+
+
+    action_labels = [
+        row[0]
+        for row in actions
+    ]
+
+    action_counts = [
+        row[1]
+        for row in actions
+    ]
+
+
+    # =========================
+    # RENDER PAGE
+    # =========================
+
     return render_template(
         "admin/audit_logs.html",
-        logs=logs,
-        dates=dates,
-        counts=counts,
-        action_labels=action_labels,
-        action_counts=action_counts,
+
+        logs=logs.items,
+
+        pagination=logs,
+
+        action=action,
+
+        user_id=user_id,
+
+        start_date=start_date,
+
+        end_date=end_date,
+
         total_logs=total_logs,
+
         active_users=active_users,
+
+        today_logs=today_logs,
+
         most_common_action=most_common_action,
-        today_logs=today_logs
+
+        dates=dates,
+
+        counts=counts,
+
+        action_labels=action_labels,
+
+        action_counts=action_counts
     )
 # ==================
 # LOGS DELETES

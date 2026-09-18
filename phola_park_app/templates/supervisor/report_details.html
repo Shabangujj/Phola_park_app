@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Report Details - Phola Park
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='supervisor.css') }}">
+
+<div class="supervisor-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <h1>Report Details</h1>
+
+            <p>
+                Portfolio:
+                <strong>{{ report.portfolio }}</strong>
+            </p>
+        </div>
+
+        <a href="{{ url_for('supervisor.reports') }}"
+           class="btn btn-secondary">
+            ← Back to Reports
+        </a>
+
+    </div>
+
+
+    <!-- REPORT INFORMATION -->
+    <section class="card">
+
+        <div class="card-header">
+            📋 Report Information
+        </div>
+
+        <div class="card-body">
+
+            <div class="report-details-grid">
+
+                <div class="detail-item">
+                    <span class="detail-label">Report ID</span>
+                    <strong>#{{ report.id }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Category</span>
+                    <strong>
+                        {{ report.category or report.report_type or 'N/A' }}
+                    </strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+
+                    <span class="status-badge
+                        {% if report.status == 'Pending' %}
+                            status-pending
+                        {% elif report.status == 'In Progress' %}
+                            status-progress
+                        {% elif report.status == 'Completed' %}
+                            status-completed
+                        {% elif report.status == 'Rejected' %}
+                            status-rejected
+                        {% endif %}">
+
+                        {{ report.status }}
+
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Date Submitted</span>
+
+                    <strong>
+                        {% if report.created_at %}
+                            {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% elif report.timestamp %}
+                            {{ report.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+            <div class="report-description">
+
+                <h3>Description</h3>
+
+                <div class="description-box">
+                    {{ report.description or 'No description provided.' }}
+                </div>
+
+            </div>
+
+
+            <!-- CURRENT COMMENT -->
+            {% if report.comment %}
+
+            <div class="report-comment">
+
+                <h3>Supervisor Comment</h3>
+
+                <div class="comment-box">
+                    {{ report.comment }}
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- UPDATE REPORT -->
+    <section class="card">
+
+        <div class="card-header">
+            ✏️ Update Report
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST"
+      action="{{ url_for('supervisor.update_report_status', report_id=report.id) }}">
+
+    <input type="hidden"
+           name="csrf_token"
+           value="{{ csrf_token() }}">
+
+    <label for="status">Status</label>
+
+    <select name="status" id="status">
+        <option value="Pending"
+                {% if report.status == "Pending" %}selected{% endif %}>
+            Pending
+        </option>
+
+        <option value="In Progress"
+                {% if report.status == "In Progress" %}selected{% endif %}>
+            In Progress
+        </option>
+
+        <option value="Completed"
+                {% if report.status == "Completed" %}selected{% endif %}>
+            Completed
+        </option>
+
+        <option value="Rejected"
+                {% if report.status == "Rejected" %}selected{% endif %}>
+            Rejected
+        </option>
+    </select>
+
+    <br><br>
+
+    <label for="comment">
+        Supervisor Comment
+    </label>
+
+    <br>
+
+    <textarea name="comment"
+              id="comment"
+              rows="5">{{ report.comment or "" }}</textarea>
+
+    <br><br>
+
+    <button type="submit">
+        Update Report
+    </button>
+
+</form>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

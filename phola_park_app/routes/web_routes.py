@@ -108,7 +108,7 @@ def supervisor_dashboard():
 
     reports = Report.query.filter_by(portfolio=portfolio).order_by(Report.created_at.desc()).all()
 
-    return render_template('supervisor_dashboard.html', reports=reports)
+    return render_template('supervisor/supervisor_dashboard.html', reports=reports)
 
 from flask import Blueprint, render_template, abort
 from flask_login import login_required, current_user
@@ -180,7 +180,7 @@ def user_reports():
     )
 
     return render_template(
-        "user/user_reports.html",
+        "user/submit_reports.html",
         reports=reports
     )
 

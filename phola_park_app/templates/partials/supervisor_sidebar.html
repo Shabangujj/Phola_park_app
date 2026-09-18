@@ -1,24 +1,124 @@
-<div class="sidebar">
-  <div class="sidebar-header">
-    <h4>Phola Park</h4>
-    <span class="role-badge">Supervisor</span>
-  </div>
+<!-- ========================================= -->
+<!-- SUPERVISOR SIDEBAR -->
+<!-- ========================================= -->
 
-  <ul class="sidebar-menu">
-    <li>
-      <a href="{{ url_for('supervisor.dashboard') }}">Dashboard</a>
-    </li>
-    <li>
-      <a href="{{ url_for('supervisor.reports') }}">Reports</a>
-    </li>
-    <li>
-      <a href="{{ url_for('supervisor.surveys') }}">Surveys</a>
-    </li>
-    <li>
-      <a href="{{ url_for('main.notifications_page') }}">Notifications</a>
-    </li>
-    <li class="logout">
-      <a href="{{ url_for('auth.logout') }}">Logout</a>
-    </li>
-  </ul>
-</div>
+<aside class="sidebar">
+
+    <!-- ========================================= -->
+    <!-- BRAND -->
+    <!-- ========================================= -->
+
+    <div class="mb-4">
+
+        <h2>Phola Park</h2>
+
+        <small>Supervisor Panel</small>
+
+        {% if current_user.portfolio %}
+            <small>
+                Portfolio: {{ current_user.portfolio }}
+            </small>
+        {% endif %}
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- NAVIGATION -->
+    <!-- ========================================= -->
+
+    <ul class="nav flex-column">
+
+
+        <!-- Dashboard -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('supervisor/supervisor_dashboard') }}"
+                class="nav-link"
+            >
+                🏠 Dashboard
+            </a>
+
+        </li>
+
+
+        <!-- Reports -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('supervisor.reports') }}"
+                class="nav-link"
+            >
+                📋 Reports
+            </a>
+
+        </li>
+        <!-- Notices -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('supervisor.notices') }}"
+                class="nav-link"
+            >
+                📋 NOTICES
+            </a>
+
+        </li>
+
+        <!-- Surveys -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('supervisor.surveys') }}"
+                class="nav-link"
+            >
+                📊 Surveys
+            </a>
+
+        </li>
+
+
+        <!-- Committees -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('supervisor.committees') }}"
+                class="nav-link"
+            >
+                👥 Committees
+            </a>
+
+        </li>
+
+
+        <!-- Divider -->
+
+        <li class="nav-item mt-3">
+
+            <hr>
+
+        </li>
+
+
+        <!-- Logout -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+                class="nav-link"
+            >
+                🚪 Logout
+            </a>
+
+        </li>
+
+    </ul>
+
+</aside>

@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>
-        {% block title %}Phola Park App{% endblock %}
+        {% block title %}
+            Phola Park App
+        {% endblock %}
     </title>
 
     <!-- MAIN CSS -->
@@ -15,66 +21,281 @@
     <!-- FONT AWESOME -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
+
 
 <body>
 
-    <!-- TOPBAR -->
-    {% include "partials/topbar.html" %}
 
-    <!-- PAGE LAYOUT -->
-    <div class="dashboard-container">
+<!-- =====================================================
+     TOPBAR
+===================================================== -->
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
+{% include "partials/topbar.html" %}
+
+
+
+<!-- =====================================================
+     PAGE LAYOUT
+===================================================== -->
+
+<div class="dashboard-container">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+
+        <!-- BRAND -->
+        <div class="sidebar-brand">
 
             <div class="logo">
-                Phola Park
+                🔒 Phola Park
             </div>
 
-            <a href="{{ url_for('main.admin_dashboard') }}">
-                <i class="fas fa-home"></i>
-                Dashboard
+            <span>
+                Community Service Portal
+            </span>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <nav class="sidebar-nav">
+
+
+            <!-- =================================================
+                 ADMIN SIDEBAR
+            ================================================== -->
+            {% if current_user.is_authenticated and current_user.role %}
+            {% if current_user.role.name|lower == "admin" %}
+
+        <a
+    href="{{ url_for('main.admin_dashboard') }}"
+    class="{% if request.endpoint == 'main.admin_dashboard' %}active{% endif %}"
+>
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+</a>
+
+<a
+    href="{{ url_for('admin.users') }}"
+    class="{% if request.endpoint.startswith('admin.user') %}active{% endif %}"
+>
+    <i class="fas fa-users"></i>
+    <span>Users</span>
+</a>
+
+<a
+    href="{{ url_for('admin.reports') }}"
+    class="{% if request.endpoint.startswith('admin.report') %}active{% endif %}"
+>
+    <i class="fas fa-file-alt"></i>
+    <span>Reports</span>
+</a>
+
+<a
+    href="{{ url_for('admin.announcements') }}"
+    class="{% if request.endpoint.startswith('admin.announcement') %}active{% endif %}"
+>
+    <i class="fas fa-bullhorn"></i>
+    <span>Announcements</span>
+</a>
+
+<a
+    href="{{ url_for('admin.audit_logs') }}"
+    class="{% if request.endpoint.startswith('admin.audit') %}active{% endif %}"
+>
+    <i class="fas fa-history"></i>
+    <span>Audit Logs</span>
+</a>
+
+            <!-- =================================================
+                 SUPERVISOR SIDEBAR
+            ================================================== -->
+
+            {% elif current_user.role.name|lower == "supervisor" %}
+
+        <a
+    href="{{ url_for('supervisor.dashboard') }}"
+    class="{% if request.endpoint == 'supervisor.dashboard' %}active{% endif %}"
+>
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+</a>
+
+<a
+    href="{{ url_for('supervisor.reports') }}"
+    class="{% if request.endpoint.startswith('supervisor.report') %}active{% endif %}"
+>
+    <i class="fas fa-file-alt"></i>
+    <span>Reports</span>
+</a>
+
+<a
+    href="{{ url_for('supervisor.surveys') }}"
+    class="{% if request.endpoint.startswith('supervisor.survey') %}active{% endif %}"
+>
+    <i class="fas fa-clipboard-list"></i>
+    <span>Surveys</span>
+</a>
+
+<a
+    href="{{ url_for('supervisor.committees') }}"
+    class="{% if request.endpoint.startswith('supervisor.committee') %}active{% endif %}"
+>
+    <i class="fas fa-users"></i>
+    <span>Committees</span>
+</a>
+
+
+<a
+    href="{{ url_for('supervisor.notices') }}"
+    class="{% if request.endpoint.startswith('supervisor.notices') %}active{% endif %}"
+>
+    <i class="fas fa-users"></i>
+    <span>NOTICES</span>
+</a>
+
+
+
+            <!-- =================================================
+                 USER SIDEBAR
+            ================================================== -->
+
+            {% else %}
+
+        <a
+    href="{{ url_for('user.user_dashboard') }}"
+    class="{% if request.endpoint == 'user.user_dashboard' %}active{% endif %}"
+>
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+</a>
+
+<a
+    href="{{ url_for('user.user_reports') }}"
+    class="{% if request.endpoint == 'user.user_reports' %}active{% endif %}"
+>
+    <i class="fas fa-file-alt"></i>
+    <span>My Reports</span>
+</a>
+
+<a
+    href="{{ url_for('user.submit_report') }}"
+    class="{% if request.endpoint == 'user.submit_report' %}active{% endif %}"
+>
+    <i class="fas fa-file-circle-plus"></i>
+    <span>Submit Report</span>
+</a>
+
+<a
+    href="{{ url_for('user.user_notices') }}"
+    class="{% if request.endpoint == 'user.user_notices' %}active{% endif %}"
+>
+    <i class="fas fa-bullhorn"></i>
+    <span>Notices</span>
+</a>
+
+<a
+    href="{{ url_for('user.surveys') }}"
+    class="{% if request.endpoint == 'user.surveys' %}active{% endif %}"
+>
+    <i class="fas fa-clipboard-list"></i>
+    <span>Surveys</span>
+</a>
+            {% endif %}
+            {% endif %}
+
+
+            <!-- =================================================
+                 LOGOUT
+            ================================================== -->
+
+            <div class="sidebar-divider"></div>
+
+            <a href="{{ url_for('auth.logout') }}"
+               class="sidebar-logout">
+
+                <i class="fas fa-sign-out-alt"></i>
+
+                <span>
+                    Logout
+                </span>
+
             </a>
 
-            <a href="{{ url_for('admin.users') }}">
-                <i class="fas fa-users"></i>
-                Users
-            </a>
-              {% for report in reports %}
-            <a href="{{ url_for('admin.reports', report_id=report.id) }}">
-                <i class="fas fa-file-alt"></i>
-                Reports
-            </a>
-            {% endfor %}
-            <a href="{{ url_for('admin.announcements') }}">
-                <i class="fas fa-bullhorn"></i>
-                Announcements
-            </a>
-    
-            <a href="{{ url_for('admin.audit_logs') }}">
-                <i class="fas fa-history"></i>
-                Audit Logs
-            </a>
 
-        </aside>
+        </nav>
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
+    </aside>
 
-            {% block content %}
-            {% endblock %}
 
-        </main>
 
-    </div>
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
 
-    <!-- FOOTER -->
-    {% include "partials/footer.html" %}
+    <main class="main-content">
 
-    <!-- EXTRA JS -->
-    {% block extra_js %}
-    {% endblock %}
+        {% block content %}
 
+        {% endblock %}
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+{% include "partials/footer.html" %}
+
+
+
+<!-- =====================================================
+     EXTRA JAVASCRIPT
+===================================================== -->
+<!-- =====================================================
+     SIDEBAR JAVASCRIPT
+===================================================== -->
+
+<script>
+
+function toggleSidebar() {
+
+    const sidebar = document.getElementById("sidebar");
+    const container = document.querySelector(".dashboard-container");
+
+    if (!sidebar) {
+        console.log("Sidebar not found");
+        return;
+    }
+
+    sidebar.classList.toggle("collapsed");
+
+    if (container) {
+        container.classList.toggle("sidebar-closed");
+    }
+
+}
+
+</script>
+
+{% block extra_js %}
+{% endblock %}
 </body>
+
 </html>

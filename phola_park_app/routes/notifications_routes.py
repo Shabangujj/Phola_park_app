@@ -1,116 +1,275 @@
-from flask import Blueprint, jsonify, session, redirect, url_for, request
+"""
+JJCORETECH
+Phola Park App
+
+Notification Routes
+"""
+
 from datetime import datetime
-from phola_park_app.models import Notification, User, Reports, Announcement
+
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    url_for,
+    render_template,
+    session,
+)
+
+from flask_login import login_required, current_user
+
 from phola_park_app.extensions import db
-notifications_bp = Blueprint("notifications", __name__, url_prefix="/notifications")
+
+from phola_park_app.models import (
+    Notification,
+    User,
+)
 
 
-# 🔔 CREATE NOTIFICATION (Reusable function)
-def create_notification(user_id, message):
+notifications_bp = Blueprint(
+    "notifications",
+    __name__,
+    url_prefix="/notifications"
+)
+
+
+# ============================================================
+# NOTIFICATION CENTER PAGE
+# ============================================================
+
+@notifications_bp.route("/page")
+@login_required
+def notification_page():
+
+    notifications = (
+        Notification.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Notification.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "notifications/notifications.html",
+        notifications=notifications
+    )
+
+# ============================================================
+# CREATE NOTIFICATION
+# Reusable helper
+# ============================================================
+
+def create_notification(
+    user_id,
+    title,
+    message,
+    role_target=None,
+    portfolio=None,
+    notification_type="general",
+):
+
     notification = Notification(
         user_id=user_id,
+        title=title,
         message=message,
+        role_target=role_target,
+        portfolio=portfolio,
+        notification_type=notification_type,
         is_read=False,
-        created_at=datetime.utcnow()
+        created_at=datetime.utcnow(),
     )
+
     db.session.add(notification)
     db.session.commit()
 
+    return notification
 
-# 📥 GET USER NOTIFICATIONS
-@notifications_bp.route("/", methods=["GET"])
+
+# ============================================================
+# GET USER NOTIFICATIONS
+# ============================================================
+
+@notifications_bp.route("/")
+@login_required
 def get_notifications():
-    if not session.get("user_id"):
-        return redirect(url_for("auth.login"))
 
-    user_id = session.get("user_id")
+    notifications = (
+        Notification.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Notification.created_at.desc())
+        .all()
+    )
 
-    notifications = Notification.query.filter_by(user_id=user_id)\
-        .order_by(Notification.created_at.desc()).all()
-
-    result = []
-    for n in notifications:
-        result.append({
+    return jsonify([
+        {
             "id": n.id,
+            "title": n.title,
             "message": n.message,
             "is_read": n.is_read,
-            "date": str(n.created_at)
-        })
+            "notification_type": n.notification_type,
+            "portfolio": n.portfolio,
+            "created_at": (
+                n.created_at.strftime("%Y-%m-%d %H:%M")
+                if n.created_at
+                else ""
+            ),
+        }
+        for n in notifications
+    ])
 
-    return jsonify(result)
 
+# ============================================================
+# MARK AS READ
+# ============================================================
 
-# ✅ MARK AS READ
-@notifications_bp.route("/read/<int:notification_id>", methods=["POST"])
+@notifications_bp.route(
+    "/read/<int:notification_id>",
+    methods=["POST"]
+)
+@login_required
 def mark_as_read(notification_id):
-    if not session.get("user_id"):
-        return redirect(url_for("auth.login"))
 
-    notification = Notification.query.get_or_404(notification_id)
+    notification = Notification.query.get_or_404(
+        notification_id
+    )
+
+    if notification.user_id != current_user.id:
+
+        return jsonify({
+            "error": "Unauthorized"
+        }), 403
+
     notification.is_read = True
+
     db.session.commit()
 
-    return jsonify({"message": "Marked as read"})
+    return jsonify({
+        "message": "Notification marked as read."
+    })
 
 
-# 🧹 MARK ALL AS READ
-@notifications_bp.route("/read_all", methods=["POST"])
+# ============================================================
+# MARK ALL AS READ
+# ============================================================
+
+@notifications_bp.route(
+    "/read_all",
+    methods=["POST"]
+)
+@login_required
 def mark_all_read():
-    if not session.get("user_id"):
-        return redirect(url_for("auth.login"))
 
-    user_id = session.get("user_id")
-
-    Notification.query.filter_by(user_id=user_id, is_read=False)\
-        .update({"is_read": True})
+    Notification.query.filter_by(
+        user_id=current_user.id,
+        is_read=False
+    ).update(
+        {
+            "is_read": True
+        }
+    )
 
     db.session.commit()
 
-    return jsonify({"message": "All notifications marked as read"})
+    return jsonify({
+        "message": "All notifications marked as read."
+    })
 
 
-# ❌ DELETE NOTIFICATION
-@notifications_bp.route("/delete/<int:notification_id>", methods=["POST"])
+# ============================================================
+# DELETE NOTIFICATION
+# ============================================================
+
+@notifications_bp.route(
+    "/delete/<int:notification_id>",
+    methods=["POST"]
+)
+@login_required
 def delete_notification(notification_id):
-    if not session.get("user_id"):
-        return redirect(url_for("auth.login"))
 
-    notification = Notification.query.get_or_404(notification_id)
+    notification = Notification.query.get_or_404(
+        notification_id
+    )
+
+    if notification.user_id != current_user.id:
+
+        return jsonify({
+            "error": "Unauthorized"
+        }), 403
 
     db.session.delete(notification)
+
     db.session.commit()
 
-    return jsonify({"message": "Notification deleted"})
+    return jsonify({
+        "message": "Notification deleted."
+    })
 
 
-# 🔔 TRIGGER: REPORT STATUS CHANGE
+# ============================================================
+# REPORT STATUS NOTIFICATION
+# ============================================================
+
 def notify_report_status(report, new_status):
-    user = User.query.get(report.user_id)
 
-    if user:
-        create_notification(
-            user.id,
-            f"Your report #{report.id} status changed to {new_status}"
-        )
+    create_notification(
+        user_id=report.user_id,
+        title="Report Status Updated",
+        message=(
+            f"Your report #{report.id} has been updated to "
+            f"'{new_status}'."
+        ),
+        role_target="user",
+        portfolio=report.portfolio,
+        notification_type="report",
+    )
 
 
-# 🔔 TRIGGER: NEW ANNOUNCEMENT
+# ============================================================
+# NEW ANNOUNCEMENT NOTIFICATION
+# ============================================================
+
 def notify_new_announcement(announcement):
+
     users = User.query.all()
 
     for user in users:
+
         create_notification(
-            user.id,
-            f"New announcement: {announcement.title}"
+            user_id=user.id,
+            title="New Community Announcement",
+            message=announcement.title,
+            role_target="user",
+            portfolio=announcement.portfolio,
+            notification_type="announcement",
         )
 
 
-# 🔔 TRIGGER: NEW REPORT (notify supervisor)
-def notify_new_report(report):
-    supervisors = User.query.filter_by(role="supervisor", portfolio=report.portfolio).all()
+# ============================================================
+# NEW REPORT NOTIFICATION
+# Supervisor
+# ============================================================
 
-    for sup in supervisors:
+def notify_new_report(report):
+
+    supervisors = (
+        User.query
+        .join(User.role)
+        .filter(
+            User.portfolio == report.portfolio,
+            User.role.has(name="supervisor")
+        )
+        .all()
+    )
+
+    for supervisor in supervisors:
+
         create_notification(
-            sup.id,
-            f"New report in {report.portfolio} portfolio"
+            user_id=supervisor.id,
+            title="New Community Report",
+            message=(
+                f"A new report has been submitted in the "
+                f"{report.portfolio} portfolio."
+            ),
+            role_target="supervisor",
+            portfolio=report.portfolio,
+            notification_type="report",
         )

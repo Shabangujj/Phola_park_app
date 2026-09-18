@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Notice - Phola Park App
+{% endblock %}
+
+{% block content %}
+
+<div class="user-dashboard">
+
+    <!-- HEADER -->
+
+    <div class="user-welcome">
+
+        <div>
+
+            <h1>
+                Edit Notice
+            </h1>
+
+            <p>
+                Update this notice for the
+                {{ portfolio }} portfolio.
+            </p>
+
+        </div>
+
+        <div class="user-badge">
+            ✏️ Edit Notice
+        </div>
+
+    </div>
+
+
+    <!-- FORM -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Notice Information
+                </h2>
+
+                <p>
+                    Update the notice details below.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for(
+                    'supervisor.notice_detail',
+                    notice_id=notice.id
+                ) }}"
+                class="section-link"
+            >
+                ← Back
+            </a>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'supervisor.edit_notice',
+                notice_id=notice.id
+            ) }}"
+        >
+
+            <!-- CSRF -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- TITLE -->
+
+            <div class="form-group">
+
+                <label for="title">
+                    Notice Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    value="{{ notice.title }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div class="form-group">
+
+                <label for="message">
+                    Notice Message
+                </label>
+
+                <textarea
+                    id="message"
+                    name="message"
+                    class="form-control"
+                    rows="6"
+                    required
+                >{{ notice.message }}</textarea>
+
+            </div>
+
+
+            <!-- NOTICE TYPE -->
+
+            <div class="form-group">
+
+                <label for="notice_type">
+                    Notice Type
+                </label>
+
+                <select
+                    id="notice_type"
+                    name="notice_type"
+                    class="form-control"
+                >
+
+                    <option
+                        value="Notice"
+                        {% if notice.notice_type == 'Notice' %}
+                            selected
+                        {% endif %}
+                    >
+                        Notice
+                    </option>
+
+                    <option
+                        value="Alert"
+                        {% if notice.notice_type == 'Alert' %}
+                            selected
+                        {% endif %}
+                    >
+                        Alert
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PRIORITY -->
+
+            <div class="form-group">
+
+                <label for="priority">
+                    Priority
+                </label>
+
+                <select
+                    id="priority"
+                    name="priority"
+                    class="form-control"
+                >
+
+                    <option
+                        value="Normal"
+                        {% if notice.priority == 'Normal' %}
+                            selected
+                        {% endif %}
+                    >
+                        Normal
+                    </option>
+
+                    <option
+                        value="Important"
+                        {% if notice.priority == 'Important' %}
+                            selected
+                        {% endif %}
+                    >
+                        Important
+                    </option>
+
+                    <option
+                        value="Urgent"
+                        {% if notice.priority == 'Urgent' %}
+                            selected
+                        {% endif %}
+                    >
+                        Urgent
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PORTFOLIO -->
+
+            <div class="form-group">
+
+                <label>
+                    Portfolio
+                </label>
+
+                <input
+                    type="text"
+                    class="form-control"
+                    value="{{ portfolio }}"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="mt-3">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="fas fa-save"></i>
+
+                    Save Changes
+
+                </button>
+
+
+                <a
+                    href="{{ url_for(
+                        'supervisor.notice_detail',
+                        notice_id=notice.id
+                    ) }}"
+                    class="btn btn-secondary"
+                >
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

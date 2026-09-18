@@ -1,204 +1,516 @@
 {% extends "base.html" %}
+
 {% block content %}
+
 <link rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}">
+
 <div class="dashboard-container">
+
     <main class="main-content">
-    
+
         <!-- PAGE HEADER -->
-         <!--TOP BAR-->
-         <header class="topbar">  
-        <div class="page-header">
-            <p>Welcome back, Admin! 
-                Here's an overview of the latest 
-                activity in Phola Park.</p>
+        <header class="topbar">
+
+            <div class="page-header">
+
+                <p>
+                    Welcome back, Admin!
+                    Here's an overview of the latest
+                    activity in Phola Park.
+                </p>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE TITLE -->
+        <h2 class="announcement-card">
+            Audit Logs Dashboard
+        </h2>
+
+
+        <!-- ========================= -->
+        <!-- FILTERS -->
+        <!-- ========================= -->
+
+        <div class="filter-form">
+
+            <form method="GET" class="filter-form">
+
+                <div class="input">
+
+                    <input
+                        type="text"
+                        name="action"
+                        value="{{ request.args.get('action', '') }}"
+                        placeholder="Action (LOGIN)"
+                        class="form-control"
+                    >
+
                 </div>
-                </header>
 
 
+                <div class="input">
 
-    <h2 class="announcement-card">Audit Logs Dashboard</h2>
+                    <input
+                        type="number"
+                        name="user_id"
+                        value="{{ request.args.get('user_id', '') }}"
+                        placeholder="User ID"
+                        class="form-control"
+                    >
 
-    <!-- 🔍 Filters -->
-    <div class="filter-form">
-         
-        <form method="GET" class="filter-form">
+                </div>
 
-            <div class="input">
-                <input type="text" name="action" placeholder="Action (LOGIN)" class="form-control">
-            </div>
 
-            <div class="input">
-                <input type="number" name="user_id" placeholder="User ID" class="form-control">
-            </div>
+                <div class="input">
 
-            <div class="input">
-                <input type="date" name="start_date" class="form-control">
-            </div>
+                    <input
+                        type="date"
+                        name="start_date"
+                        value="{{ request.args.get('start_date', '') }}"
+                        class="form-control"
+                    >
 
-            <div class="input">
-                <input type="date" name="end_date" class="form-control">
-            </div>
+                </div>
 
-            <div class="button">
-                <button class="btn btn-primary w-100">Filter</button>
-                <a href="{{ url_for('admin.export_audit_logs') }}" class="btn btn-success w-100">
-                    Export CSV
-                </a>
-            </div>
 
-        </form>
-    </div>
+                <div class="input">
 
-    <!-- 📊 SUMMARY CARDS -->
-    <div class="stats-container">
+                    <input
+                        type="date"
+                        name="end_date"
+                        value="{{ request.args.get('end_date', '') }}"
+                        class="form-control"
+                    >
 
-        <div class="card">
-                <h6>Total Logs</h6>
-                <h3>{{ total_logs }}</h3>
-            
-        </div>
+                </div>
 
-        <div class="card">
-                <h6>Active Users</h6>
-                <h3>{{ active_users }}</h3>
-        </div>
 
-        <div class="card">
-                <h6>Top Action</h6>
-                <h3>{{ most_common_action }}</h3>
-        </div>
+                <div class="button">
 
-        <div class="card">
-                <h6>Today Logs</h6>
-                <h3>{{ today_logs }}</h3>
-        </div>
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100">
+                        Filter
+                    </button>
 
-    </div>
 
-    <!-- 📊 CHARTS -->
-    <div class="charts-container">
+                   <a
+    href="{{ url_for(
+        'admin.export_audit_logs',
+        action=request.args.get('action', ''),
+        user_id=request.args.get('user_id', ''),
+        start_date=request.args.get('start_date', ''),
+        end_date=request.args.get('end_date', '')
+    ) }}"
+    class="btn btn-success w-100">
+    Export CSV
+</a>
 
-        <div class="chart-card">
-            <canvas id="logsChart"></canvas>
-        </div>
-
-        <div class="chart-card">
-            <canvas id="actionsChart"></canvas>
-        </div>
-
-    </div>
-
-    <!-- 📋 TABLE -->
-    <div class="table-section">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Action</th>
-                    <th>Description</th>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-
-{% if logs %}
-
-    {% for log in logs %}
-
-    <tr>
-        <td>{{ log.id }}</td>
-        <td>{{ log.action }}</td>
-        <td>{{ log.description }}</td>
-
-        <td>
-            {% if log.user %}
-                {{ log.user.username }}
-            {% else %}
-                Unknown
-            {% endif %}
-        </td>
-
-        <td>
-            {% if log.created_at %}
-                {{ log.created_at.strftime("%d %b %Y %H:%M") }}
-            {% endif %}
-        </td>
-
-        <td>
-            <form method="POST"
-                  action="{{ url_for('admin.delete_audit_log', log_id=log.id) }}"
-                  onsubmit="return confirm('Delete this log?');">
-
-                <button class="btn btn-danger btn-sm">
-                    Delete
-                </button>
+                </div>
 
             </form>
-        </td>
-    </tr>
 
-    {% endfor %}
+        </div>
 
-{% else %}
 
-<tr>
-    <td colspan="6" class="text-center">
-        No audit logs found.
-    </td>
-</tr>
+        <!-- ========================= -->
+        <!-- SUMMARY CARDS -->
+        <!-- ========================= -->
 
-{% endif %}
+        <div class="stats-container">
 
-</tbody>
-        </table>
+            <div class="card">
+
+                <h6>Total Logs</h6>
+
+                <h3>
+                    {{ total_logs }}
+                </h3>
+
+            </div>
+
+
+            <div class="card">
+
+                <h6>Active Users</h6>
+
+                <h3>
+                    {{ active_users }}
+                </h3>
+
+            </div>
+
+
+            <div class="card">
+
+                <h6>Top Action</h6>
+
+                <h3>
+                    {{ most_common_action }}
+                </h3>
+
+            </div>
+
+
+            <div class="card">
+
+                <h6>Today Logs</h6>
+
+                <h3>
+                    {{ today_logs }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+<!-- ========================= -->
+<!-- CHARTS -->
+<!-- ========================= -->
+
+<div class="charts-container">
+
+    <div class="chart-card">
+
+        <h4>Logs Per Day</h4>
+
+        <div style="height: 300px;">
+
+            <canvas id="logsChart"></canvas>
+
+        </div>
+
     </div>
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <div class="chart-card">
+
+        <h4>Actions Distribution</h4>
+
+        <div style="height: 300px;">
+
+            <canvas id="actionsChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+        <!-- ========================= -->
+        <!-- AUDIT LOG TABLE -->
+        <!-- ========================= -->
+
+        <div class="table-section">
+
+            <table class="table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Action</th>
+
+                        <th>Description</th>
+
+                        <th>User</th>
+
+                        <th>Date</th>
+
+                        <th>Delete</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% if logs %}
+
+                        {% for log in logs %}
+
+                        <tr>
+
+                            <!-- ID -->
+                            <td>
+                                {{ log.id }}
+                            </td>
+
+
+                            <!-- ACTION -->
+                            <td>
+                                {{ log.action }}
+                            </td>
+
+
+                            <!-- DESCRIPTION -->
+                            <td>
+                                {{ log.description }}
+                            </td>
+
+
+                            <!-- USER -->
+                            <td>
+
+                                {% if log.user %}
+
+                                    {{ log.user.username }}
+
+                                {% else %}
+
+                                    Unknown
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- DATE -->
+                            <td>
+
+                                {% if log.created_at %}
+
+                                    {{ log.created_at.strftime("%d %b %Y %H:%M") }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- DELETE -->
+                            <td>
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('admin.delete_log', log_id=log.id) }}"
+                                    onsubmit="return confirm('Delete this audit log?');"
+                                >
+
+                                    <!-- CSRF PROTECTION -->
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-danger btn-sm"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="text-center"
+                            >
+                                No audit logs found.
+                            </td>
+
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </main>
+
+</div>
+
+<!-- ========================= -->
+<!-- CHART.JS -->
+<!-- ========================= -->
+
+<script src="{{ url_for('static', filename='css/js/chart.min.js') }}"></script>
+
+<script type="application/json" id="audit-chart-data">
+{
+    "dates": {{ dates | default([]) | tojson }},
+    "counts": {{ counts | default([]) | tojson }},
+    "actionLabels": {{ action_labels | default([]) | tojson }},
+    "actionCounts": {{ action_counts | default([]) | tojson }}
+}
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const dates = JSON.parse('{{ dates | tojson | safe }}');
-    const counts = JSON.parse('{{ counts | tojson | safe }}');
-    const actionLabels = JSON.parse('{{ action_labels | tojson | safe }}');
-    const actionCounts = JSON.parse('{{ action_counts | tojson | safe }}');
+    console.log("Audit charts loading...");
 
-    new Chart(document.getElementById("logsChart"), {
-        type: "bar",
-        data: {
-            labels: dates,
-            datasets: [{
-                label: "Logs per Day",
-                data: counts
-            }]
-        }
-    });
+    const chartData = JSON.parse(
+        document.getElementById("audit-chart-data").textContent
+    );
+    const auditLogDates = chartData.dates;
+    const logsPerDayCounts = chartData.counts;
+    const actionLabels = chartData.actionLabels;
+    const actionCounts = chartData.actionCounts;
 
-    new Chart(document.getElementById("actionsChart"), {
-        type: "pie",
-        data: {
-            labels: actionLabels,
-            datasets: [{
-                data: actionCounts
-            }]
+
+    console.log("Dates:", auditLogDates);
+    console.log("Counts:", logsPerDayCounts);
+    console.log("Actions:", actionLabels);
+    console.log("Action counts:", actionCounts);
+
+
+    /* ========================= */
+    /* LOGS PER DAY */
+    /* ========================= */
+
+    const logsCanvas =
+        document.getElementById("logsChart");
+
+    if (logsCanvas) {
+
+        if (typeof Chart === "undefined") {
+
+            console.error(
+                "Chart.js failed to load."
+            );
+
+            return;
         }
-    });
+
+
+        new Chart(logsCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: auditLogDates,
+
+                datasets: [{
+                    label: "Logs per Day",
+                    data: logsPerDayCounts
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    } else {
+
+        console.error(
+            "logsChart canvas not found."
+        );
+
+    }
+
+
+    /* ========================= */
+    /* ACTION DISTRIBUTION */
+    /* ========================= */
+
+    const actionsCanvas =
+        document.getElementById("actionsChart");
+
+    if (actionsCanvas) {
+
+        new Chart(actionsCanvas, {
+
+            type: "pie",
+
+            data: {
+
+                labels: actionLabels,
+
+                datasets: [{
+                    data: actionCounts
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false
+
+            }
+
+        });
+
+    } else {
+
+        console.error(
+            "actionsChart canvas not found."
+        );
+
+    }
 
 });
 </script>
- <!-- FOOTER -->
-        <footer class="footer">
+<!-- ========================= -->
+<!-- FOOTER -->
+<!-- ========================= -->
 
-            <p>
-                &copy; 2024 Phola Park |
-                All rights reserved |
-                Service Delivery System
-            </p>
+<footer class="footer">
 
-        </footer>
+    <p>
+
+        &copy; 2024 Phola Park |
+
+        All rights reserved |
+
+        Service Delivery System
+
+    </p>
+
+</footer>
 
 
 {% endblock %}

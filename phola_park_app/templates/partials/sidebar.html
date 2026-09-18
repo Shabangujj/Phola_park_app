@@ -1,47 +1,102 @@
-<aside class="sidebar">
+{% if current_user.is_authenticated %}
 
-    <h3>Menu</h3>
+    {% if current_user.role and current_user.role.name|lower == "admin" %}
 
-    {% if current_user.is_authenticated %}
+        <!-- ADMIN SIDEBAR -->
 
-        <a href="{{ url_for('main.dashboard') }}">
-            Dashboard
+        <a href="{{ url_for('main.admin_dashboard') }}">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
         </a>
 
-        {% if current_user.role and current_user.role.name == 'user' %}
-            <a href="{{ url_for('user.surveys') }}">Surveys</a>
-            <a href="{{ url_for('user.user_reports') }}">My Reports</a>
-            <a href="{{ url_for('web.logout') }}">Logout</a>
-        {% endif %}
-
-        {% if current_user.role and current_user.role.name == 'supervisor' %}
-            <a href="{{ url_for('supervisor.reports') }}">Reports</a>
-            <a href="{{ url_for('supervisor.surveys') }}">Surveys</a>
-             <a href="{{ url_for('web.logout') }}">Logout</a>
-        {% endif %}
-
-        {% if current_user.role and current_user.role.name == 'admin' %}
-            <a href="{{ url_for('admin.admin_users') }}">User Management</a>
-            <a href="{{ url_for('admin.admin_surveys') }}">Surveys</a>
-            <a href="{{ url_for('admin.admin_reports') }}">Reports</a>
-            <a href="{{ url_for('admin.admin_announcements') }}">Announcements</a>
-             <a href="{{ url_for('web.logout') }}">Logout</a>
-        {% endif %}
-
-        <a href="{{ url_for('main.notifications_page') }}">
-            Notifications
-
-            {% if unread_notifications and unread_notifications|length > 0 %}
-                <span class="badge">
-                    {{ unread_notifications|length }}
-                </span>
-            {% endif %}
+        <a href="{{ url_for('admin.users') }}">
+            <i class="fas fa-users"></i>
+            <span>Users</span>
         </a>
 
+        <a href="{{ url_for('admin.reports') }}">
+            <i class="fas fa-file-alt"></i>
+            <span>Reports</span>
+        </a>
+
+        <a href="{{ url_for('admin.announcements') }}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Announcements</span>
+        </a>
+
+        <a href="{{ url_for('admin.audit_logs') }}">
+            <i class="fas fa-history"></i>
+            <span>Audit Logs</span>
+        </a>
+
+
+    {% elif current_user.role and current_user.role.name|lower == "supervisor" %}
+
+        <!-- SUPERVISOR SIDEBAR -->
+
+        <a href="{{ url_for('supervisor.dashboard') }}">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('supervisor.reports') }}">
+            <i class="fas fa-file-alt"></i>
+            <span>Reports</span>
+        </a>
+
+        
+
+        <a href="{{ url_for('supervisor.surveys') }}">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Surveys</span>
+        </a>
+
+         <a href="{{ url_for('supervisor.notices') }}">
+            <i class="fas fa-clipboard-list"></i>
+            <span>NOTICES</span>
+        </a>
     {% else %}
-        <p>
-            Please login to access menu
-        </p>
+
+        <!-- USER SIDEBAR -->
+
+        <a href="{{ url_for('user.user_dashboard') }}">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('user.user_reports') }}">
+            <i class="fas fa-file-alt"></i>
+            <span>My Reports</span>
+        </a>
+
+        <a href="{{ url_for('user.submit_report') }}">
+            <i class="fas fa-file-circle-plus"></i>
+            <span>Submit Report</span>
+        </a>
+
+        <a href="{{ url_for('user.user_notices') }}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Notices</span>
+        </a>
+
+        <a href="{{ url_for('user.surveys') }}">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Surveys</span>
+        </a>
+
     {% endif %}
 
-</aside>
+{% endif %}
+{% if current_user.is_authenticated %}
+
+    <div class="sidebar-divider"></div>
+
+    <a href="{{ url_for('auth.logout') }}"
+       class="sidebar-logout">
+
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+
+    </a>
+
+{% endif %}

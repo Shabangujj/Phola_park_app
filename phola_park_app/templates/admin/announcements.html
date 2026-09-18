@@ -54,7 +54,7 @@ href="{{ url_for('admin.create_announcement') }}">
 
 <a
 class="btn btn-warning btn-sm"
-href="{{ url_for('admin.edit_announcement', id=announcement.id) }}">
+href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id) }}">
 
 Edit
 
@@ -62,7 +62,7 @@ Edit
 
 <a
 class="btn btn-danger btn-sm"
-href="{{ url_for('admin.delete_announcement', id=announcement.id) }}">
+href="{{ url_for('admin.delete_announcement', announcement_id=announcement.id) }}">
 
 Delete
 

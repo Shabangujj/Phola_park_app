@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Survey - Phola Park App
+{% endblock %}
+
+{% block content %}
+
+<div class="user-dashboard">
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================== -->
+
+    <div class="user-welcome">
+
+        <div>
+
+            <h1>
+                <i class="fas fa-edit"></i>
+                Edit Survey
+            </h1>
+
+            <p>
+                Update this survey for the
+                {{ survey.portfolio }} portfolio.
+            </p>
+
+        </div>
+
+        <div class="user-badge">
+            📝 Survey
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         EDIT SURVEY
+    ========================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Survey Information
+                </h2>
+
+                <p>
+                    Update the survey details below.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('supervisor.surveys') }}"
+                class="section-link"
+            >
+                ← Surveys
+            </a>
+
+        </div>
+
+
+        <!-- =========================================
+             FORM
+        ========================================== -->
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'supervisor.edit_survey',
+                survey_id=survey.id
+            ) }}"
+        >
+
+            <!-- CSRF TOKEN -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- TITLE -->
+
+            <div class="form-group">
+
+                <label for="title">
+                    Survey Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    value="{{ survey.title or '' }}"
+                    placeholder="Enter survey title"
+                    required
+                >
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    class="form-control"
+                    rows="6"
+                    placeholder="Enter survey description"
+                >{{ survey.description or '' }}</textarea>
+
+            </div>
+
+
+            <!-- SURVEY TYPE -->
+
+            <div class="form-group">
+
+                <label for="survey_type">
+                    Survey Type
+                </label>
+
+                <select
+                    id="survey_type"
+                    name="survey_type"
+                    class="form-control"
+                    required
+                >
+
+                    <option value="">
+                        -- Select Survey Type --
+                    </option>
+
+                    <option
+                        value="Community"
+                        {% if survey.survey_type == 'Community' %}
+                            selected
+                        {% endif %}
+                    >
+                        Community
+                    </option>
+
+                    <option
+                        value="Service Delivery"
+                        {% if survey.survey_type == 'Service Delivery' %}
+                            selected
+                        {% endif %}
+                    >
+                        Service Delivery
+                    </option>
+
+                    <option
+                        value="Feedback"
+                        {% if survey.survey_type == 'Feedback' %}
+                            selected
+                        {% endif %}
+                    >
+                        Feedback
+                    </option>
+
+                    <option
+                        value="Other"
+                        {% if survey.survey_type == 'Other' %}
+                            selected
+                        {% endif %}
+                    >
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- LINK -->
+
+            <div class="form-group">
+
+                <label for="link">
+                    Survey Link
+                </label>
+
+                <input
+                    type="url"
+                    id="link"
+                    name="link"
+                    class="form-control"
+                    value="{{ survey.link or '' }}"
+                    placeholder="https://example.com/survey"
+                >
+
+            </div>
+
+
+            <!-- PORTFOLIO -->
+
+            <div class="form-group">
+
+                <label>
+                    Portfolio
+                </label>
+
+                <input
+                    type="text"
+                    class="form-control"
+                    value="{{ survey.portfolio }}"
+                    readonly
+                >
+
+                <small>
+                    The portfolio cannot be changed by the supervisor.
+                </small>
+
+            </div>
+
+
+            <!-- =========================================
+                 ACTIONS
+            ========================================== -->
+
+            <div class="mt-3">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="fas fa-save"></i>
+
+                    Save Changes
+
+                </button>
+
+
+                <a
+                    href="{{ url_for('supervisor.surveys') }}"
+                    class="btn btn-secondary"
+                >
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

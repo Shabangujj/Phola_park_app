@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}
+Notice Details - Phola Park App
+{% endblock %}
+
+{% block content %}
+
+<div class="user-dashboard">
+
+    <!-- HEADER -->
+
+    <div class="user-welcome">
+
+        <div>
+
+            <h1>
+                {{ notice.title }}
+            </h1>
+
+            <p>
+                Notice details for the
+                {{ portfolio }} portfolio.
+            </p>
+
+        </div>
+
+        <div class="user-badge">
+            📢 Notice
+        </div>
+
+    </div>
+
+
+    <!-- NOTICE DETAILS -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    {{ notice.title }}
+                </h2>
+
+                <p>
+                    Full notice information
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('supervisor.notices') }}"
+                class="section-link"
+            >
+                ← Notices
+            </a>
+
+        </div>
+
+
+        <!-- MESSAGE -->
+
+        <div class="form-group">
+
+            <label>
+                Message
+            </label>
+
+            <p>
+                {{ notice.message }}
+            </p>
+
+        </div>
+
+
+        <!-- INFORMATION -->
+
+        <div class="survey-meta">
+
+            <span>
+                📂 {{ notice.portfolio }}
+            </span>
+
+            <span>
+                📢 {{ notice.notice_type }}
+            </span>
+
+            <span>
+                ⚡ {{ notice.priority }}
+            </span>
+
+            {% if notice.is_active %}
+
+                <span>
+                    🟢 Active
+                </span>
+
+            {% else %}
+
+                <span>
+                    ⚪ Archived
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- DATE -->
+
+        <div class="mt-3">
+
+            <p>
+                <strong>Created:</strong>
+
+                {% if notice.created_at %}
+                    {{ notice.created_at.strftime('%Y-%m-%d %H:%M') }}
+                {% else %}
+                    Not available
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <!-- ACTIONS -->
+
+<div class="mt-3">
+
+    <!-- EDIT -->
+
+    <a
+        href="{{ url_for(
+            'supervisor.edit_notice',
+            notice_id=notice.id
+        ) }}"
+        class="btn btn-primary"
+    >
+
+        <i class="fas fa-edit"></i>
+
+        Edit Notice
+
+    </a>
+
+
+    <!-- ARCHIVE -->
+
+    {% if notice.is_active %}
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'supervisor.archive_notice',
+                notice_id=notice.id
+            ) }}"
+            style="display: inline;"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <button
+                type="submit"
+                class="btn btn-secondary"
+                onclick="return confirm(
+                    'Are you sure you want to archive this notice?'
+                );"
+            >
+
+                <i class="fas fa-archive"></i>
+
+                Archive Notice
+
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <!-- PUBLISH -->
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'supervisor.publish_notice',
+                notice_id=notice.id
+            ) }}"
+            style="display: inline;"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+
+                <i class="fas fa-upload"></i>
+
+                Publish Notice
+
+            </button>
+
+        </form>
+
+    {% endif %}
+
+
+    <!-- BACK -->
+
+    <a
+        href="{{ url_for('supervisor.notices') }}"
+        class="btn btn-secondary"
+    >
+
+        ← Back to Notices
+
+    </a>
+
+</div>
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

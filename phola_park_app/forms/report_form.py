@@ -20,6 +20,7 @@ class ReportForm(FlaskForm):
         "Portfolio",
         choices=[
             ("Water", "Water"),
+            ("Electricity", "Electricity"),
             ("Health", "Health"),
             ("Safety", "Safety"),
             ("Infrastructure", "Infrastructure")

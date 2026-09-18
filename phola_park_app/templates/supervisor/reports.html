@@ -1,0 +1,387 @@
+{% extends "supervisor_base.html" %}
+
+{% block title %}
+    Supervisor Reports
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='supervisor.css') }}">
+
+<div class="page-header">
+
+    <div>
+        <h1>Reports</h1>
+
+        <p>
+            Reports for your portfolio:
+            <strong>{{ portfolio }}</strong>
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     FILTERS
+========================================== -->
+
+<section class="card">
+
+    <div class="card-header">
+        🔎 Report Filters
+    </div>
+
+    <div class="card-body">
+
+        <form method="GET"
+              action="{{ url_for('supervisor.reports') }}"
+              class="filter-box">
+
+            <!-- STATUS -->
+
+            <div class="filter-group">
+
+                <label for="status">
+                    Status
+                </label>
+
+                <select name="status"
+                        id="status">
+
+                    <option value="all"
+                        {% if status == 'all' %}selected{% endif %}>
+                        All
+                    </option>
+
+                    <option value="Pending"
+                        {% if status == 'Pending' %}selected{% endif %}>
+                        Pending
+                    </option>
+
+                    <option value="In Progress"
+                        {% if status == 'In Progress' %}selected{% endif %}>
+                        In Progress
+                    </option>
+
+                    <option value="Completed"
+                        {% if status == 'Completed' %}selected{% endif %}>
+                        Completed
+                    </option>
+
+                    <option value="Rejected"
+                        {% if status == 'Rejected' %}selected{% endif %}>
+                        Rejected
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="filter-group">
+
+                <label for="keyword">
+                    Search
+                </label>
+
+                <input
+                    type="text"
+                    name="keyword"
+                    id="keyword"
+                    value="{{ keyword }}"
+                    placeholder="Search report description..."
+                >
+
+            </div>
+
+
+            <!-- START DATE -->
+
+            <div class="filter-group">
+
+                <label for="start_date">
+                    From
+                </label>
+
+                <input
+                    type="date"
+                    name="start_date"
+                    id="start_date"
+                    value="{{ start }}"
+                >
+
+            </div>
+
+
+            <!-- END DATE -->
+
+            <div class="filter-group">
+
+                <label for="end_date">
+                    To
+                </label>
+
+                <input
+                    type="date"
+                    name="end_date"
+                    id="end_date"
+                    value="{{ end }}"
+                >
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <div class="filter-actions">
+
+                <button type="submit"
+                        class="btn-primary">
+
+                    Apply Filters
+
+                </button>
+
+
+                <a href="{{ url_for('supervisor.reports') }}"
+                   class="btn-secondary">
+
+                    Clear
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+
+<!-- ==========================================
+     REPORT SUMMARY
+========================================== -->
+
+<section class="stats-grid">
+
+    <div class="stats-card">
+
+        <h6>Total Reports</h6>
+
+        <h2>
+            {{ reports|length }}
+        </h2>
+
+    </div>
+
+
+    <div class="stats-card warning">
+
+        <h6>Pending / In Progress</h6>
+
+        <h2>
+
+            {{ reports
+                |selectattr('status', 'equalto', 'Pending')
+                |list
+                |length
+            }}
+
+        </h2>
+
+    </div>
+
+
+    <div class="stats-card success">
+
+        <h6>Completed</h6>
+
+        <h2>
+
+            {{ reports
+                |selectattr('status', 'equalto', 'Completed')
+                |list
+                |length
+            }}
+
+        </h2>
+
+    </div>
+
+</section>
+
+
+
+<!-- ==========================================
+     REPORT TABLE
+========================================== -->
+
+<section class="card">
+
+    <div class="card-header">
+
+        📋 Portfolio Reports
+
+    </div>
+
+
+    <div class="card-body">
+
+        {% if reports %}
+
+        <div class="table-responsive">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Category</th>
+
+                        <th>Description</th>
+
+                        <th>Status</th>
+
+                        <th>Date</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for report in reports %}
+
+                    <tr>
+
+                        <td>
+                            #{{ report.id }}
+                        </td>
+
+
+                        <td>
+
+                            {{ report.category or 'Not specified' }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ report.description }}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if report.status == 'Pending' %}
+
+                                <span class="status-badge pending">
+                                    Pending
+                                </span>
+
+                            {% elif report.status == 'In Progress' %}
+
+                                <span class="status-badge progress">
+                                    In Progress
+                                </span>
+
+                            {% elif report.status == 'Completed' %}
+
+                                <span class="status-badge completed">
+                                    Completed
+                                </span>
+
+                            {% elif report.status == 'Rejected' %}
+
+                                <span class="status-badge rejected">
+                                    Rejected
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge">
+                                    {{ report.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if report.created_at %}
+
+                                {{ report.created_at.strftime(
+                                    "%Y-%m-%d %H:%M"
+                                ) }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'supervisor.report_detail',
+                                    report_id=report.id
+                                ) }}"
+                                class="btn-small"
+                            >
+
+                                View
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h3>No Reports Found</h3>
+
+                <p>
+                    There are currently no reports matching
+                    your filters for this portfolio.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -34,7 +34,7 @@ def dashboard():
     role = current_user.role.name
 
     if role == "admin":
-        return render_template("admin/admin_dashboard.html")
+        return render_template("admin/dashboard.html")
 
     elif role == "supervisor":
         return render_template("supervisor/supervisor_dashboard.html")
@@ -101,7 +101,7 @@ def admin_dashboard():
     }
 
     return render_template(
-        "admin/admin_dashboard.html",
+        "admin/dashboard.html",
         stats=stats,
         total_reports=Report.query.count(),
         total_users=User.query.count(),

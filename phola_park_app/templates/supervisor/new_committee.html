@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Add Committee - Phola Park App{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-section">
+
+    <div class="section-heading">
+        <div>
+            <h1>Add Committee</h1>
+
+            <p>
+                Create a committee for your
+                <strong>{{ portfolio }}</strong> portfolio.
+            </p>
+        </div>
+
+        <a href="{{ url_for('supervisor.committees') }}"
+           class="section-link">
+            ← Back to Committees
+        </a>
+    </div>
+
+
+    <!-- =========================================
+         CREATE COMMITTEE FORM
+    ========================================== -->
+
+    <form method="POST"
+          action="{{ url_for('supervisor.new_committee') }}"
+          class="committee-form">
+
+        <!-- IMPORTANT: CSRF TOKEN -->
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+
+        <!-- COMMITTEE NAME -->
+
+        <div class="form-group">
+
+            <label for="name">
+                Committee Name
+            </label>
+
+            <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="e.g. Electricity Community Committee"
+                required
+            >
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+
+        <div class="form-group">
+
+            <label for="description">
+                Description
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+                placeholder="Describe the purpose of this committee..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- PORTFOLIO -->
+
+        <div class="form-group">
+
+            <label for="portfolio">
+                Portfolio
+            </label>
+
+            <input
+                type="text"
+                id="portfolio"
+                name="portfolio"
+                value="{{ portfolio }}"
+                readonly
+            >
+
+        </div>
+
+
+        <!-- BUTTONS -->
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                <i class="fas fa-plus"></i>
+                Create Committee
+            </button>
+
+
+            <a
+                href="{{ url_for('supervisor.committees') }}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

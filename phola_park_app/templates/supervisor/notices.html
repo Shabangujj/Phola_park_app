@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}
+Supervisor Notices - Phola Park App
+{% endblock %}
+
+{% block content %}
+
+<div class="user-dashboard">
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================== -->
+
+    <div class="user-welcome">
+
+        <div>
+
+            <h1>
+                Portfolio Notices
+            </h1>
+
+            <p>
+                Manage notices for the
+                {{ portfolio }} portfolio.
+            </p>
+
+        </div>
+
+        <div class="user-badge">
+            📢 Notices
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         NOTICE MANAGEMENT
+    ========================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Notices
+                </h2>
+
+                <p>
+                    Create and manage community notices
+                    for your portfolio.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('supervisor.new_notice') }}"
+                class="btn btn-primary"
+            >
+                <i class="fas fa-plus"></i>
+                Create Notice
+            </a>
+
+        </div>
+
+
+        <!-- =========================================
+             NOTICE LIST
+        ========================================== -->
+
+        {% if notices %}
+
+            <div class="survey-list">
+
+                {% for notice in notices %}
+
+                    <div class="survey-card">
+
+                        <div class="survey-icon">
+                            📢
+                        </div>
+
+
+                        <div class="survey-content">
+
+                            <h3>
+                                {{ notice.title }}
+                            </h3>
+
+
+                            <p>
+                                {{ notice.message }}
+                            </p>
+
+
+                            <div class="survey-meta">
+
+                                <span>
+                                    📂
+                                    {{ notice.portfolio }}
+                                </span>
+
+
+                                <span>
+                                    📢
+                                    {{ notice.notice_type }}
+                                </span>
+
+
+                                <span>
+                                    ⚡
+                                    {{ notice.priority }}
+                                </span>
+
+
+                                {% if notice.is_active %}
+
+                                    <span>
+                                        🟢 Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span>
+                                        ⚪ Archived
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="mt-3">
+
+                                <a
+    href="{{ url_for(
+        'supervisor.notice_detail',
+        notice_id=notice.id
+    ) }}"
+    class="btn btn-secondary"
+>
+    <i class="fas fa-eye"></i>
+    View
+</a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <!-- =========================================
+                 EMPTY STATE
+            ========================================== -->
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📢
+                </div>
+
+                <h3>
+                    No Notices Yet
+                </h3>
+
+                <p>
+                    There are currently no notices
+                    for the {{ portfolio }} portfolio.
+                </p>
+
+                <div class="mt-3">
+
+                    <a
+                        href="{{ url_for('supervisor.new_notice') }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="fas fa-plus"></i>
+                        Create First Notice
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% include "partials/footer.html" %}
+
+{% endblock %}

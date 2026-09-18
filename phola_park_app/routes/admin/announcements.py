@@ -27,6 +27,7 @@ from phola_park_app.models import (
     Announcement
 )
 from phola_park_app.extensions import db
+from flask_wtf.csrf import generate_csrf
 @admin_bp.route("/announcements")
 @login_required
 @role_required("admin")
@@ -98,46 +99,25 @@ def view_announcement(
 @role_required("admin")
 def create_announcement():
 
-    # =================================================
-    # CREATE ANNOUNCEMENT
-    # =================================================
-
     if request.method == "POST":
 
-        # ---------------------------------------------
-        # Get form data
-        # ---------------------------------------------
+        title = request.form.get("title", "").strip()
+        message = request.form.get("message", "").strip()
+        target_role = request.form.get("target_role", "").strip()
+        portfolio = request.form.get("portfolio", "").strip()
+        priority = request.form.get("priority", "Normal").strip()
 
-        title = request.form.get(
-            "title",
-            ""
-        ).strip()
-
-        message = request.form.get(
-            "message",
-            ""
-        ).strip()
-
-        target_role = request.form.get(
-            "target_role",
-            ""
-        ).strip()
-
-        portfolio = request.form.get(
-            "portfolio",
-            ""
-        ).strip()
-
-        priority = request.form.get(
-            "priority",
-            "Normal"
-        ).strip()
-
-        # ---------------------------------------------
-        # Validate required fields
-        # ---------------------------------------------
+        print("=" * 60)
+        print("CREATE ANNOUNCEMENT TEST")
+        print("Title:", title)
+        print("Message:", message)
+        print("Target role:", target_role)
+        print("Portfolio:", portfolio)
+        print("Priority:", priority)
 
         if not title or not message:
+
+            print("ERROR: TITLE OR MESSAGE EMPTY")
 
             flash(
                 "Title and message are required.",
@@ -148,52 +128,55 @@ def create_announcement():
                 url_for("admin.create_announcement")
             )
 
-        # ---------------------------------------------
-        # Create announcement
-        # ---------------------------------------------
-
         announcement = Announcement(
-
             title=title,
-
             message=message,
-
-            target_role=target_role
-                if target_role
-                else None,
-
-            portfolio=portfolio
-                if portfolio
-                else None,
-
-            priority=priority,
-
+            target_role=target_role or None,
+            portfolio=portfolio or None,
+            priority=priority or "Normal",
             is_active=True,
-
             publish_date=datetime.utcnow()
-
         )
-
-        # ---------------------------------------------
-        # Save
-        # ---------------------------------------------
 
         try:
 
-            db.session.add(
-                announcement
-            )
+            db.session.add(announcement)
 
             db.session.commit()
+
+            print("ANNOUNCEMENT SAVED")
+            print("ID:", announcement.id)
+
+            # Verify immediately
+            test_count = Announcement.query.count()
+
+            print("ANNOUNCEMENT COUNT:", test_count)
+
+            saved = Announcement.query.get(
+                announcement.id
+            )
+
+            print("SAVED TITLE:", saved.title if saved else "NOT FOUND")
+
+            print("=" * 60)
+
+            flash(
+                "Announcement created successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for("admin.announcements")
+            )
 
         except Exception as e:
 
             db.session.rollback()
 
-            print(
-                "ANNOUNCEMENT ERROR:",
-                e
-            )
+            print("=" * 60)
+            print("ANNOUNCEMENT SAVE ERROR:")
+            print(repr(e))
+            print("=" * 60)
 
             flash(
                 "Unable to create announcement.",
@@ -204,25 +187,9 @@ def create_announcement():
                 url_for("admin.create_announcement")
             )
 
-        # ---------------------------------------------
-        # Success
-        # ---------------------------------------------
-
-        flash(
-            "Announcement created successfully.",
-            "success"
-        )
-
-        return redirect(
-            url_for("admin.announcements")
-        )
-
-    # =================================================
-    # GET
-    # =================================================
-
     return render_template(
-        "admin/create_announcement.html"
+        "admin/create_announcement.html",
+        csrf_token=generate_csrf()
     )
 @admin_bp.route(
     "/announcements/<int:announcement_id>/edit",
@@ -274,7 +241,9 @@ def edit_announcement(
 
         "admin/edit_announcement.html",
 
-        announcement=announcement
+        announcement=announcement,
+        announcement_id=announcement.id,
+        csrf_token=generate_csrf()
 
     )
 @admin_bp.route(
@@ -397,3 +366,4 @@ def announcement_dashboard():
         archived=archived
 
     )
+    

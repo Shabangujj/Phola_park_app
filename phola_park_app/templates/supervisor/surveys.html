@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Supervisor Surveys - Phola Park
+{% endblock %}
+
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='supervisor.css') }}">
+
+
+<div class="supervisor-page">
+
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>
+                Community Surveys
+            </h1>
+
+            <p>
+                Manage surveys for your portfolio:
+                <strong>{{ portfolio }}</strong>
+            </p>
+
+        </div>
+
+
+        <a href="{{ url_for('supervisor.create_survey') }}"
+           class="btn btn-primary">
+
+            <i class="fas fa-plus"></i>
+
+            Create Survey
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =========================================
+         SURVEY SUMMARY
+    ========================================== -->
+
+    <section class="stats-grid">
+
+        <div class="stats-card">
+
+            <h6>Total Surveys</h6>
+
+            <h2>
+                {{ surveys|length }}
+            </h2>
+
+        </div>
+
+
+        <div class="stats-card success">
+
+            <h6>Portfolio</h6>
+
+            <h2>
+                {{ portfolio }}
+            </h2>
+
+        </div>
+
+
+        <div class="stats-card warning">
+
+            <h6>Management</h6>
+
+            <h2>
+                Active
+            </h2>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================================
+         SURVEY LIST
+    ========================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <i class="fas fa-clipboard-list"></i>
+
+            Surveys
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            {% if surveys %}
+
+                <div class="survey-list">
+
+
+                    {% for survey in surveys %}
+
+                        <div class="survey-card">
+
+
+                            <!-- ICON -->
+
+                            <div class="survey-icon">
+
+                                📝
+
+                            </div>
+
+
+
+                            <!-- CONTENT -->
+
+                            <div class="survey-content">
+
+                                <h3>
+                                    {{ survey.title }}
+                                </h3>
+
+
+                                <p>
+
+                                    {{ survey.description
+                                       or "No description provided." }}
+
+                                </p>
+
+
+                                <div class="survey-meta">
+
+
+                                    <span>
+
+                                        📂
+
+                                        {{ survey.survey_type
+                                           or "General" }}
+
+                                    </span>
+
+
+
+                                    <span>
+
+                                        🏷
+
+                                        {{ survey.portfolio
+                                           or "All Portfolios" }}
+
+                                    </span>
+
+
+
+                                    {% if survey.total_questions is defined %}
+
+                                        <span>
+
+                                            ❓
+
+                                            {{ survey.total_questions }}
+                                            Questions
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if survey.created_at %}
+
+                                        <span>
+
+                                            📅
+
+                                            {{ survey.created_at.strftime(
+                                                "%Y-%m-%d"
+                                            ) }}
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+
+                                <!-- ACTIONS -->
+
+                                <div class="survey-actions">
+
+
+                                    <a
+                                        href="{{ url_for(
+                                            'supervisor.edit_survey',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        class="btn btn-secondary"
+                                    >
+
+                                        <i class="fas fa-edit"></i>
+
+                                        Edit
+
+                                    </a>
+
+
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'supervisor.delete_survey',
+                                            survey_id=survey.id
+                                        ) }}"
+                                        style="display:inline;"
+                                        onsubmit="return confirm(
+                                            'Are you sure you want to delete this survey?'
+                                        );"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="{{ csrf_token() }}"
+                                        >
+
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger"
+                                        >
+
+                                            <i class="fas fa-trash"></i>
+
+                                            Delete
+
+                                        </button>
+
+                                    </form>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <!-- EMPTY STATE -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+
+                        📝
+
+                    </div>
+
+
+                    <h3>
+                        No Surveys Yet
+                    </h3>
+
+
+                    <p>
+                        There are currently no surveys
+                        available for your portfolio.
+                    </p>
+
+
+                    <a
+                        href="{{ url_for('supervisor.upload_new_survey') }}"
+                        class="btn btn-primary"
+                    >
+
+                        <i class="fas fa-plus"></i>
+
+                        Create Your First Survey
+
+                    </a>
+
+                </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+{% endblock %}

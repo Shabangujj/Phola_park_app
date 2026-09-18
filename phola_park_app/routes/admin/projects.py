@@ -323,7 +323,7 @@ def project_dashboard():
 
     return render_template(
 
-        "admin/project_dashboard.html",
+        "admin/add_project.html",
 
         total=total,
 
@@ -336,3 +336,17 @@ def project_dashboard():
         cancelled=cancelled
 
     )
+@admin_bp.route("/projects/dashboard")
+@login_required
+@role_required("admin")
+def add_project():
+        return redirect(
+                url_for(
+                    "admin_routes"
+                )
+            )
+    
+        return render_template(
+            "admin/add_project.html"
+        )
+    

@@ -222,7 +222,7 @@ def reports():
     # -------------------------------------------------
 
     return render_template(
-        "admin_reports.html",
+        "admin/reports.html",
 
         reports=reports,
 

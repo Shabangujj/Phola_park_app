@@ -1,9 +1,29 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import (
+    Blueprint,
+    request,
+    jsonify,
+    render_template,
+    redirect,
+    url_for,
+    flash,
+    session
+)
+
+from werkzeug.security import (
+    check_password_hash,
+    generate_password_hash
+)
+
 from phola_park_app.extensions import db
 from phola_park_app.models import User, UserRole
-from flask_login import login_required, login_user, logout_user
+from phola_park_app.utils.audit import log_action
 
+from flask_login import (
+    login_required,
+    login_user,
+    logout_user,
+    current_user
+)
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -64,10 +84,25 @@ def login():
 
     print("SESSION SAVED:", session)
 
-    # =========================
-    # � LOGIN USER
-    # =========================
+# =========================
+# 🔐 LOGIN USER
+# =========================
     login_user(user)
+
+    # =========================
+    # 📝 AUDIT LOG
+    # =========================
+    try:
+        log_action(
+            user_id=user.id,
+            action="LOGIN",
+            module="AUTH",
+            description=f"User {user.username} logged in successfully",
+            ip_address=request.remote_addr,
+            user_agent=request.user_agent.string
+        )
+    except Exception as e:
+        print("AUDIT LOG ERROR:", e)
 
     # =========================
     # 🔁 API RESPONSE
@@ -233,12 +268,27 @@ def register():
     # GET request
     return render_template("register.html")
 
-# =========================
-# 🚪 LOGOUT
-# =========================
 @auth_bp.route("/logout")
 @login_required
 def logout():
+
+    user_id = current_user.id
+    username = current_user.username
+
+    try:
+        log_action(
+            user_id=user_id,
+            action="LOGOUT",
+            module="AUTH",
+            description=f"User {username} logged out",
+            ip_address=request.remote_addr,
+            user_agent=request.user_agent.string
+        )
+    except Exception as e:
+        print("AUDIT LOG ERROR:", e)
+
     logout_user()
+
     flash("Logged out successfully")
+
     return redirect(url_for("auth.login"))

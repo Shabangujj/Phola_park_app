@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Notifications | Phola Park</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .notification {
+            background: white;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            border-left: 5px solid #777;
+        }
+
+        .notification.unread {
+            border-left-color: #1f6feb;
+            background: #eef5ff;
+        }
+
+        .notification h3 {
+            margin: 0 0 8px;
+        }
+
+        .notification p {
+            margin: 5px 0;
+        }
+
+        .date {
+            font-size: 13px;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .type {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 5px;
+            background: #eee;
+            margin-bottom: 8px;
+        }
+
+        .actions {
+            margin-top: 12px;
+        }
+
+        button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .read-btn {
+            background: #ddd;
+        }
+
+        .delete-btn {
+            background: #eee;
+            margin-left: 5px;
+        }
+
+        .empty {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            color: #777;
+        }
+
+        form {
+            display: inline;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>🔔 Notifications</h1>
+
+        <p>
+            Your community notifications and updates.
+        </p>
+
+        <div class="top-actions">
+
+            <form
+                method="POST"
+                action="{{ url_for('notifications.mark_all_read') }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <button type="submit">
+                    Mark All as Read
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    {% if notifications %}
+
+        {% for notification in notifications %}
+
+            <div
+                class="notification
+                {% if not notification.is_read %}unread{% endif %}"
+            >
+
+                <div class="type">
+                    {{ notification.notification_type }}
+                </div>
+
+                <h3>
+                    {{ notification.title }}
+                </h3>
+
+                <p>
+                    {{ notification.message }}
+                </p>
+
+                <div class="date">
+
+                    {{ notification.created_at.strftime(
+                        "%Y-%m-%d %H:%M"
+                    ) if notification.created_at else "" }}
+
+                </div>
+
+                <div class="actions">
+
+                    {% if not notification.is_read %}
+
+                        <form
+                            method="POST"
+                            action="{{
+                                url_for(
+                                    'notifications.mark_as_read',
+                                    notification_id=notification.id
+                                )
+                            }}"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="read-btn"
+                            >
+                                Mark as Read
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+
+                    <form
+                        method="POST"
+                        action="{{
+                            url_for(
+                                'notifications.delete_notification',
+                                notification_id=notification.id
+                            )
+                        }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="delete-btn"
+                        >
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+
+            <h3>No notifications</h3>
+
+            <p>
+                You are all caught up.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+
+</html>

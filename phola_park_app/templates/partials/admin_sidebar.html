@@ -1,119 +1,163 @@
 <!-- ========================================= -->
-<!-- ADMIN BRAND -->
+<!-- ADMIN SIDEBAR -->
 <!-- ========================================= -->
 
-<div class="mb-4">
+<aside class="sidebar">
 
-    <h2>Phola Park</h2>
+    <!-- ========================================= -->
+    <!-- ADMIN BRAND -->
+    <!-- ========================================= -->
 
-    <small>Admin Panel</small>
+    <div class="mb-4">
 
-</div>
+        <h2>Phola Park</h2>
 
+        <small>Admin Panel</small>
 
-<!-- ========================================= -->
-<!-- NAVIGATION -->
-<!-- ========================================= -->
-
-<ul class="nav flex-column">
-
-
-    <!-- Dashboard -->
-
-    <li class="nav-item">
-
-        <a
-            href="{{ url_for('admin.dashboard') }}"
-            class="nav-link"
-        >
-            🏠 Dashboard
-        </a>
-
-    </li>
+    </div>
 
 
-    <!-- Users -->
+    <!-- ========================================= -->
+    <!-- NAVIGATION -->
+    <!-- ========================================= -->
 
-    <li class="nav-item">
-
-        <a
-            href="{{ url_for('admin.users') }}"
-            class="nav-link"
-        >
-            👥 Users
-        </a>
-
-    </li>
+    <ul class="nav flex-column">
 
 
-    <!-- Reports -->
+        <!-- Dashboard -->
 
-    <li class="nav-item">
+        <li class="nav-item">
 
-        <a
-            href="{{ url_for('admin.reports') }}"
-            class="nav-link"
-        >
-            📋 Reports
-        </a>
+            <a
+                href="{{ url_for('main.dashboard') }}"
+                class="nav-link"
+            >
+                🏠 Dashboard
+            </a>
 
-    </li>
-
-
-    <!-- Surveys -->
-
-    <li class="nav-item">
-
-        <a
-            href="{{ url_for('admin.surveys') }}"
-            class="nav-link"
-        >
-            📊 Surveys
-        </a>
-
-    </li>
+        </li>
 
 
-    <!-- Projects -->
+        <!-- Users -->
 
-    <li class="nav-item">
+        <li class="nav-item">
 
-        <a
-            href="{{ url_for('admin.projects') }}"
-            class="nav-link"
-        >
-            🏗 Projects
-        </a>
+            <a
+                href="{{ url_for('admin.users') }}"
+                class="nav-link"
+            >
+                👥 Users
+            </a>
 
-    </li>
-
-
-    <!-- Analytics -->
-
-    <li class="nav-item">
-
-        <a
-            href="{{ url_for('admin.analytics_dashboard') }}"
-            class="nav-link"
-        >
-            📈 Analytics
-        </a>
-
-    </li>
+        </li>
 
 
-    <!-- Logout -->
+        <!-- Reports -->
 
-    <li class="nav-item mt-3">
+        <li class="nav-item">
 
-        <a
-            href="{{ url_for('auth.logout') }}"
-            class="nav-link"
-        >
-            🚪 Logout
-        </a>
+            <a
+                href="{{ url_for('admin.reports') }}"
+                class="nav-link"
+            >
+                📋 Reports
+            </a>
 
-    </li>
+        </li>
 
 
-</ul>
+        <!-- Surveys -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('admin.surveys') }}"
+                class="nav-link"
+            >
+                📊 Surveys
+            </a>
+
+        </li>
+
+
+        <!-- Projects -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('admin.projects') }}"
+                class="nav-link"
+            >
+                🏗 Projects
+            </a>
+
+        </li>
+
+
+        <!-- Analytics -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('admin.analytics_dashboard') }}"
+                class="nav-link"
+            >
+                📈 Analytics
+            </a>
+
+        </li>
+
+
+        <!-- Announcements -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('admin.announcements') }}"
+                class="nav-link"
+            >
+                📢 Announcements
+            </a>
+
+        </li>
+
+
+        <!-- Audit Logs -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('admin.audit_logs') }}"
+                class="nav-link"
+            >
+                🕘 Audit Logs
+            </a>
+
+        </li>
+
+
+        <!-- Divider -->
+
+        <li class="nav-item mt-3">
+
+            <hr>
+
+        </li>
+
+
+        <!-- Logout -->
+
+        <li class="nav-item">
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+                class="nav-link"
+            >
+                🚪 Logout
+            </a>
+
+        </li>
+
+    </ul>
+
+</aside>

@@ -1,36 +1,50 @@
 <header class="topbar">
 
-<button id="menu-toggle">
+    <button id="menu-toggle" type="button"
+    onclick="toggleSidebar()">
+        ☰
+    </button>
 
-☰
+    <div>
 
-</button>
+        <h2>
+            {% if current_user.is_authenticated %}
+                {{ current_user.role.name|capitalize }} Dashboard
+            {% else %}
+                Phola Park App
+            {% endif %}
+        </h2>
 
-<div>
+        <p>
 
-<h2>
+            {% if current_user.is_authenticated %}
 
-Admin Dashboard
+                Welcome back {{ current_user.username }}
 
-</h2>
+            {% else %}
 
-<p>
+                Community Service Delivery Platform
 
-Welcome back {{ current_user.username }}
+            {% endif %}
 
-</p>
+        </p>
 
-</div>
+    </div>
 
-<div class="topbar-actions">
 
-<a href="{{ url_for('auth.logout') }}"
-class="logout-btn">
+    <div class="topbar-actions">
 
-Logout
+        {% if current_user.is_authenticated %}
 
-</a>
+            <a href="{{ url_for('auth.logout') }}"
+               class="logout-btn">
 
-</div>
+                Logout
+
+            </a>
+
+        {% endif %}
+
+    </div>
 
 </header>

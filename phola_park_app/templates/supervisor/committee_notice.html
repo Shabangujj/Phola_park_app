@@ -1,0 +1,270 @@
+{% extends "supervisor_base.html" %}
+
+{% block title %}
+Send Committee Notice
+{% endblock %}
+
+{% block content %}
+
+<div class="supervisor-dashboard">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="supervisor-header">
+
+        <div>
+
+            <span class="dashboard-eyebrow">
+                📢 Committee Communication
+            </span>
+
+            <h1>
+                Send Committee Notice
+            </h1>
+
+            <p>
+                Send a notification to all members of this committee.
+            </p>
+
+        </div>
+
+        <div class="portfolio-card">
+
+            <span>
+                Portfolio
+            </span>
+
+            <strong>
+                {{ portfolio }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         COMMITTEE INFORMATION
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    👥 {{ committee.name }}
+                </h3>
+
+                <p>
+                    {{ committee.description or
+                       'Committee communication' }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <p>
+                <strong>Portfolio:</strong>
+                {{ committee.portfolio }}
+            </p>
+
+            <p>
+                <strong>Recipients:</strong>
+                {{ members|length }} committee member(s)
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NOTICE FORM
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    📢 Notice Message
+                </h3>
+
+                <p>
+                    This message will be sent to every committee member.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'supervisor.committee_notice',
+                    committee_id=committee.id
+                ) }}"
+            >
+
+                <!-- CSRF -->
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- MESSAGE -->
+
+                <div class="form-group">
+
+                    <label for="message">
+                        Message
+                    </label>
+
+                    <textarea
+                        id="message"
+                        name="message"
+                        class="form-control"
+                        rows="7"
+                        placeholder="Enter your notice..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="form-actions">
+
+                    <a
+                        href="{{ url_for(
+                            'supervisor.committee_detail',
+                            committee_id=committee.id
+                        ) }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        📢 Send Notice
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RECIPIENTS
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    👥 Recipients
+                </h3>
+
+                <p>
+                    The following committee members will receive
+                    the notification.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            {% if members %}
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Portfolio</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for member in members %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ member.full_name }}
+                                    </td>
+
+                                    <td>
+                                        @{{ member.username }}
+                                    </td>
+
+                                    <td>
+                                        {{ member.portfolio or
+                                           'Not Assigned' }}
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <p>
+                        This committee currently has no members.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -12,111 +12,144 @@
         Create a new community announcement.
     </p>
 
-    <form method="POST"
-          action="{{ url_for('admin.create_announcement') }}"
-          class="auth-form">
+<form method="POST"
+      action="{{ url_for('admin.create_announcement') }}">
+    
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="form-group">
 
-        {% if csrf_token is defined %}
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
-        {% endif %}
+        <label for="title">
+            Title
+        </label>
 
-        <!-- Title -->
-        <div class="form-group">
+        <input
+            type="text"
+            id="title"
+            name="title"
+            class="form-control"
+            placeholder="Enter announcement title"
+            required
+        >
 
-            <label for="title">
-                Announcement Title
-            </label>
-
-            <input
-                type="text"
-                id="title"
-                name="title"
-                placeholder="Enter announcement title"
-                required
-            >
-
-        </div>
+    </div>
 
 
-        <!-- Content -->
-        <div class="form-group">
+    <div class="form-group">
 
-            <label for="content">
-                Announcement Message
-            </label>
+        <label for="message">
+            Message
+        </label>
 
-            <textarea
-                id="content"
-                name="content"
-                rows="7"
-                placeholder="Write your announcement..."
-                required
-            ></textarea>
+        <textarea
+            id="message"
+            name="message"
+            class="form-control"
+            rows="6"
+            placeholder="Enter announcement message"
+            required
+        ></textarea>
 
-        </div>
-
-
-        <!-- Target -->
-        <div class="form-group">
-
-            <label for="target">
-                Target Audience
-            </label>
-
-            <select
-                id="target"
-                name="target"
-                required
-            >
-
-                <option value="">
-                    Select target audience
-                </option>
-
-                <option value="All">
-                    Everyone
-                </option>
-
-                <option value="Users">
-                    Users
-                </option>
-
-                <option value="Supervisors">
-                    Supervisors
-                </option>
-
-                <option value="Admins">
-                    Administrators
-                </option>
-
-            </select>
-
-        </div>
+    </div>
 
 
-        <!-- Buttons -->
-        <div class="form-actions">
+    <div class="form-group">
 
-            <button
-                type="submit"
-                class="dashboard-btn"
-            >
-                📢 Publish Announcement
-            </button>
+        <label for="target_role">
+            Target Role
+        </label>
 
-            <a
-                href="{{ url_for('admin.announcements') }}"
-                class="btn btn-secondary"
-            >
-                Cancel
-            </a>
+        <select
+            id="target_role"
+            name="target_role"
+            class="form-control"
+        >
 
-        </div>
+            <option value="">
+                All Users
+            </option>
 
-    </form>
+            <option value="user">
+                Users
+            </option>
 
+            <option value="supervisor">
+                Supervisors
+            </option>
+
+            <option value="admin">
+                Administrators
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="portfolio">
+            Portfolio
+        </label>
+
+        <input
+            type="text"
+            id="portfolio"
+            name="portfolio"
+            class="form-control"
+            placeholder="Leave blank for all portfolios"
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="priority">
+            Priority
+        </label>
+
+        <select
+            id="priority"
+            name="priority"
+            class="form-control"
+        >
+
+            <option value="Normal">
+                Normal
+            </option>
+
+            <option value="Important">
+                Important
+            </option>
+
+            <option value="Urgent">
+                Urgent
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="form-actions">
+
+        <button
+            type="submit"
+            class="dashboard-btn"
+        >
+            📢 Publish Announcement
+        </button>
+
+        <a
+            href="{{ url_for('admin.announcements') }}"
+            class="btn btn-secondary"
+        >
+            Cancel
+        </a>
+
+    </div>
+
+</form>
 </div>
 
 {% include "partials/footer.html" %}

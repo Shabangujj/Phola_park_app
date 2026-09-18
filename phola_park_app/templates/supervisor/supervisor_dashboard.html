@@ -1,0 +1,929 @@
+{% extends "supervisor_base.html" %}
+
+{% block content %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='supervisor.css') }}"
+>
+
+
+<div class="supervisor-dashboard">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="supervisor-header">
+
+        <div>
+
+            <span class="dashboard-eyebrow">
+                🔵 Supervisor Panel
+            </span>
+
+            <h1>
+                Supervisor Dashboard
+            </h1>
+
+            <p>
+                Monitor and manage community service delivery
+                for your assigned portfolio.
+            </p>
+
+        </div>
+
+
+        <div class="portfolio-card">
+
+            <span>
+                Your Portfolio
+            </span>
+
+            <strong>
+                {{ portfolio }}
+            </strong>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <section class="stats-grid">
+
+
+        <!-- TOTAL REPORTS -->
+
+        <div class="stats-card">
+
+            <div class="stats-icon">
+                📋
+            </div>
+
+            <div>
+
+                <span>
+                    Total Reports
+                </span>
+
+                <h2>
+                    {{ stats.total }}
+                </h2>
+
+                <small>
+                    Reports in your portfolio
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- OPEN REPORTS -->
+
+        <div class="stats-card warning">
+
+            <div class="stats-icon">
+                ⏳
+            </div>
+
+            <div>
+
+                <span>
+                    Open Reports
+                </span>
+
+                <h2>
+                    {{ stats.open }}
+                </h2>
+
+                <small>
+                    Pending or in progress
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- CLOSED REPORTS -->
+
+        <div class="stats-card success">
+
+            <div class="stats-icon">
+                ✅
+            </div>
+
+            <div>
+
+                <span>
+                    Closed Reports
+                </span>
+
+                <h2>
+                    {{ stats.closed }}
+                </h2>
+
+                <small>
+                    Completed or rejected
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE NOTICES -->
+
+        <div class="stats-card">
+
+            <div class="stats-icon">
+                📢
+            </div>
+
+            <div>
+
+                <span>
+                    Active Notices
+                </span>
+
+                <h2>
+                    {{ stats.notices }}
+                </h2>
+
+                <small>
+                    Notices for your portfolio
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         PORTFOLIO NOTICES
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    📢 Portfolio Notices
+                </h3>
+
+                <p>
+                    Latest information for your portfolio.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('supervisor.notices') }}"
+                class="dashboard-btn"
+            >
+                View All
+            </a>
+
+        </div>
+
+
+        <div class="card-body">
+
+            {% if notices %}
+
+                <div class="announcement-list">
+
+                    {% for notice in notices[:3] %}
+
+                        <div class="announcement-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ notice.title }}
+                                </strong>
+
+                                <p>
+                                    {{ notice.message }}
+                                </p>
+
+                                <small>
+
+                                    {% if notice.created_at %}
+
+                                        {{ notice.created_at.strftime(
+                                            "%d-%m-%Y %H:%M"
+                                        ) }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </small>
+
+                            </div>
+
+
+                            <div>
+
+                                {% if notice.notice_type %}
+
+                                    <span class="priority-badge">
+                                        {{ notice.notice_type }}
+                                    </span>
+
+                                {% endif %}
+
+
+                                {% if notice.priority %}
+
+                                    <span class="priority-badge">
+                                        {{ notice.priority }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    📭
+
+                    <p>
+                        No notices for this portfolio.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         CHARTS
+    ====================================================== -->
+
+    <section class="charts-grid">
+
+
+        <!-- STATUS CHART -->
+
+        <div class="card chart-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+                        📊 Reports by Status
+                    </h3>
+
+                    <p>
+                        Current report status distribution.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body chart-container">
+
+                {% if status_labels and status_values %}
+
+                    <canvas id="statusChart"></canvas>
+
+                {% else %}
+
+                    <div class="chart-empty">
+
+                        📊
+
+                        <p>
+                            No report data available.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CATEGORY CHART -->
+
+        <div class="card chart-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+                        📂 Reports by Category
+                    </h3>
+
+                    <p>
+                        Community issues by category.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body chart-container">
+
+                {% if category_labels and category_values %}
+
+                    <canvas id="categoryChart"></canvas>
+
+                {% else %}
+
+                    <div class="chart-empty">
+
+                        📂
+
+                        <p>
+                            No category data available.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECENT REPORTS
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    📋 Recent Community Reports
+                </h3>
+
+                <p>
+                    The latest reports submitted to your portfolio.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('supervisor.reports') }}"
+                class="dashboard-btn"
+            >
+                View All
+            </a>
+
+        </div>
+
+
+        <div class="card-body">
+
+            {% if recent_reports %}
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Title</th>
+
+                                <th>Category</th>
+
+                                <th>Status</th>
+
+                                <th>Date</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for report in recent_reports %}
+
+                                <tr>
+
+                                    <td>
+                                        #{{ report.id }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ report.title
+                                           or "Community Report"
+                                        }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ report.category
+                                           or "General"
+                                        }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if report.status == "Pending" %}
+
+                                            <span class="status-badge pending">
+                                                Pending
+                                            </span>
+
+                                        {% elif report.status == "In Progress" %}
+
+                                            <span class="status-badge progress">
+                                                In Progress
+                                            </span>
+
+                                        {% elif report.status == "Completed" %}
+
+                                            <span class="status-badge resolved">
+                                                Completed
+                                            </span>
+
+                                        {% elif report.status == "Rejected" %}
+
+                                            <span class="status-badge rejected">
+                                                Rejected
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="status-badge">
+                                                {{ report.status or "Unknown" }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if report.created_at %}
+
+                                            {{ report.created_at.strftime(
+                                                "%d-%m-%Y"
+                                            ) }}
+
+                                        {% else %}
+
+                                            -
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <a
+                                            href="{{ url_for(
+                                                'supervisor.report_detail',
+                                                report_id=report.id
+                                            ) }}"
+                                            class="btn btn-primary btn-sm"
+                                        >
+                                            👁 View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        📭
+                    </div>
+
+                    <h3>
+                        No Reports Yet
+                    </h3>
+
+                    <p>
+                        No community reports have been submitted
+                        to this portfolio.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         QUICK ACTIONS
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    ⚡ Quick Actions
+                </h3>
+
+                <p>
+                    Access your main supervisor functions.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+
+            <!-- REPORTS -->
+
+            <a
+                href="{{ url_for('supervisor.reports') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📋
+                </span>
+
+                <span>
+
+                    <strong>
+                        Reports
+                    </strong>
+
+                    <small>
+                        Review and process reports
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <!-- SURVEYS -->
+
+            <a
+                href="{{ url_for('supervisor.surveys') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📊
+                </span>
+
+                <span>
+
+                    <strong>
+                        Surveys
+                    </strong>
+
+                    <small>
+                        Manage portfolio surveys
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <!-- COMMITTEES -->
+
+            <a
+                href="{{ url_for('supervisor.committees') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    👥
+                </span>
+
+                <span>
+
+                    <strong>
+                        Committees
+                    </strong>
+
+                    <small>
+                        Manage your portfolio committee
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <!-- NOTICES -->
+
+            <a
+                href="{{ url_for('supervisor.notices') }}"
+                class="quick-action"
+            >
+
+                <span class="quick-action-icon">
+                    📢
+                </span>
+
+                <span>
+
+                    <strong>
+                        Notices
+                    </strong>
+
+                    <small>
+                        Manage portfolio notices
+                    </small>
+
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- =====================================================
+     CHART DATA
+====================================================== -->
+
+<div
+    id="chart-data"
+
+    data-status-labels='{{ status_labels | tojson | forceescape }}'
+
+    data-status-values='{{ status_values | tojson | forceescape }}'
+
+    data-category-labels='{{ category_labels | tojson | forceescape }}'
+
+    data-category-values='{{ category_values | tojson | forceescape }}'
+
+    hidden>
+</div>
+
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    const chartData =
+        document.getElementById("chart-data");
+
+
+    if (!chartData) {
+        return;
+    }
+
+
+    /* ==========================================
+       GET CHART DATA
+    ========================================== */
+
+    const statusLabels =
+        JSON.parse(
+            chartData.dataset.statusLabels || "[]"
+        );
+
+
+    const statusValues =
+        JSON.parse(
+            chartData.dataset.statusValues || "[]"
+        );
+
+
+    const categoryLabels =
+        JSON.parse(
+            chartData.dataset.categoryLabels || "[]"
+        );
+
+
+    const categoryValues =
+        JSON.parse(
+            chartData.dataset.categoryValues || "[]"
+        );
+
+
+
+    /* ==========================================
+       STATUS CHART
+    ========================================== */
+
+    const statusCanvas =
+        document.getElementById("statusChart");
+
+
+    if (
+        statusCanvas &&
+        statusLabels.length > 0
+    ) {
+
+        new Chart(statusCanvas, {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: statusLabels,
+
+                datasets: [
+
+                    {
+
+                        label: "Reports",
+
+                        data: statusValues,
+
+                        borderWidth: 1
+
+                    }
+
+                ]
+
+            },
+
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom"
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+
+    /* ==========================================
+       CATEGORY CHART
+    ========================================== */
+
+    const categoryCanvas =
+        document.getElementById("categoryChart");
+
+
+    if (
+        categoryCanvas &&
+        categoryLabels.length > 0
+    ) {
+
+        new Chart(categoryCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: categoryLabels,
+
+                datasets: [
+
+                    {
+
+                        label: "Reports",
+
+                        data: categoryValues,
+
+                        borderWidth: 1
+
+                    }
+
+                ]
+
+            },
+
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Report - Phola Park App{% endblock %}
+
+{% block content %}
+
+
+<div class="user-page-dashboard-container">
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================== -->
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>📝 Submit Community Report</h1>
+
+            <p>
+                Report a community service delivery issue
+                to the Phola Park App.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('user.user_reports') }}"
+            class="dashboard-btn"
+        >
+            📋 My Reports
+        </a>
+
+    </div>
+
+
+    <!-- =========================================
+         FLASH MESSAGES
+    ========================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =========================================
+         REPORT FORM
+    ========================================== -->
+
+    <div class="dashboard-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+
+                <h2>
+                    Community Service Delivery Report
+                </h2>
+
+                <p>
+                    Please provide accurate information about
+                    the issue you want to report.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('user.submit_report') }}"
+            enctype="multipart/form-data"
+        >
+
+            <!-- =====================================
+                 CSRF
+            ====================================== -->
+
+            {{ form.hidden_tag() }}
+
+
+            <!-- =====================================
+                 REPORT TYPE
+            ====================================== -->
+
+            <div class="form-group">
+
+                {{ form.report_type.label(
+                    class="form-label"
+                ) }}
+
+                {{ form.report_type(
+                    class="form-control"
+                ) }}
+
+                {% if form.report_type.errors %}
+
+                    <div class="form-error">
+
+                        {% for error in form.report_type.errors %}
+
+                            <span>
+                                {{ error }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =====================================
+                 CATEGORY
+            ====================================== -->
+
+            <div class="form-group">
+
+                {{ form.category.label(
+                    class="form-label"
+                ) }}
+
+                {{ form.category(
+                    class="form-control"
+                ) }}
+
+                {% if form.category.errors %}
+
+                    <div class="form-error">
+
+                        {% for error in form.category.errors %}
+
+                            <span>
+                                {{ error }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =====================================
+                 DESCRIPTION
+            ====================================== -->
+
+            <div class="form-group">
+
+                {{ form.description.label(
+                    class="form-label"
+                ) }}
+
+                {{ form.description(
+                    class="form-control",
+                    rows="6",
+                    placeholder="Describe the community issue..."
+                ) }}
+
+                {% if form.description.errors %}
+
+                    <div class="form-error">
+
+                        {% for error in form.description.errors %}
+
+                            <span>
+                                {{ error }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+                <small class="form-help">
+                    Provide as much useful information as possible.
+                </small>
+
+            </div>
+
+
+            <!-- =====================================
+                 PORTFOLIO
+            ====================================== -->
+
+            <div class="form-group">
+
+                {{ form.portfolio.label(
+                    class="form-label"
+                ) }}
+
+                {{ form.portfolio(
+                    class="form-control"
+                ) }}
+
+                {% if form.portfolio.errors %}
+
+                    <div class="form-error">
+
+                        {% for error in form.portfolio.errors %}
+
+                            <span>
+                                {{ error }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =====================================
+                 IMAGE
+            ====================================== -->
+
+            <div class="form-group">
+
+                {{ form.image.label(
+                    class="form-label"
+                ) }}
+
+                {{ form.image(
+                    class="form-control",
+                    accept=".jpg,.jpeg,.png,.gif"
+                ) }}
+
+                {% if form.image.errors %}
+
+                    <div class="form-error">
+
+                        {% for error in form.image.errors %}
+
+                            <span>
+                                {{ error }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+                <small class="form-help">
+                    Optional. You can attach an image showing
+                    the reported issue.
+                </small>
+
+            </div>
+
+
+            <!-- =====================================
+                 INFORMATION BOX
+            ====================================== -->
+
+            <div class="account-info">
+
+                <strong>
+                    📌 Before submitting
+                </strong>
+
+                <small>
+                    Make sure your report contains clear and
+                    accurate information. Your report will be
+                    recorded and can be reviewed by the relevant
+                    administrator or supervisor.
+                </small>
+
+            </div>
+
+
+            <!-- =====================================
+                 ACTIONS
+            ====================================== -->
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="register-button"
+                >
+                    📤 Submit Report
+                </button>
+
+                <a
+                    href="{{ url_for('user.user_dashboard') }}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================================
+         BACK TO DASHBOARD
+    ========================================== -->
+
+    <div class="page-actions">
+
+        <a
+            href="{{ url_for('user.user_dashboard') }}"
+            class="dashboard-btn"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

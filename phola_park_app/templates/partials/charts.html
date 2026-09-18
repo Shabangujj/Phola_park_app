@@ -1,4 +1,8 @@
-<div class="charts-container">
+<div class="charts-container"
+    data-dates='{{ dates | default([]) | tojson | e }}'
+    data-counts='{{ counts | default([]) | tojson | e }}'
+    data-action-labels='{{ action_labels | default([]) | tojson | e }}'
+    data-action-counts='{{ action_counts | default([]) | tojson | e }}'>
 
     <!-- Reports Chart -->
     <div class="dashboard-card">
@@ -20,55 +24,149 @@
 
 </div>
 
+<!-- ========================= -->
+<!-- CHART.JS -->
+<!-- ========================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-const portfolioData = {{ portfolio_counts|default({}, true)|tojson }};
+    console.log("Audit charts loading...");
 
-const labels = Object.keys(portfolioData);
+    const chartsContainer = document.querySelector(".charts-container");
 
-const values = Object.values(portfolioData);
+    function getChartData(name) {
+        try {
+            return JSON.parse(chartsContainer.dataset[name] || "[]");
+        } catch (error) {
+            console.error("Invalid chart data:", name, error);
+            return [];
+        }
+    }
 
-new Chart(document.getElementById("reportsChart"),{
+    const dates = getChartData("dates");
+    const counts = getChartData("counts");
+    const actionLabels = getChartData("actionLabels");
+    const actionCounts = getChartData("actionCounts");
 
-    type:"bar",
 
-    data:{
+    console.log("Dates:", dates);
+    console.log("Counts:", counts);
+    console.log("Actions:", actionLabels);
+    console.log("Action counts:", actionCounts);
 
-        labels:labels,
 
-        datasets:[{
+    /* ========================= */
+    /* LOGS PER DAY */
+    /* ========================= */
 
-            label:"Reports",
+    const logsCanvas =
+        document.getElementById("logsChart");
 
-            data:values
+    if (logsCanvas) {
 
-        }]
+        if (typeof Chart === "undefined") {
+
+            console.error(
+                "Chart.js failed to load."
+            );
+
+            return;
+        }
+
+
+        new Chart(logsCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: dates,
+
+                datasets: [{
+                    label: "Logs per Day",
+                    data: counts
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    } else {
+
+        console.error(
+            "logsChart canvas not found."
+        );
+
+    }
+
+
+    /* ========================= */
+    /* ACTION DISTRIBUTION */
+    /* ========================= */
+
+    const actionsCanvas =
+        document.getElementById("actionsChart");
+
+    if (actionsCanvas) {
+
+        new Chart(actionsCanvas, {
+
+            type: "pie",
+
+            data: {
+
+                labels: actionLabels,
+
+                datasets: [{
+                    data: actionCounts
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false
+
+            }
+
+        });
+
+    } else {
+
+        console.error(
+            "actionsChart canvas not found."
+        );
 
     }
 
 });
-
-new Chart(document.getElementById("surveyChart"),{
-
-    type:"doughnut",
-
-    data:{
-
-        labels:["Completed","Pending"],
-
-        datasets:[{
-
-            data:[
-                {{ survey_completed|default(0, true) }},
-                {{ survey_pending|default(0, true) }}
-            ]
-
-        }]
-
-    }
-
-});
-
 </script>

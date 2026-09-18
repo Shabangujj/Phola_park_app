@@ -1,211 +1,395 @@
 {% extends "base.html" %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}
+Edit User - Phola Park App
+{% endblock %}
 
 {% block content %}
 
-<div class="container-fluid py-4">
+<div class="user-dashboard">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="user-welcome">
 
         <div>
-            <h2 class="fw-bold">
-                <i class="fas fa-user-edit text-primary"></i>
-                Edit User
-            </h2>
 
-            <p class="text-muted">
+            <h1>
+                <i class="fas fa-user-edit"></i>
+                Edit User
+            </h1>
+
+            <p>
                 Update user account information.
             </p>
+
         </div>
 
-        <a href="{{ url_for('admin.users') }}"
-           class="btn btn-secondary">
+        <div class="user-badge">
+            👤 User
+        </div>
 
-            <i class="fas fa-arrow-left"></i>
-            Back
+    </div>
 
+
+    <!-- =====================================================
+         BACK
+    ====================================================== -->
+
+    <div class="dashboard-section">
+
+        <a
+            href="{{ url_for('admin.users') }}"
+            class="section-link"
+        >
+            ← Back to Users
         </a>
 
     </div>
 
-    <div class="card shadow">
 
-        <div class="card-header bg-primary text-white">
+    <!-- =====================================================
+         EDIT USER FORM
+    ====================================================== -->
 
-            <h5 class="mb-0">
-                <i class="fas fa-user"></i>
-                User Details
-            </h5>
+    <div class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    <i class="fas fa-user"></i>
+                    User Details
+                </h2>
+
+                <p>
+                    Manage account details, role, portfolio and status.
+                </p>
+
+            </div>
 
         </div>
 
-        <div class="card-body">
 
-            <form method="POST">
+        <form
+            method="POST"
+            action="{{ url_for('admin.edit_user', user_id=user.id) }}"
+        >
 
-                <div class="row">
+            <!-- =================================================
+                 CSRF TOKEN
+            ================================================== -->
 
-                    <div class="col-md-6 mb-3">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
 
-                        <label class="form-label">
-                            Full Name
-                        </label>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="name"
-                            value="{{ user.name }}"
-                            required>
+            <!-- =================================================
+                 FULL NAME
+            ================================================== -->
 
-                    </div>
+            <div class="form-group">
 
-                    <div class="col-md-6 mb-3">
+                <label for="full_name">
+                    Full Name
+                </label>
 
-                        <label class="form-label">
-                            Username
-                        </label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    class="form-control"
+                    value="{{ user.full_name or '' }}"
+                    required
+                >
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="username"
-                            value="{{ user.username }}"
-                            required>
+            </div>
 
-                    </div>
 
-                    <div class="col-md-6 mb-3">
+            <!-- =================================================
+                 USERNAME
+            ================================================== -->
 
-                        <label>Email</label>
+            <div class="form-group">
 
-                        <input
-                            type="email"
-                            class="form-control"
-                            name="email"
-                            value="{{ user.email }}"
-                            required>
+                <label for="username">
+                    Username
+                </label>
 
-                    </div>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    value="{{ user.username or '' }}"
+                    required
+                >
 
-                    <div class="col-md-6 mb-3">
+            </div>
 
-                        <label>Phone</label>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="phone"
-                            value="{{ user.phone or '' }}">
+            <!-- =================================================
+                 EMAIL
+            ================================================== -->
 
-                    </div>
+            <div class="form-group">
 
-                    <div class="col-md-6 mb-3">
+                <label for="email">
+                    Email
+                </label>
 
-                        <label>Role</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    value="{{ user.email or '' }}"
+                    required
+                >
 
-                        <select
-                            class="form-select"
-                            name="role_id">
+            </div>
 
-                            {% for role in roles %}
 
-                            <option
-                                value="{{ role.id }}"
-                                {% if role.id==user.role_id %}selected{% endif %}>
+            <!-- =================================================
+                 PHONE
+            ================================================== -->
 
-                                {{ role.name|title }}
+            <div class="form-group">
 
-                            </option>
+                <label for="phone">
+                    Phone
+                </label>
 
-                            {% endfor %}
+                <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    class="form-control"
+                    value="{{ user.phone or '' }}"
+                >
 
-                        </select>
+            </div>
 
-                    </div>
 
-                    <div class="col-md-6 mb-3">
+            <!-- =================================================
+                 ROLE
+            ================================================== -->
 
-                        <label>Portfolio</label>
+            <div class="form-group">
 
-                        <select
-                            class="form-select"
-                            name="portfolio">
+                <label for="role_id">
+                    Role
+                </label>
 
-                            <option value="">
-                                Select Portfolio
-                            </option>
+                <select
+                    id="role_id"
+                    name="role_id"
+                    class="form-control"
+                    required
+                >
 
-                            {% for portfolio in portfolios %}
+                    <option value="">
+                        -- Select Role --
+                    </option>
 
-                            <option
-                                value="{{ portfolio }}"
-                                {% if portfolio==user.portfolio %}selected{% endif %}>
+                    {% for role in roles %}
 
-                                {{ portfolio.name }}
+                        <option
+                            value="{{ role.id }}"
+                            {% if user.role_id == role.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ role.name|capitalize }}
+                        </option>
 
-                            </option>
+                    {% endfor %}
 
-                            {% endfor %}
+                </select>
 
-                        </select>
+                <small class="form-text">
+                    Select the user's system role.
+                </small>
 
-                    </div>
+            </div>
 
-                    <div class="col-md-6 mb-3">
 
-                        <label>Status</label>
+            <!-- =================================================
+                 PORTFOLIO
+            ================================================== -->
 
-                        <select
-                            class="form-select"
-                            name="is_active">
+            <div class="form-group">
 
-                            <option
-                                value="1"
-                                {% if user.is_active %}selected{% endif %}>
-                                Active
-                            </option>
+                <label for="portfolio">
+                    Portfolio
+                </label>
 
-                            <option
-                                value="0"
-                                {% if not user.is_active %}selected{% endif %}>
-                                Disabled
-                            </option>
+                <select
+                    id="portfolio"
+                    name="portfolio"
+                    class="form-control"
+                >
 
-                        </select>
+                    <option value="">
+                        Not Assigned
+                    </option>
 
-                    </div>
+                    {% for portfolio_name in portfolios %}
+
+                        <option
+                            value="{{ portfolio_name }}"
+                            {% if user.portfolio == portfolio_name %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ portfolio_name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small class="form-text">
+                    Supervisors must have a portfolio assigned.
+                    Community users may remain Not Assigned.
+                </small>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACCOUNT STATUS
+            ================================================== -->
+
+            <div class="form-group">
+
+                <label for="is_active">
+                    Account Status
+                </label>
+
+                <select
+                    id="is_active"
+                    name="is_active"
+                    class="form-control"
+                    required
+                >
+
+                    <option
+                        value="1"
+                        {% if user.is_active %}
+                            selected
+                        {% endif %}
+                    >
+                        Active
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if not user.is_active %}
+                            selected
+                        {% endif %}
+                    >
+                        Inactive
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 CURRENT ACCOUNT INFORMATION
+            ================================================== -->
+
+            <div class="account-info">
+
+                <div>
+
+                    <strong>
+                        User ID
+                    </strong>
+
+                    <span>
+                        #{{ user.id }}
+                    </span>
 
                 </div>
 
-                <hr>
 
-                <div class="d-flex justify-content-end">
+                <div>
 
-                    <a href="{{ url_for('admin.users') }}"
-                       class="btn btn-secondary me-2">
+                    <strong>
+                        Current Role
+                    </strong>
 
-                        Cancel
+                    <span>
 
-                    </a>
+                        {% if user.role %}
+                            {{ user.role.name|capitalize }}
+                        {% else %}
+                            User
+                        {% endif %}
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
-
-                        <i class="fas fa-save"></i>
-
-                        Save Changes
-
-                    </button>
+                    </span>
 
                 </div>
 
-            </form>
 
-        </div>
+                <div>
+
+                    <strong>
+                        Current Portfolio
+                    </strong>
+
+                    <span>
+
+                        {% if user.portfolio %}
+                            {{ user.portfolio }}
+                        {% else %}
+                            Not Assigned
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+            <div class="form-actions">
+
+                <a
+                    href="{{ url_for('admin.users') }}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="fas fa-save"></i>
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 

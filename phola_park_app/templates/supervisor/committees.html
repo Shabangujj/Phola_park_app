@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    {% include "partials/sidebar.html" %}
+    <div class="content" style="padding:30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Committees for {{ portfolio }} Portfolio</h1>
+            <a href="{{ url_for('supervisor.new_committee') }}" class="btn btn-success">+ New Committee</a>
+        </div>
+
+        {% if committees %}
+        <table border="1" cellpadding="10" cellspacing="0" width="100%" style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for committee in committees %}
+
+<div class="committee-card">
+
+    <div class="committee-icon">
+        👥
+    </div>
+
+    <div class="committee-content">
+
+        <h3>
+            {{ committee.name }}
+        </h3>
+
+        <p>
+            {{ committee.description or "No description provided." }}
+        </p>
+
+        <div class="committee-meta">
+
+            <span>
+                🏷 {{ committee.portfolio }}
+            </span>
+
+            <span>
+                👥 {{ committee.member_count }} Members
+            </span>
+
+            {% if committee.has_minimum_members %}
+
+                <span class="status-badge status-completed">
+                    ✓ Minimum reached
+                </span>
+
+            {% else %}
+
+                <span class="status-badge status-pending">
+                    ⚠ {{ committee.member_count }}/10 Members
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="committee-actions">
+
+            <a
+                href="{{ url_for(
+                    'supervisor.committee_detail',
+                    committee_id=committee.id
+                ) }}"
+                class="btn btn-primary"
+            >
+                <i class="fas fa-eye"></i>
+                View Committee
+            </a>
+            
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endfor %}
+            
+            </tbody>
+        </table>
+        {% else %}
+            <p>No committees exist for your portfolio yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

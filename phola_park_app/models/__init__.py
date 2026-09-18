@@ -13,26 +13,34 @@ from .survey import (
     SurveyResponse,
     SurveyAnswer,
 )
-from .notice import Notice, Announcement, Committee
+from .notice import Notice, Announcement
+from .committee import Committee
 from .notification import Notification
 from .audit import AuditLog
 from .project import Project
 from .settings import SystemSettings
 
+
 __all__ = [
     "User",
     "UserRole",
+
     "Report",
     "ReportNote",
+
     "Survey",
     "SurveyQuestion",
     "SurveyResponse",
     "SurveyAnswer",
+
     "Notice",
     "Announcement",
+
     "Committee",
+
     "Notification",
     "AuditLog",
+
     "Project",
     "SystemSettings",
 ]

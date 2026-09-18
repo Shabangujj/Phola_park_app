@@ -208,53 +208,180 @@ def clear_logs():
 @role_required("admin")
 def export_audit_logs():
 
-    logs = AuditLog.query.order_by(
+    # =========================
+    # FILTER VALUES
+    # =========================
+
+    action = request.args.get(
+        "action",
+        ""
+    ).strip()
+
+    user_id = request.args.get(
+        "user_id",
+        ""
+    ).strip()
+
+    start_date = request.args.get(
+        "start_date",
+        ""
+    ).strip()
+
+    end_date = request.args.get(
+        "end_date",
+        ""
+    ).strip()
+
+
+    # =========================
+    # BASE QUERY
+    # =========================
+
+    query = AuditLog.query
+
+
+    # =========================
+    # ACTION FILTER
+    # =========================
+
+    if action:
+
+        query = query.filter(
+            AuditLog.action.ilike(
+                f"%{action}%"
+            )
+        )
+
+
+    # =========================
+    # USER ID FILTER
+    # =========================
+
+    if user_id and user_id.isdigit():
+
+        query = query.filter(
+            AuditLog.user_id == int(user_id)
+        )
+
+
+    # =========================
+    # START DATE
+    # =========================
+
+    if start_date:
+
+        try:
+
+            start = datetime.strptime(
+                start_date,
+                "%Y-%m-%d"
+            )
+
+            query = query.filter(
+                AuditLog.created_at >= start
+            )
+
+        except ValueError:
+
+            pass
+
+
+    # =========================
+    # END DATE
+    # =========================
+
+    if end_date:
+
+        try:
+
+            end = datetime.strptime(
+                end_date,
+                "%Y-%m-%d"
+            )
+
+            end = end.replace(
+                hour=23,
+                minute=59,
+                second=59,
+                microsecond=999999
+            )
+
+            query = query.filter(
+                AuditLog.created_at <= end
+            )
+
+        except ValueError:
+
+            pass
+
+
+    # =========================
+    # ORDER
+    # =========================
+
+    logs = query.order_by(
         AuditLog.created_at.desc()
     ).all()
 
+
+    # =========================
+    # CSV ESCAPING
+    # =========================
+
+    import csv
+    from io import StringIO
+
+
     def generate():
 
-        yield (
-            "ID,"
-            "Username,"
-            "Action,"
-            "Module,"
-            "IP Address,"
-            "Created\n"
+        output = StringIO()
+
+        writer = csv.writer(
+            output
         )
+
+        writer.writerow([
+            "ID",
+            "Username",
+            "Action",
+            "Module",
+            "IP Address",
+            "Created"
+        ])
+
+        yield output.getvalue()
+
+        output.seek(0)
+
+        output.truncate(0)
+
 
         for log in logs:
 
-            yield (
+            writer.writerow([
+                log.id,
+                log.username,
+                log.action,
+                log.module,
+                log.ip_address or "",
+                log.created_at
+            ])
 
-                f"{log.id},"
+            yield output.getvalue()
 
-                f"{log.username},"
+            output.seek(0)
 
-                f"{log.action},"
+            output.truncate(0)
 
-                f"{log.module},"
-
-                f"{log.ip_address},"
-
-                f"{log.created_at}\n"
-
-            )
 
     return Response(
-
         generate(),
-
         mimetype="text/csv",
-
         headers={
-
             "Content-Disposition":
-
-            "attachment; filename=audit_logs.csv"
-
+                "attachment; "
+                "filename=audit_logs.csv"
         }
-
     )
 @admin_bp.route("/audit-logs/dashboard")
 @login_required

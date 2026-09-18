@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-# phola_park_app/auth_helpers.py
 
 from functools import wraps
 from flask import redirect, url_for, flash, abort
@@ -12,9 +10,6 @@ from phola_park_app.models import UserRole
 # ─────────────────────────────────────────────
 # ROLE UTILITIES
 # ─────────────────────────────────────────────
-=======
-# Cleaned up auth_helpers to remove duplicate imports and fix role checks
->>>>>>> origin/main
 
 from functools import wraps
 from flask import redirect, url_for, flash, abort

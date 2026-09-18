@@ -8,9 +8,19 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    transition:all 0.2s ease;
 }
-
+button,
+a,
+input,
+select,
+textarea {
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
 /* ========= BODY ========= */
 
 body{
@@ -94,7 +104,6 @@ body{
     margin-top:10px;
     margin-bottom: 20px;
     min-height: calc(100vh - 110px);
-    margin: center;
     padding:25px;
 }
 
@@ -1868,4 +1877,971 @@ table tr:hover{
     padding: 20px;
     text-align: center;
     opacity: 0.65;
+}
+/* =========================================================
+   USER - SUBMIT REPORT PAGE
+========================================================= */
+
+.report-form-card {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 30px;
+}
+
+
+/* =========================================================
+   REPORT FORM HEADER
+========================================================= */
+
+.report-form-header {
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.report-form-header h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.report-form-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   REPORT FORM
+========================================================= */
+
+.report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.report-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
+}
+
+.report-form .form-label {
+    display: block;
+    margin: 0;
+
+    color: #374151;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.report-form .form-control,
+.report-form select,
+.report-form input[type="text"],
+.report-form input[type="file"],
+.report-form textarea {
+    width: 100%;
+
+    padding: 11px 13px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #1f2937;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+.report-form textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FILE INPUT
+========================================================= */
+
+.report-form input[type="file"] {
+    padding: 9px 11px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   INPUT FOCUS
+========================================================= */
+
+.report-form .form-control:focus,
+.report-form select:focus,
+.report-form input:focus,
+.report-form textarea:focus {
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   HELP TEXT
+========================================================= */
+
+.report-form .form-help {
+    display: block;
+
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   VALIDATION ERRORS
+========================================================= */
+
+.report-form .form-error {
+    margin: 0;
+}
+
+.report-form .form-error span {
+    display: block;
+
+    color: #dc2626;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   INFORMATION BOX
+========================================================= */
+
+.report-form .account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    padding: 16px 18px;
+
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+
+    border-left: 4px solid #2563eb;
+
+    border-radius: 8px;
+}
+
+.report-form .account-info strong {
+    color: #1e3a8a;
+
+    font-size: 14px;
+}
+
+.report-form .account-info small {
+    color: #4b5563;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.report-form .form-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding-top: 5px;
+}
+
+
+/* =========================================================
+   SUBMIT BUTTON
+========================================================= */
+
+.report-form .register-button {
+    width: auto;
+
+    min-height: 44px;
+
+    padding: 11px 22px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            to right,
+            #2563eb,
+            #3b82f6
+        );
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.report-form .register-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.25);
+
+    background:
+        linear-gradient(
+            to right,
+            #1d4ed8,
+            #2563eb
+        );
+}
+
+
+/* =========================================================
+   CANCEL BUTTON
+========================================================= */
+
+.report-form .btn-secondary {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 44px;
+
+    padding: 10px 20px;
+
+    border-radius: 8px;
+
+    background: #6b7280;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.report-form .btn-secondary:hover {
+    background: #4b5563;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .report-form-card {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .report-form-header h2 {
+        font-size: 19px;
+    }
+
+    .report-form .form-actions {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .report-form .register-button,
+    .report-form .btn-secondary {
+        width: 100%;
+    }
+
+}
+/* =========================================================
+   USER SUBMIT REPORT - PAGE LAYOUT FIX
+========================================================= */
+
+.user-page-container {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 100px 25px 80px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.user-page-container .dashboard-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+}
+
+.user-page-container .dashboard-header h1 {
+    margin: 0 0 8px;
+
+    font-size: 30px;
+
+    color: #1f2937;
+}
+
+.user-page-container .dashboard-header p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   REPORT CARD
+========================================================= */
+
+.user-page-container .dashboard-card {
+    width: 100%;
+
+    max-width: 900px;
+
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    padding: 30px;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+
+    border: 1px solid #e5e7eb;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.user-page-container .dashboard-card-header {
+    margin-bottom: 25px;
+
+    padding-bottom: 18px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.user-page-container .dashboard-card-header h2 {
+    margin: 0 0 6px;
+
+    font-size: 22px;
+
+    color: #1f2937;
+}
+
+.user-page-container .dashboard-card-header p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.user-page-container form {
+    width: 100%;
+}
+
+.user-page-container .form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-bottom: 20px;
+}
+
+.user-page-container .form-label {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.user-page-container .form-control {
+    width: 100%;
+
+    min-height: 44px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+.user-page-container textarea.form-control {
+    min-height: 150px;
+
+    resize: vertical;
+}
+
+.user-page-container .form-control:focus {
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   FORM HELP
+========================================================= */
+
+.user-page-container .form-help {
+    color: #6b7280;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   INFORMATION BOX
+========================================================= */
+
+.user-page-container .account-info {
+    margin-top: 10px;
+
+    padding: 16px 18px;
+
+    background: #eff6ff;
+
+    border-left: 4px solid #2563eb;
+
+    border-radius: 8px;
+}
+
+.user-page-container .account-info strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #1e3a8a;
+}
+
+.user-page-container .account-info small {
+    color: #4b5563;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+.user-page-container .form-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 25px;
+}
+
+.user-page-container .register-button {
+    width: auto;
+
+    padding: 12px 22px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.user-page-container .register-button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+.user-page-container .btn-secondary {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 12px 20px;
+
+    border-radius: 8px;
+
+    background: #6b7280;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+.user-page-container .btn-secondary:hover {
+    background: #4b5563;
+}
+
+
+/* =========================================================
+   BACK TO DASHBOARD
+========================================================= */
+
+.user-page-container .page-actions {
+    max-width: 900px;
+
+    margin: 20px auto 0;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .user-page-container {
+        padding: 90px 15px 80px;
+    }
+
+    .user-page-container .dashboard-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .user-page-container .dashboard-btn {
+        width: 100%;
+
+        text-align: center;
+    }
+
+    .user-page-container .dashboard-card {
+        padding: 20px;
+    }
+
+    .user-page-container .form-actions {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .user-page-container .register-button,
+    .user-page-container .btn-secondary {
+        width: 100%;
+    }
+
+}
+/* =========================================================
+   USER REPORTS - SUMMARY CARDS
+========================================================= */
+
+.dashboard-stats {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 20px;
+
+    width: 100%;
+
+    margin: 25px 0 30px;
+}
+
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+.dashboard-stats .stat-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    min-height: 120px;
+
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.06);
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   STAT ICON
+========================================================= */
+
+.dashboard-stats .stat-icon {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 50px;
+
+    height: 50px;
+
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    font-size: 24px;
+}
+
+
+/* =========================================================
+   STAT CONTENT
+========================================================= */
+
+.dashboard-stats .stat-content {
+    min-width: 0;
+}
+
+.dashboard-stats .stat-content h3 {
+    margin: 0 0 5px;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+    color: #1f2937;
+}
+
+.dashboard-stats .stat-content p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+
+}
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+
+    background: #162447;
+    color: #ffffff;
+
+    padding: 25px 15px;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    z-index: 1000;
+}
+
+
+/* BRAND */
+
+.sidebar-brand {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar-brand .logo {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.sidebar-brand span {
+    font-size: 12px;
+    opacity: 0.75;
+}
+
+
+/* NAVIGATION */
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+/* LINKS */
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 13px 15px;
+
+    color: #ffffff;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+}
+
+
+/* ICON */
+
+.sidebar-nav a i {
+    width: 20px;
+    text-align: center;
+}
+
+
+/* HOVER */
+
+.sidebar-nav a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(3px);
+}
+
+
+/* LOGOUT */
+
+.sidebar-nav .sidebar-logout {
+    color: #ffffff;
+}
+
+.sidebar-nav .sidebar-logout:hover {
+    background: #c0392b;
+}
+
+
+/* DIVIDER */
+
+.sidebar-divider {
+    height: 1px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    margin: 15px 5px;
+}
+
+
+/* MAIN CONTENT */
+
+.main-content {
+    margin-left: 240px;
+    min-height: 100vh;
+    padding: 20px;
+}
+/* =========================================
+   SIDEBAR TOGGLE
+   ========================================= */
+
+.sidebar {
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* Sidebar hidden */
+.sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+/* Main content expands when sidebar closes */
+.dashboard-container.sidebar-closed .main-content {
+    margin-left: 0;
+    width: 100%;
+}
+
+
+/* =========================================
+   MENU BUTTON
+   ========================================= */
+
+#menu-toggle {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    color: #333;
+}
+
+
+/* =========================================
+   MOBILE SIDEBAR
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+    }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+}
+/* =========================================
+   ACTIVE SIDEBAR LINK
+========================================= */
+
+.sidebar-nav a.active {
+    background: rgba(255, 255, 255, 0.18);
+    font-weight: 700;
+    border-left: 4px solid #ffffff;
+    padding-left: 11px;
+}
+
+.sidebar-nav a.active i {
+    transform: scale(1.08);
 }

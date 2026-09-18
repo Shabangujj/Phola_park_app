@@ -1,5 +1,7 @@
 """
 JJCORETECH
+Phola Park App
+
 Notification Model
 """
 
@@ -7,10 +9,6 @@ from datetime import datetime
 
 from phola_park_app.extensions import db
 
-
-# =====================================================
-# NOTIFICATION
-# =====================================================
 
 class Notification(db.Model):
     __tablename__ = "notifications"
@@ -26,7 +24,7 @@ class Notification(db.Model):
     )
 
     message = db.Column(
-        db.Text,
+        db.String(1000),
         nullable=False
     )
 
@@ -51,8 +49,8 @@ class Notification(db.Model):
 
     notification_type = db.Column(
         db.String(50),
-        default="general",
-        nullable=False
+        nullable=False,
+        default="general"
     )
 
     is_read = db.Column(
@@ -72,54 +70,27 @@ class Notification(db.Model):
         back_populates="notifications"
     )
 
-    # =============================================
-    # Helper Methods
-    # =============================================
-
-    def mark_as_read(self):
-        self.is_read = True
-
-    def mark_as_unread(self):
-        self.is_read = False
-
-    @property
-    def is_global(self):
-        return (
-            self.user_id is None and
-            self.role_target is None
-        )
-
     def to_dict(self):
-
         return {
-
             "id": self.id,
-
             "title": self.title,
-
             "message": self.message,
-
             "user_id": self.user_id,
-
             "role_target": self.role_target,
-
             "portfolio": self.portfolio,
-
             "notification_type": self.notification_type,
-
             "is_read": self.is_read,
-
             "created_at": (
                 self.created_at.isoformat()
                 if self.created_at
                 else None
             )
-
         }
 
     def __repr__(self):
-
         return (
             f"<Notification "
-            f"{self.id}: {self.title}>"
+            f"id={self.id} "
+            f"title={self.title!r} "
+            f"user_id={self.user_id}>"
         )

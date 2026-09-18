@@ -1,6 +1,6 @@
 """
 JJCORETECH
-Notice, Announcement & Committee Models
+Notice & Announcement Models
 """
 
 from datetime import datetime
@@ -13,6 +13,7 @@ from phola_park_app.extensions import db
 # =====================================================
 
 class Announcement(db.Model):
+
     __tablename__ = "announcements"
 
     id = db.Column(
@@ -67,15 +68,16 @@ class Announcement(db.Model):
         default=datetime.utcnow
     )
 
-    # ----------------------------
-    # Helper Methods
-    # ----------------------------
 
     def publish(self):
+
         self.is_active = True
 
+
     def unpublish(self):
+
         self.is_active = False
+
 
     @property
     def is_expired(self):
@@ -85,9 +87,10 @@ class Announcement(db.Model):
 
         return datetime.utcnow() > self.expiry_date
 
-    def __repr__(self):
-        return f"<Announcement {self.title}>"
 
+    def __repr__(self):
+
+        return f"<Announcement {self.title}>"
 
 
 
@@ -96,6 +99,7 @@ class Announcement(db.Model):
 # =====================================================
 
 class Notice(db.Model):
+
     __tablename__ = "notices"
 
     id = db.Column(
@@ -123,18 +127,19 @@ class Notice(db.Model):
     )
 
     notice_type = db.Column(
-        db.String(50),
-        default="Notice"
-    )
-
+    db.String(50),
+    default="Notice",
+    nullable=False
+)
     priority = db.Column(
-        db.String(20),
-        default="Normal"
-    )
-
+    db.String(20),
+    default="Normal",
+    nullable=False
+)
     is_active = db.Column(
         db.Boolean,
-        default=True
+        default=True,
+        nullable=False
     )
 
     created_by = db.Column(
@@ -156,72 +161,29 @@ class Notice(db.Model):
         back_populates="notices"
     )
 
-    # ----------------------------
 
     def publish(self):
+
         self.is_active = True
 
+
     def archive(self):
+
         self.is_active = False
+
 
     @property
     def is_notice(self):
+
         return self.notice_type.lower() == "notice"
+
 
     @property
     def is_alert(self):
+
         return self.notice_type.lower() == "alert"
 
+
     def __repr__(self):
+
         return f"<Notice {self.title}>"
-
-
-
-
-# =====================================================
-# COMMITTEE
-# =====================================================
-
-class Committee(db.Model):
-    __tablename__ = "committees"
-
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    name = db.Column(
-        db.String(255),
-        nullable=False
-    )
-
-    description = db.Column(
-        db.Text
-    )
-
-    portfolio = db.Column(
-        db.String(100),
-        nullable=False
-    )
-
-    created_by = db.Column(
-        db.Integer,
-        db.ForeignKey(
-            "users.id",
-            ondelete="SET NULL"
-        ),
-        nullable=True
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
-
-    creator = db.relationship(
-        "User",
-        back_populates="committees_created"
-    )
-
-    def __repr__(self):
-        return f"<Committee {self.name}>"

@@ -18,7 +18,27 @@ from phola_park_app.models import (
 )
 from phola_park_app.auth_helpers import role_required
 from phola_park_app.forms.report_form import ReportForm
+import os
 
+from datetime import datetime, timedelta
+from datetime import datetime
+
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    abort,
+    jsonify,
+    current_app
+)
+
+from flask_login import (
+    login_required,
+    current_user
+)
+from sqlalchemy import or_, func
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
 # ─────────────────────────────────────────────
@@ -35,11 +55,6 @@ def allowed_file(filename: str) -> bool:
 # USER ROUTES
 # ─────────────────────────────────────────────
 
-user_bp = Blueprint(
-    "user",
-    __name__,
-    url_prefix="/user"
-)
 
 
 @user_bp.route("/dashboard")
@@ -145,103 +160,377 @@ def user_dashboard():
 
         active_surveys=active_surveys,
     )
-
 # ─────────────────────────────────────────────
 # SUBMIT REPORT
 # ─────────────────────────────────────────────
-@user_bp.route("/reports/submit", methods=["GET", "POST"])
+
+@user_bp.route(
+    "/reports/submit",
+    methods=["GET", "POST"]
+)
 @login_required
+@role_required("user")
 def submit_report():
+
     form = ReportForm()
-    print("CSRF:", form.csrf_token.data)
+
+    # -----------------------------------------
+    # Submit form
+    # -----------------------------------------
+
     if form.validate_on_submit():
-        flash("Submitting report...", "info")
+
         image_file = form.image.data
         filename = None
 
+        # -------------------------------------
+        # Save image
+        # -------------------------------------
+
         if image_file:
-            filename = secure_filename(image_file.filename)
-            image_file.save(
-                os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+
+            filename = secure_filename(
+                image_file.filename
             )
+
+            upload_folder = current_app.config[
+                "UPLOAD_FOLDER"
+            ]
+
+            os.makedirs(
+                upload_folder,
+                exist_ok=True
+            )
+
+            image_file.save(
+                os.path.join(
+                    upload_folder,
+                    filename
+                )
+            )
+
+        # -------------------------------------
+        # Create report
+        # -------------------------------------
 
         report = Report(
-                    title=f"{form.category.data} Report",
-                    report_type=form.report_type.data,
-                    category=form.category.data,
-                    description=form.description.data,
-                    portfolio=form.portfolio.data,
-                    image=filename,
-                    user_id=current_user.id
+
+            title=(
+                f"{form.category.data} Report"
+            ),
+
+            report_type=form.report_type.data,
+
+            category=form.category.data,
+
+            description=form.description.data,
+
+            portfolio=form.portfolio.data,
+
+            image=filename,
+
+            user_id=current_user.id
+
+        )
+
+        # -------------------------------------
+        # Save report
+        # -------------------------------------
+
+        try:
+
+            db.session.add(report)
+
+            db.session.commit()
+
+            flash(
+                "Report submitted successfully.",
+                "success"
             )
 
-        db.session.add(report)
-        db.session.commit()
+            return redirect(
+                url_for(
+                    "user.user_reports"
+                )
+            )
 
-        db.session.add(report)
-        db.session.commit()
+        except Exception as e:
 
-        flash("Report submitted successfully", "success")
-        return redirect(url_for("user.user_reports"))
+            db.session.rollback()
 
-    return render_template("user_submit_report.html", form=form)
+            print(
+                "REPORT SUBMISSION ERROR:",
+                e
+            )
+
+            flash(
+                "Unable to submit report. "
+                "Please try again.",
+                "danger"
+            )
+
+    # -----------------------------------------
+    # Display form
+    # -----------------------------------------
+
+    return render_template(
+        "user/submit_report.html",
+        form=form
+    )
 
 
 # ─────────────────────────────────────────────
-# USER REPORTS (LIST + FILTER + EXPORT)
+# USER REPORTS
+# LIST + FILTER + CSV EXPORT
 # ─────────────────────────────────────────────
+
 @user_bp.route("/reports")
 @login_required
 @role_required("user")
 def user_reports():
-    reports = Report.query.filter(Report.user_id == current_user.id)
 
-    q = request.args.get("q", "").strip()
-    category = request.args.get("category")
-    date_from = request.args.get("date_from")
-    date_to = request.args.get("date_to")
+    # -----------------------------------------
+    # Base query
+    # -----------------------------------------
 
-    if q:
-        reports = reports.filter(Report.description.ilike(f"%{q}%"))
-        reports = reports.order_by(Report.created_at.desc()).all()
-        filters = {"q": q, "category": category, "date_from": date_from, "date_to": date_to}
-    if category:
-        reports = reports.filter_by(category=category)
-
-    if date_from:
-        reports = reports.filter(Report.created_at >= datetime.strptime(date_from, "%Y-%m-%d"))
-
-    if date_to:
-        reports = reports.filter(
-            Report.created_at < datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)
-        )
-
-    if request.args.get("export") == "csv":
-        import csv, io
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerow(["ID", "Type", "Category", "Description", "Created At"])
-
-        for r in reports:
-            cw.writerow([r.id, r.report_type, r.category, r.description, r.created_at])
-
-        return current_app.response_class(
-            si.getvalue(),
-            mimetype="text/csv",
-            headers={"Content-Disposition": "attachment; filename=reports.csv"},
-        )
-
-    pagination = reports.order_by(Report.created_at.desc()).paginate(
-        page=request.args.get("page", 1, type=int),
-        per_page=10,
-        error_out=False
+    reports = Report.query.filter(
+        Report.user_id == current_user.id
     )
 
+    # -----------------------------------------
+    # Filters
+    # -----------------------------------------
+
+    q = request.args.get(
+        "q",
+        ""
+    ).strip()
+
+    category = request.args.get(
+        "category",
+        ""
+    ).strip()
+
+    date_from = request.args.get(
+        "date_from",
+        ""
+    ).strip()
+
+    date_to = request.args.get(
+        "date_to",
+        ""
+    ).strip()
+
+
+    # -----------------------------------------
+    # Search
+    # -----------------------------------------
+
+    if q:
+
+        reports = reports.filter(
+            db.or_(
+                Report.description.ilike(
+                    f"%{q}%"
+                ),
+
+                Report.title.ilike(
+                    f"%{q}%"
+                ),
+
+                Report.category.ilike(
+                    f"%{q}%"
+                )
+            )
+        )
+
+
+    # -----------------------------------------
+    # Category
+    # -----------------------------------------
+
+    if category:
+
+        reports = reports.filter(
+            Report.category == category
+        )
+
+
+    # -----------------------------------------
+    # Date From
+    # -----------------------------------------
+
+    if date_from:
+
+        try:
+
+            start_date = datetime.strptime(
+                date_from,
+                "%Y-%m-%d"
+            )
+
+            reports = reports.filter(
+                Report.created_at >= start_date
+            )
+
+        except ValueError:
+
+            flash(
+                "Invalid start date.",
+                "warning"
+            )
+
+
+    # -----------------------------------------
+    # Date To
+    # -----------------------------------------
+
+    if date_to:
+
+        try:
+
+            end_date = (
+                datetime.strptime(
+                    date_to,
+                    "%Y-%m-%d"
+                )
+                + timedelta(days=1)
+            )
+
+            reports = reports.filter(
+                Report.created_at < end_date
+            )
+
+        except ValueError:
+
+            flash(
+                "Invalid end date.",
+                "warning"
+            )
+
+
+    # -----------------------------------------
+    # Order
+    # -----------------------------------------
+
+    reports = reports.order_by(
+        Report.created_at.desc()
+    )
+
+
+    # =========================================
+    # CSV EXPORT
+    # =========================================
+
+    if request.args.get("export") == "csv":
+
+        import csv
+        import io
+
+        output = io.StringIO()
+
+        writer = csv.writer(
+            output
+        )
+
+        writer.writerow([
+            "ID",
+            "Title",
+            "Type",
+            "Category",
+            "Description",
+            "Portfolio",
+            "Status",
+            "Created At"
+        ])
+
+        for report in reports.all():
+
+            writer.writerow([
+
+                report.id,
+
+                report.title,
+
+                report.report_type,
+
+                report.category,
+
+                report.description,
+
+                report.portfolio,
+
+                report.status,
+
+                report.created_at
+
+            ])
+
+        return current_app.response_class(
+
+            output.getvalue(),
+
+            mimetype="text/csv",
+
+            headers={
+                "Content-Disposition":
+                    "attachment; "
+                    "filename=user_reports.csv"
+            }
+
+        )
+
+
+    # =========================================
+    # PAGINATION
+    # =========================================
+
+    pagination = reports.paginate(
+
+        page=request.args.get(
+            "page",
+            1,
+            type=int
+        ),
+
+        per_page=10,
+
+        error_out=False
+
+    )
+
+
+    # =========================================
+    # FILTER DATA
+    # =========================================
+
+    filters = {
+
+        "q": q,
+
+        "category": category,
+
+        "date_from": date_from,
+
+        "date_to": date_to
+
+    }
+
+
+    # =========================================
+    # RENDER
+    # =========================================
+
     return render_template(
+
         "user/user_reports.html",
+
         reports=pagination.items,
+
         pagination=pagination,
-        filters=filters if q else {}
+
+        filters=filters
+
     )
 
 # =====================================================
@@ -503,20 +792,6 @@ def submit_survey(survey_id):
         )
 
 # ─────────────────────────────────────────────
-# NOTICES
-# ─────────────────────────────────────────────
-@user_bp.route("/notices")
-@login_required
-@role_required("user")
-def user_notices():
-    notices = Announcement.query.order_by(
-        Announcement.created_at.desc()
-    ).all()
-
-    return render_template("user/notices.html", notices=notices)
-
-
-# ─────────────────────────────────────────────
 # REPORT DETAIL (AJAX)
 # ─────────────────────────────────────────────
 @user_bp.route("/reports/<int:report_id>")
@@ -549,3 +824,42 @@ def notify_report_created(report):
         )
 
     db.session.commit()
+# ─────────────────────────────────────────────
+# USER NOTICES
+# ─────────────────────────────────────────────
+
+@user_bp.route("/notices")
+@login_required
+@role_required("user")
+def user_notices():
+
+    notices = (
+        Announcement.query
+        .filter(
+            Announcement.is_active.is_(True),
+
+            # Target audience
+            or_(
+                Announcement.target_role.is_(None),
+                Announcement.target_role == "",
+                Announcement.target_role == "all",
+                Announcement.target_role == "user"
+            ),
+
+            # Portfolio
+            or_(
+                Announcement.portfolio.is_(None),
+                Announcement.portfolio == "",
+                Announcement.portfolio == current_user.portfolio
+            )
+        )
+        .order_by(
+            Announcement.created_at.desc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "user/notices.html",
+        notices=notices
+    )
