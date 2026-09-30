@@ -1,4 +1,4 @@
-alembic==1.17.2
+alembic==1.16.5
 arabic-reshaper==3.0.0
 asn1crypto==1.5.1
 blinker==1.9.0
